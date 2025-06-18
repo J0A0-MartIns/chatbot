@@ -1,0 +1,10 @@
+# Ignorar pastas node_modules do frontend e backend
+frontend/node_modules/
+backend/node_modules/
+
+# Ignorar outros arquivos e pastas
+.env
+.DS_Store
+npm-debug.log
+yarn-error.log
+package-lock.json
