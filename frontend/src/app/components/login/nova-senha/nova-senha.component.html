@@ -1,0 +1,19 @@
+<div class="login-container">
+    <div class="login-left">
+        <div class="login-content">
+            <img src="../images/logo_qq.png" alt="Logo Quero-Quero" class="logo" />
+            <h2>Colaborador</h2>
+            <p class="login-label">Recuperar senha</p>
+            <form>
+                <input type="password" [(ngModel)]="password" placeholder="Nova senha" name="password" required />
+                <input type="password" [(ngModel)]="confirmPassword" placeholder="Confirmar senha" name="confirmPassword" required />
+                <button type="button" (click)="salvarNovaSenha()">Salvar senha</button>
+            </form>
+
+        </div>
+    </div>
+
+    <div class="login-right">
+        <img src="../images/mascote_quero_quero.jpg" alt="Mascote Quero-Quero" />
+    </div>
+</div>

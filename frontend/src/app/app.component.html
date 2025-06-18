@@ -1,0 +1,77 @@
+<div class="topbar" *ngIf="showTopbar">
+    <div class="topbar-left">
+        <img src="../images/logo_qq.png" alt="Logo Quero-Quero" />
+    </div>
+
+    <div class="topbar-right">
+        <div class="user-info">
+            <span>Olá, {{ user?.name }} ({{ user?.role }})</span>
+            <button (click)="logout()">Sair</button>
+        </div>
+    </div>
+</div>
+
+<div class="app-container" *ngIf="showSidebar">
+  <aside class="sidebar" [class.collapsed]="isCollapsed">
+    <button class="toggle-btn" (click)="toggleSidebar()">
+      <span class="material-icons">menu</span>
+    </button>
+
+    <div class="logo">
+      <span *ngIf="!isCollapsed">Controle Chat Bot</span>
+      <span *ngIf="isCollapsed" class="material-icons">android</span>
+    </div>
+
+      <nav class="menu">
+          <ul>
+              <li>
+                  <a routerLink="/home" routerLinkActive="ativo">
+                      <span class="material-icons">home</span>
+                      <span class="text" *ngIf="!isCollapsed">Início</span>
+                  </a>
+              </li>
+
+              <li *ngIf="user?.permissoes?.acessaChat">
+                  <a routerLink="/chat" routerLinkActive="ativo">
+                      <span class="material-icons">assignment</span>
+                      <span class="text" *ngIf="!isCollapsed">Buscar Solução</span>
+                  </a>
+              </li>
+
+              <li *ngIf="user?.permissoes?.acessaDashboard">
+                  <a routerLink="/dashboard" routerLinkActive="ativo">
+                      <span class="material-icons">insights</span>
+                      <span class="text" *ngIf="!isCollapsed">Dashboard</span>
+                  </a>
+              </li>
+
+              <li *ngIf="user?.permissoes?.acessaGerirUsuarios">
+                  <a routerLink="/gestao" routerLinkActive="ativo">
+                      <span class="material-icons">person_add</span>
+                      <span class="text" *ngIf="!isCollapsed">Gerenciar Usuários</span>
+                  </a>
+              </li>
+
+              <li *ngIf="user?.permissoes?.acessaBase">
+                  <a routerLink="/base" routerLinkActive="ativo">
+                      <span class="material-icons">library_books</span>
+                      <span class="text" *ngIf="!isCollapsed">Base de Conhecimento</span>
+                  </a>
+              </li>
+          </ul>
+      </nav>
+  </aside>
+    <app-alerta
+            *ngIf="expired"
+            [message]="expiredMessage"
+            (close)="onModalClose()">
+    </app-alerta>
+
+      <div class="main-content" [class.collapsed]="isCollapsed">
+    <router-outlet></router-outlet>
+  </div>
+</div>
+<div *ngIf="!showSidebar" class="full-screen-content">
+
+  <router-outlet></router-outlet>
+</div>

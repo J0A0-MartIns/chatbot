@@ -1,0 +1,28 @@
+<div class="dashboard-container">
+    <div class="dashboard-box">
+        <h2>Dashboard</h2>
+        <div class="dashboard-grid">
+            <div class="dashboard-left dashboard-box-inner">
+                <div class="button-group">
+                    <button (click)="irParaRelatorios()">
+                        Relatórios
+                    </button>
+                    <button (click)="irParaPendencias()">
+                        Solicitações de Inclusão
+                    </button>
+                </div>
+            </div>
+
+            <div class="dashboard-right dashboard-box-inner">
+                <div class="stat-card">
+                    <h3>Perguntas feitas hoje</h3>
+                    <p>{{ perguntasHojeCount }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Solicitações de inclusão pendentes</h3>
+                    <p>{{ pendenciasCount }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

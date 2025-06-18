@@ -1,0 +1,24 @@
+<div class="login-container">
+    <div class="login-left">
+        <div class="login-content">
+            <img src="../images/logo_qq.png" alt="Logo Quero-Quero" class="logo" />
+            <h2>Colaborador</h2>
+            <p class="login-label">Cadastro</p>
+            <form>
+                <input type="text" placeholder="Nome" [(ngModel)]="name" name="name" />
+                <input type="email" placeholder="E-mail" [(ngModel)]="email" name="email" />
+                <select [(ngModel)]="role" name="role">
+                    <option value="Administrador">Administrador</option>
+                    <option value="Operador">Operador</option>
+                </select>
+                <input type="password" placeholder="Senha" [(ngModel)]="password" name="password" />
+
+                <button type="button" (click)="register()">Cadastrar</button>
+                <button type="button" [routerLink]="'/login'">Voltar</button>
+            </form>
+        </div>
+    </div>
+    <div class="login-right">
+        <img src="images/mascote_quero_quero.jpg" alt="Mascote Quero-Quero" />
+    </div>
+</div>

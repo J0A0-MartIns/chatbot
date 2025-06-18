@@ -1,0 +1,55 @@
+<div class="page-container" *ngIf="user">
+    <div class="page-content">
+        <h2>Perfil do Usuário</h2>
+        <div class="user-info">
+            <p><strong>Nome:</strong> {{ user.name }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Perfil:</strong> {{ user.role }}</p>
+        </div>
+
+        <button (click)="mostraMudarSenha()" class="btn-change-password">
+            Alterar Senha
+        </button>
+
+        <div class="modal-overlay" *ngIf="mostrarTrocaSenha">
+            <div class="modal">
+                <h3>Alterar Senha</h3>
+                <form (ngSubmit)="mudarSenha()">
+                    <input
+                            type="password"
+                            id="currentPassword"
+                            [(ngModel)]="senhaAtual"
+                            name="currentPassword"
+                            placeholder="Senha Atual"
+                            required
+                    />
+
+                    <input
+                            type="password"
+                            id="newPassword"
+                            [(ngModel)]="novaSenha"
+                            name="newPassword"
+                            placeholder="Nova Senha"
+                            required
+                    />
+
+                    <input
+                            type="password"
+                            id="confirmPassword"
+                            [(ngModel)]="confirmarSenha"
+                            name="confirmPassword"
+                            placeholder="Confirmar Nova Senha"
+                            required
+                    />
+
+                    <div *ngIf="erro" class="message error">{{ erro }}</div>
+
+                    <div class="modal-buttons">
+                        <button type="submit">Salvar</button>
+                        <button type="button" (click)="mostraMudarSenha()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

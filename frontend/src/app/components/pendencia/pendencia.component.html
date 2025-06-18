@@ -1,0 +1,81 @@
+<div class="page-container">
+    <h2>Solicitações de inclusão de material</h2>
+    <div class="table-container">
+        <table class="pendencias-tabela">
+            <thead>
+            <tr>
+                <th>Data/Hora</th>
+                <th>Tema</th>
+                <th>Microtema</th>
+                <th>Pergunta</th>
+                <th>Avaliação</th>
+                <th>Ações</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let pendencia of pendencias; let i = index">
+                <td>{{ formatarData(pendencia.data) }}</td>
+                <td>{{ pendencia.tema }}</td>
+                <td>{{ pendencia.microtema }}</td>
+                <td>{{ pendencia.pergunta }}</td>
+                <td>{{ pendencia.avaliacao || 'Sem avaliação' }}</td>
+                <td>
+                    <button (click)="adicionarPendenciaNaBase(pendencia, i)" class="btn-aceitar">Adicionar à Base
+                    </button>
+                    <button (click)="excluirPendencia(i)" class="btn-excluir">Excluir</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="modal" *ngIf="showModal">
+        <div class="modal-content">
+            <span class="close" (click)="closeModal()">&times;</span>
+            <h3>{{ editIndex === null ? 'Adicionar Documento' : 'Editar Documento' }}</h3>
+
+            <div *ngIf="newDoc.pergunta" class="campo">
+                <label><strong>Pergunta original:</strong></label>
+                <p>{{ newDoc.pergunta }}</p>
+            </div>
+
+            <form>
+                <input type="text" [(ngModel)]="newDoc.nome" name="name" placeholder="Nome" required/>
+                <input type="text" [(ngModel)]="newDoc.tema" name="tema" placeholder="Tema"/>
+                <input type="text" [(ngModel)]="newDoc.microtema" name="microtema" placeholder="Microtema"/>
+
+                <div>
+                    <input type="text" [(ngModel)]="newPalavraChave" placeholder="Nova Palavra-chave"
+                           name="palavraChave"/>
+                    <button type="button" (click)="addPalavraChave()">Adicionar Palavra-chave</button>
+                </div>
+                <ul>
+                    <li *ngFor="let palavra of newDoc.palavrasChave; let i = index">
+                        {{ palavra }}
+                        <button type="button" (click)="removePalavraChave(i)">Remover</button>
+                    </li>
+                </ul>
+
+                <textarea [(ngModel)]="newDoc.conteudo" name="conteudo" placeholder="Conteúdo" required></textarea>
+
+                <div>
+                    <input type="file" (change)="onFileSelected($event)" accept=".pdf,.docx"/>
+                    <button type="button" (click)="uploadFile()" [disabled]="!selectedFile">Enviar Arquivo</button>
+                    <ul>
+                        <li *ngFor="let arquivo of newDoc.arquivos; let i = index">
+                            {{ arquivo.nome }} ({{ arquivo.tipo }})
+                            <button type="button" (click)="removeArquivo(i)">Remover</button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" (click)="addOrUpdateDoc()" [disabled]="!newDoc.nome || !newDoc.conteudo">
+                        {{ editIndex === null ? 'Adicionar' : 'Atualizar' }}
+                    </button>
+                    <button type="button" (click)="closeModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,31 @@
+<div class="page-container" *ngIf="user">
+    <div class="page-left">
+        <div class="atalho">
+            <button class="atalho-button" (click)="irPara('chat')">
+                Soluções
+            </button>
+            <button class="atalho-button" *ngIf="user.role == 'Administrador'" (click)="irPara('gestao')">
+                Usuários
+            </button>
+            <button class="atalho-button" *ngIf="user.role == 'Administrador'" (click)="irPara('dashboard')">
+                Dashboard
+            </button>
+            <button class="atalho-button" *ngIf="user.role == 'Administrador'" (click)="irPara('base')">
+                 Base do Conhecimento
+            </button>
+        </div>
+    </div>
+
+    <div class="page-right">
+        <div class="profile-content">
+            <h2>Perfil do Usuário</h2>
+        </div>
+        <div class="user-info">
+            <p><i class="fas fa-id-card"></i> <strong>Nome:</strong> {{ user.name }}</p>
+            <p><i class="fas fa-briefcase"></i> <strong>Perfil:</strong> {{ user.role }}</p>
+        </div>
+        <button (click)="irParaPerfil()" class="buttonPerfil">
+            <i class="fas fa-user-edit"></i> Editar Perfil
+        </button>
+    </div>
+</div>

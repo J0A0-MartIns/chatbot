@@ -1,0 +1,176 @@
+.relatorios-container {
+    padding: 3rem;
+    max-width: 1000px;
+    margin: auto;
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+}
+
+.relatorios-container h2 {
+    font-size: 2rem;
+    color: #2f855a;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.relatorio-bloco {
+    background-color: #f5f5f5;
+    padding: 2rem;
+    border-radius: 16px;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+
+}
+
+.relatorio-bloco:hover {
+    background-color: #e6f0e8;
+}
+
+.relatorio-bloco h3 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
+    color: #005f3c;
+}
+
+.filtros-container,
+.filtro-periodo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.filtros-container label,
+.filtro-periodo label {
+    font-weight: 600;
+    color: #34495e;
+}
+
+.filtros-container select,
+.filtro-periodo input[type="date"] {
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    border: 1px solid #cbd5e0;
+    font-size: 1rem;
+    color: #34495e;
+    background-color: #fff;
+    min-width: 160px;
+    transition: border-color 0.2s ease;
+}
+
+.filtros-container select:focus,
+.filtro-periodo input[type="date"]:focus {
+    border-color: #007d3d;
+    outline: none;
+}
+
+.botao-filtrar {
+    padding: 0.8rem 1.8rem;
+    background-color: #007d3d;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    min-width: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.botao-filtrar:hover {
+    background-color: #27ae60;
+}
+
+.tabela-container {
+    margin-top: 1rem;
+    overflow-x: auto;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+    color: #34495e;
+    border-radius: 6px;
+}
+
+thead {
+    background-color: #007d3d;
+    color: white;
+    font-weight: 600;
+}
+
+th, td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    vertical-align: middle;
+}
+
+tbody tr:hover {
+    background-color: #e6f0e8;
+    cursor: default;
+}
+
+.mensagem-sem-dados {
+    margin-top: 1rem;
+    color: #cc0000;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+@media (max-width: 780px) {
+    .filtros-container,
+    .filtro-periodo {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filtros-container label,
+    .filtro-periodo label,
+    .filtros-container select,
+    .filtro-periodo input[type="date"],
+    .botao-filtrar {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .botao-filtrar {
+        margin-top: 0.5rem;
+    }
+
+    th, td {
+        padding: 0.75rem 0.8rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .relatorios-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .relatorio-bloco {
+        padding: 1.5rem 1rem;
+    }
+
+    table {
+        font-size: 0.9rem;
+    }
+
+    th, td {
+        padding: 0.5rem 0.6rem;
+    }
+}

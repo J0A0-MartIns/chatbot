@@ -1,0 +1,87 @@
+<div class="relatorios-container">
+    <h2>Relatórios</h2>
+
+    <div class="relatorio-bloco">
+        <h3>Visualizar Interações</h3>
+        <div class="filtros-container">
+
+            <label for="filtroTema">Filtrar por Tema:</label>
+            <select id="filtroTema" [(ngModel)]="filtroTema">
+                <option value="">Todos</option>
+                <option *ngFor="let tema of temasUnicos" [value]="tema">{{ tema }}</option>
+            </select>
+
+            <label for="filtroMicrotema">Filtrar por Microtema:</label>
+            <select id="filtroMicrotema" [(ngModel)]="filtroMicrotema">
+                <option value="">Todos</option>
+                <option *ngFor="let microtema of microtemasDisponiveis" [value]="microtema">{{ microtema }}</option>
+            </select>
+            <button (click)="aplicarFiltroVisualizacoes()" class="botao-filtrar">
+                <i class="material-icons">filter_list</i>Filtrar
+            </button>
+
+        </div>
+
+        <div class="tabela-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Tema</th>
+                    <th>Micro-tema</th>
+                    <th>Pergunta</th>
+                    <th>Resposta</th>
+                    <th>Avaliação</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let item of registrosFiltrados">
+                    <td>{{ formatarData(item.dataHora) }}</td>
+                    <td>{{ item.tema }}</td>
+                    <td>{{ item.microTema }}</td>
+                    <td>{{ item.pergunta }}</td>
+                    <td>{{ item.resposta }}</td>
+                    <td>{{ item.avaliacao }}</td>
+                </tr>
+                </tbody>
+            </table>
+            <div *ngIf="registrosFiltrados.length === 0">
+                Nenhuma interação encontrada para os filtros selecionados.
+            </div>
+        </div>
+    </div>
+
+    <div class="relatorio-bloco">
+        <h3>Temas mais utilizados por Período</h3>
+        <div class="filtro-periodo">
+            <label for="dataInicio">Data Início:</label>
+            <input type="date" id="dataInicio" [(ngModel)]="dataInicio" name="dataInicio">
+
+            <label for="dataFim">Data Fim:</label>
+            <input type="date" id="dataFim" [(ngModel)]="dataFim" name="dataFim">
+        </div>
+        <button (click)="filtrarPorPeriodo()" class="botao-filtrar">
+            <i class="material-icons">filter_list</i>Filtrar
+        </button>
+
+        <div *ngIf="dadosFiltrados.length > 0" class="tabela-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>Tema</th>
+                    <th>Quantidade</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let item of dadosFiltrados">
+                    <td>{{ item.tema }}</td>
+                    <td>{{ item.quantidade }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div *ngIf="dadosFiltrados.length === 0" class="mensagem-sem-dados">
+            Não existem dados para o período selecionado.
+        </div>
+    </div>
+</div>
