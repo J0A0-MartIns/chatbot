@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { Usuario, Perfil } = require('../models');
+const sessaoController = require('./sessao.controller');
 require('dotenv').config();
 
 exports.cadastrar = async (req, res) => {
@@ -46,6 +47,7 @@ exports.login = async (req, res) => {
         }, process.env.JWT_SECRET, { expiresIn: '8h' });
 
         res.json({ token, perfil: usuario.perfil.tipo, nome: usuario.nome });
+        await sessaoController.iniciarSessao(usuario.id_usuario);
     } catch (err) {
         res.status(400).json({ message: 'Erro no login', erro: err });
     }
