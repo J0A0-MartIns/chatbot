@@ -1,10 +1,10 @@
 <div class="page-container" *ngIf="user">
     <div class="page-content">
-        <h2>Perfil do Usuário</h2>
+        <h2>PerfilModel do Usuário</h2>
         <div class="user-info">
             <p><strong>Nome:</strong> {{ user.name }}</p>
             <p><strong>Email:</strong> {{ user.email }}</p>
-            <p><strong>Perfil:</strong> {{ user.role }}</p>
+            <p><strong>PerfilModel:</strong> {{ user.role }}</p>
         </div>
 
         <button (click)="mostraMudarSenha()" class="btn-change-password">

@@ -1,14 +1,14 @@
 <div class="page-container">
     <div class="page-left">
         <h2>Gerenciar Perfis de Acesso</h2>
-        <button class="open-modal-btn" (click)="abrirModal()">Criar Perfil</button>
+        <button class="open-modal-btn" (click)="abrirModal()">Criar PerfilModel</button>
         <div class="page-content">
 
             <div class="modal-backdrop" *ngIf="modalAberto">
                 <div class="modal">
-                    <h3>{{ editIndex === null ? 'Novo Perfil' : 'Editar Perfil' }}</h3>
+                    <h3>{{ editIndex === null ? 'Novo PerfilModel' : 'Editar PerfilModel' }}</h3>
                     <form (ngSubmit)="salvarPerfil()">
-                        <input type="text" placeholder="Nome do Perfil" [(ngModel)]="novoPerfil.nome" name="nome" required />
+                        <input type="text" placeholder="Nome do PerfilModel" [(ngModel)]="novoPerfil.nome" name="nome" required />
 
                         <fieldset>
                             <legend>Permissões</legend>
@@ -42,7 +42,7 @@
                 <table>
                     <thead>
                     <tr>
-                        <th>Nome do Perfil</th>
+                        <th>Nome do PerfilModel</th>
                         <th>Permissões</th>
                         <th>Ações</th>
                     </tr>
