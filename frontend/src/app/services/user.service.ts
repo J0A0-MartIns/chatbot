@@ -1,36 +1,33 @@
 import { Injectable } from '@angular/core';
-import { User } from '../models/user.model';
+import { HttpClient } from '@angular/common/http';
 
-@Injectable({
-    providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class UserService {
-    private storageKey = 'usuarios';
+    private api = 'http://localhost:3000/api/usuario';
 
-    getUsers(): User[] {
-        const data = localStorage.getItem(this.storageKey);
-        return data ? JSON.parse(data) : [];
+    constructor(private http: HttpClient) {}
+
+    listar() {
+        return this.http.get<any[]>(this.api);
     }
 
-    saveUsers(users: User[]) {
-        localStorage.setItem(this.storageKey, JSON.stringify(users));
+    listarPendentes() {
+        return this.http.get<any[]>(`${this.api}/pendentes`);
     }
 
-    addUser(user: User) {
-        const users = this.getUsers();
-        users.push(user);
-        this.saveUsers(users);
+    aprovar(id: number) {
+        return this.http.put(`${this.api}/aprovar/${id}`, {});
     }
 
-    updateUser(index: number, updatedUser: User) {
-        const users = this.getUsers();
-        users[index] = updatedUser;
-        this.saveUsers(users);
+    rejeitar(id: number) {
+        return this.http.delete(`${this.api}/rejeitar/${id}`);
     }
 
-    deleteUser(index: number) {
-        const users = this.getUsers();
-        users.splice(index, 1);
-        this.saveUsers(users);
+    atualizar(id: number, usuario: any) {
+        return this.http.put(`${this.api}/${id}`, usuario);
+    }
+
+    excluir(id: number) {
+        return this.http.delete(`${this.api}/${id}`);
     }
 }

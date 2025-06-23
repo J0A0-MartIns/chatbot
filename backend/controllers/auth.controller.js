@@ -1,54 +1,53 @@
+const { Usuario, Perfil } = require('../models');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { Usuario, Perfil } = require('../models');
-const sessaoController = require('./sessao.controller');
-require('dotenv').config();
 
-exports.cadastrar = async (req, res) => {
-    try {
-        const { nome, email, senha, tipoPerfil } = req.body;
-
-        const perfil = await Perfil.findOne({ where: { tipo: tipoPerfil } });
-        if (!perfil) return res.status(400).json({ message: 'Perfil inválido' });
-
-        const hash = await bcrypt.hash(senha, 10);
-
-        const novo = await Usuario.create({
-            nome,
-            email,
-            senha: hash,
-            perfil_id_perfil: perfil.id_perfil
-        });
-
-        res.status(201).json({ message: 'Cadastro realizado (pendente de aprovação, se necessário)', usuario: novo });
-    } catch (err) {
-        res.status(400).json({ message: 'Erro ao cadastrar', erro: err });
-    }
-};
-
-exports.login = async (req, res) => {
-    try {
+const AuthController = {
+    async login(req, res) {
         const { email, senha } = req.body;
 
-        const usuario = await Usuario.findOne({
-            where: { email },
-            include: [{ model: Perfil, as: 'perfil' }]
-        });
+        if (!email || !senha) {
+            return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
+        }
 
-        if (!usuario) return res.status(401).json({ message: 'Usuário não encontrado' });
+        try {
+            const usuario = await Usuario.findOne({
+                where: { email },
+                include: { model: Perfil }
+            });
 
-        const senhaValida = await bcrypt.compare(senha, usuario.senha);
-        if (!senhaValida) return res.status(401).json({ message: 'Senha inválida' });
+            if (!usuario) {
+                return res.status(404).json({ message: 'Usuário não encontrado.' });
+            }
 
-        const token = jwt.sign({
-            id_usuario: usuario.id_usuario,
-            perfil: usuario.perfil.tipo,
-            nome: usuario.nome
-        }, process.env.JWT_SECRET, { expiresIn: '8h' });
+            if (!usuario.ativo) {
+                return res.status(403).json({ message: 'Usuário pendente de aprovação.' });
+            }
 
-        res.json({ token, perfil: usuario.perfil.tipo, nome: usuario.nome });
-        await sessaoController.iniciarSessao(usuario.id_usuario);
-    } catch (err) {
-        res.status(400).json({ message: 'Erro no login', erro: err });
+            const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
+
+            if (!senhaCorreta) {
+                return res.status(401).json({ message: 'Senha incorreta.' });
+            }
+
+            const token = jwt.sign({ id: usuario.id_usuario, perfil: usuario.id_perfil }, process.env.JWT_SECRET, {
+                expiresIn: '4h'
+            });
+
+            return res.json({
+                token,
+                usuario: {
+                    id: usuario.id_usuario,
+                    nome: usuario.nome,
+                    email: usuario.email,
+                    perfil: usuario.perfil.nome
+                }
+            });
+
+        } catch (err) {
+            return res.status(500).json({ message: 'Erro ao autenticar.', error: err.message });
+        }
     }
 };
+
+module.exports = AuthController;

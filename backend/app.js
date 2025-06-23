@@ -1,18 +1,17 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
+const routes = require('./routes');
+const { sequelize } = require('./models');
+const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
 
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:4200' }));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-app.use('/auth', require('./routes/auth.routes'));
-app.use('/usuarios', require('./routes/usuario.routes'));
-app.use('/sessoes', require('./routes/sessao.routes'));
-app.use('/chatbot', require('./routes/chatbot.routes'));
-app.use('/dashboard', require('./routes/dashboard.routes'));
-//Ir conectando as rotas...
+app.use('/api', routes);
+
+app.use(errorHandler);
 
 module.exports = app;

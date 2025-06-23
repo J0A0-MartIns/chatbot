@@ -1,60 +1,35 @@
 import { Injectable } from '@angular/core';
-import { PerfilAcesso } from '../models/perfil.model';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+export interface Perfil {
+    id?: number;
+    nome: string;
+    acessaChat: boolean;
+    acessaDashboard: boolean;
+    acessaBase: boolean;
+    acessaGerirUsuarios: boolean;
+}
 
 @Injectable({ providedIn: 'root' })
-export class PerfilAcessoService {
-    private chaveStorage = 'perfisAcesso';
+export class PerfilService {
+    private api = 'http://localhost:3000/api/perfil';
 
-    constructor() {
-        this.inicializarPerfisPadrao();
+    constructor(private http: HttpClient) {}
+
+    listar(): Observable<Perfil[]> {
+        return this.http.get<Perfil[]>(this.api);
     }
 
-    private inicializarPerfisPadrao() {
-        const armazenado = localStorage.getItem(this.chaveStorage);
-        if (!armazenado) {
-            const perfisPadrao: PerfilAcesso[] = [
-                {
-                    nome: 'Administrador',
-                    permissoes: {
-                        acessaGerirUsuarios: true,
-                        acessaDashboard: true,
-                        acessaBase: true,
-                        acessaChat: true,
-                    }
-                },
-                {
-                    nome: 'Operador',
-                    permissoes: {
-                        acessaGerirUsuarios: false,
-                        acessaDashboard: false,
-                        acessaBase: false,
-                        acessaChat: true,
-                    }
-                }
-            ];
-            localStorage.setItem(this.chaveStorage, JSON.stringify(perfisPadrao));
-        }
+    criar(perfil: Perfil): Observable<Perfil> {
+        return this.http.post<Perfil>(this.api, perfil);
     }
 
-    obterPerfis(): PerfilAcesso[] {
-        return JSON.parse(localStorage.getItem(this.chaveStorage) || '[]');
+    atualizar(id: number, perfil: Perfil): Observable<any> {
+        return this.http.put(`${this.api}/${id}`, perfil);
     }
 
-    adicionarPerfil(perfil: PerfilAcesso) {
-        const perfis = this.obterPerfis();
-        perfis.push(perfil);
-        localStorage.setItem(this.chaveStorage, JSON.stringify(perfis));
-    }
-
-    atualizarPerfil(indice: number, perfilAtualizado: PerfilAcesso) {
-        const perfis = this.obterPerfis();
-        perfis[indice] = perfilAtualizado;
-        localStorage.setItem(this.chaveStorage, JSON.stringify(perfis));
-    }
-
-    excluirPerfil(indice: number) {
-        const perfis = this.obterPerfis();
-        perfis.splice(indice, 1);
-        localStorage.setItem(this.chaveStorage, JSON.stringify(perfis));
+    excluir(id: number): Observable<any> {
+        return this.http.delete(`${this.api}/${id}`);
     }
 }

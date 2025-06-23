@@ -5,7 +5,7 @@ import {PerfilComponent} from './components/perfil/perfil.component';
 import {DashboardComponent} from './components/dashboard/dashboard.component';
 import {LoginComponent} from './components/login/login.component';
 import {CadastroComponent} from './components/cadastro/cadastro.component';
-import {ChatComponent} from "./components/chat/chat.component";
+import {ChatbotComponent} from "./components/chat/chat.component";
 import {SenhaComponent} from "./components/login/senha-form/senha.component";
 import {RelatorioComponent} from "./components/relatorio/relatorio.component";
 import {FeedbakcsComponent} from "./components/feedbakcs/feedbakcs.component";
@@ -23,7 +23,7 @@ export const routes: Routes = [
   { path: 'base', component: BaseComponent },
   { path: 'login', component: LoginComponent },
   { path: 'cadastro', component: CadastroComponent },
-  { path: 'chat', component: ChatComponent },
+  { path: 'chat', component: ChatbotComponent },
   { path: 'senha', component: SenhaComponent },
   { path: 'relatorio', component: RelatorioComponent },
   { path: 'feedback', component: FeedbakcsComponent },

@@ -1,85 +1,69 @@
-const { Usuario, Perfil } = require('../models');
+const { Usuario, UsuarioPendente, Perfil } = require('../models');
 const bcrypt = require('bcryptjs');
 
-//lista todos os cadastrados
-exports.listarTodos = async (req, res) => {
-    const lista = await Usuario.findAll({
-        where: { aprovado: true },
-        include: { model: Perfil, as: 'perfil' }
-    });
-    res.json(lista);
-};
+const UserController = {
+    // Lista usuários ativos
+    async getAll(req, res) {
+        try {
+            const users = await Usuario.findAll({
+                include: Perfil,
+                where: { ativo: 1 }
+            });
+            return res.json(users);
+        } catch (err) {
+            return res.status(500).json({ message: 'Erro ao listar usuários.', error: err.message });
+        }
+    },
 
-//listar usuários pendentes de aprovação
-exports.listarPendentes = async (req, res) => {
-    const lista = await Usuario.findAll({
-        where: { aprovado: false },
-        include: { model: Perfil, as: 'perfil' }
-    });
-    res.json(lista);
-};
+    // Lista solicitações pendentes
+    async getPending(req, res) {
+        try {
+            const pendentes = await UsuarioPendente.findAll({ include: Perfil });
+            return res.json(pendentes);
+        } catch (err) {
+            return res.status(500).json({ message: 'Erro ao buscar pendentes.', error: err.message });
+        }
+    },
 
-//aprovar criação de conta
-exports.aprovar = async (req, res) => {
-    const id = req.params.id;
-    const usuario = await Usuario.findByPk(id);
-    if (!usuario) return res.status(404).json({ message: 'Usuário não encontrado' });
+    // Aprova um usuário pendente
+    async approve(req, res) {
+        const { id } = req.params;
+        try {
+            const pendente = await UsuarioPendente.findByPk(id);
+            if (!pendente) return res.status(404).json({ message: 'Solicitação não encontrada.' });
 
-    usuario.aprovado = true;
-    await usuario.save();
+            const hash = await bcrypt.hash(pendente.senha, 10);
 
-    res.json({ message: 'Usuário aprovado', usuario });
-};
+            await Usuario.create({
+                nome: pendente.nome,
+                email: pendente.email,
+                senha: hash,
+                id_perfil: pendente.id_perfil,
+                ativo: 1
+            });
 
-// rejeitar solicitação de criação de conta
-exports.rejeitar = async (req, res) => {
-    const id = req.params.id;
-    const usuario = await Usuario.findByPk(id);
-    if (!usuario) return res.status(404).json({ message: 'Usuário não encontrado' });
+            await pendente.destroy();
+            return res.json({ message: 'Usuário aprovado e cadastrado.' });
 
-    await usuario.destroy();
-    res.json({ message: 'Usuário rejeitado e removido' });
-};
+        } catch (err) {
+            return res.status(500).json({ message: 'Erro ao aprovar usuário.', error: err.message });
+        }
+    },
 
-//atualizar dados do usuário
-exports.atualizar = async (req, res) => {
-    const { nome, email, senha, tipoPerfil } = req.body;
-    const id = req.params.id;
+    // Rejeita uma solicitação
+    async reject(req, res) {
+        const { id } = req.params;
+        try {
+            const pendente = await UsuarioPendente.findByPk(id);
+            if (!pendente) return res.status(404).json({ message: 'Solicitação não encontrada.' });
 
-    const usuario = await Usuario.findByPk(id);
-    if (!usuario) return res.status(404).json({ message: 'Usuário não encontrado' });
+            await pendente.destroy();
+            return res.json({ message: 'Solicitação rejeitada.' });
 
-    const perfil = await Perfil.findOne({ where: { tipo: tipoPerfil } });
-    if (!perfil) return res.status(400).json({ message: 'Perfil inválido' });
-
-    usuario.nome = nome;
-    usuario.email = email;
-    usuario.perfil_id_perfil = perfil.id_perfil;
-
-    if (senha) {
-        const hash = await bcrypt.hash(senha, 10);
-        usuario.senha = hash;
+        } catch (err) {
+            return res.status(500).json({ message: 'Erro ao rejeitar.', error: err.message });
+        }
     }
-
-    await usuario.save();
-    res.json({ message: 'Usuário atualizado com sucesso', usuario });
 };
 
-//buscar por id do usuário
-exports.buscar = async (req, res) => {
-    const usuario = await Usuario.findByPk(req.params.id, {
-        include: { model: Perfil, as: 'perfil' }
-    });
-
-    if (!usuario) return res.status(404).json({ message: 'Usuário não encontrado' });
-    res.json(usuario);
-};
-
-//excluir usuário
-exports.deletar = async (req, res) => {
-    const usuario = await Usuario.findByPk(req.params.id);
-    if (!usuario) return res.status(404).json({ message: 'Usuário não encontrado' });
-
-    await usuario.destroy();
-    res.json({ message: 'Usuário excluído com sucesso' });
-};
+module.exports = UserController;

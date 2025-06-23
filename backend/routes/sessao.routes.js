@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const ctrl = require('../controllers/sessao.controller');
+const ctrl = require('../controllers/sessao_usuario.controller');
 const autenticar = require('../middlewares/auth.middleware');
 const permitir = require('../middlewares/role.middleware');
 

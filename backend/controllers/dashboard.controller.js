@@ -1,38 +1,33 @@
-const { Usuario, Perfil, Atendimento, Feedback, Pendencia } = require('../models');
-const { Op } = require('sequelize');
+const {
+    BaseConhecimento,
+    Pendencia,
+    AtendimentoChatbot,
+    Feedback
+} = require('../models');
 
-exports.resumoGeral = async (req, res) => {
-    try {
-        const totalUsuarios = await Usuario.count({ where: { aprovado: true } });
+const DashboardController = {
+    async getEstatisticas(req, res) {
+        try {
+            const totalDocumentos = await BaseConhecimento.count({ where: { ativo: 1 } });
+            const totalPendencias = await Pendencia.count();
+            const totalPerguntas = await AtendimentoChatbot.count();
+            const totalFeedbacks = await Feedback.count({ where: { avaliacao: { not: null } } });
+            const totalUteis = await Feedback.count({ where: { avaliacao: 1 } });
 
-        const usuariosPorPerfil = await Usuario.findAll({
-            attributes: ['perfil_id_perfil', [sequelize.fn('COUNT', 'id_usuario'), 'quantidade']],
-            where: { aprovado: true },
-            group: ['perfil_id_perfil'],
-            include: { model: Perfil, as: 'perfil', attributes: ['tipo'] }
-        });
+            const taxaUtilidade = totalFeedbacks > 0
+                ? ((totalUteis / totalFeedbacks) * 100).toFixed(1)
+                : '0.0';
 
-        const totalAtendimentos = await Atendimento.count();
-
-        const totalPendencias = await Pendencia.count();
-
-        const totalFeedbacks = await Feedback.count();
-        const totalSatisfatorios = await Feedback.count({ where: { avaliacao: true } });
-        const totalInsatisfatorios = totalFeedbacks - totalSatisfatorios;
-
-        res.json({
-            totalUsuarios,
-            usuariosPorPerfil: usuariosPorPerfil.map(item => ({
-                perfil: item.perfil.tipo,
-                quantidade: item.dataValues.quantidade
-            })),
-            totalAtendimentos,
-            totalPendencias,
-            totalFeedbacks,
-            totalSatisfatorios,
-            totalInsatisfatorios
-        });
-    } catch (err) {
-        res.status(500).json({ message: 'Erro ao gerar dashboard', erro: err.message });
+            return res.json({
+                totalDocumentos,
+                totalPendencias,
+                totalPerguntas,
+                taxaUtilidade: `${taxaUtilidade}%`
+            });
+        } catch (err) {
+            return res.status(500).json({ message: 'Erro ao obter dados do dashboard.', error: err.message });
+        }
     }
 };
+
+module.exports = DashboardController;

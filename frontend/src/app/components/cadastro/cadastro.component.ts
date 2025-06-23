@@ -1,56 +1,30 @@
 import { Component } from '@angular/core';
-import {Router, RouterLink} from '@angular/router';
-import { AuthService } from '../../auth/auth.service';
-import { User } from '../../models/user.model';
-import {FormsModule} from "@angular/forms";
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-cadastro',
-  styleUrls: ['./cadastro.component.css'],
-  templateUrl: './cadastro.component.html',
-  imports: [
-    RouterLink,
-    FormsModule
-  ]
+  templateUrl: './cadastro.component.html'
 })
 export class CadastroComponent {
-  name = '';
+  nome = '';
   email = '';
-  password = '';
-  role: 'Administrador' | 'Operador' = 'Operador';
+  senha = '';
+  tipoPerfil = 'operador';
 
   constructor(private auth: AuthService, private router: Router) {}
 
-  register() {
-    const newUser: User = {
-      name: this.name.trim(),
-      email: this.email.trim(),
-      password: this.password,
-      role: this.role
+  cadastrar() {
+    const dados = {
+      nome: this.nome,
+      email: this.email,
+      senha: this.senha,
+      tipoPerfil: this.tipoPerfil
     };
 
-    const pendingUsers = JSON.parse(localStorage.getItem('pendingUsers') || '[]');
-    pendingUsers.push(newUser);
-    localStorage.setItem('pendingUsers', JSON.stringify(pendingUsers));
-
-    alert('Cadastro enviado para aprovação!');
-    this.router.navigate(['/login']);
+    this.auth.register(dados).subscribe(() => {
+      alert('Cadastro enviado com sucesso!');
+      this.router.navigate(['/login']);
+    });
   }
-
-  // register() {
-  //   const newUser: User = {
-  //     name: this.name.trim(),
-  //     email: this.email.trim(),
-  //     password: this.password,
-  //     role: this.role
-  //   };
-  //   const success = this.auth.saveUser(newUser);
-  //
-  //   if (success) {
-  //     alert('Usuário cadastrado com sucesso!');
-  //     this.router.navigate(['/login']);
-  //   } else {
-  //     alert('E-mail já cadastrado!');
-  //   }
-  // }
 }

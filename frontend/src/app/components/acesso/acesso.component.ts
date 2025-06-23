@@ -1,92 +1,63 @@
-import {Component, OnInit} from '@angular/core';
-import {CommonModule} from "@angular/common";
-import {FormsModule} from "@angular/forms";
-import {PerfilAcesso} from "../../models/perfil.model";
-import {PerfilAcessoService} from "../../services/perfil.service";
+import { Component, OnInit } from '@angular/core';
+import { PerfilService, Perfil } from '../../services/perfil.service';
 
 @Component({
-  selector: 'app-acessos',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+  selector: 'app-acesso',
   templateUrl: './acesso.component.html',
   styleUrls: ['./acesso.component.css']
 })
 export class AcessoComponent implements OnInit {
-  perfis: PerfilAcesso[] = [];
-  novoPerfil: PerfilAcesso = {
-    nome: '',
-    permissoes: {
-      acessaGerirUsuarios: false,
-      acessaDashboard: false,
-      acessaBase: false,
-      acessaChat: false
-    }
-  };
-  editIndex: number | null = null;
-  modalAberto: boolean = false;
-  openActionIndex: number | null = null;
+  perfis: Perfil[] = [];
+  novoPerfil: Perfil = this.resetPerfil();
+  editando = false;
 
-  constructor(private servicoPerfil: PerfilAcessoService) {}
+  constructor(private perfilService: PerfilService) {}
 
   ngOnInit() {
-    this.perfis = this.servicoPerfil.obterPerfis();
+    this.carregarPerfis();
   }
 
-  salvarPerfil() {
-    if (this.editIndex === null) {
-      this.servicoPerfil.adicionarPerfil(this.novoPerfil);
+  carregarPerfis() {
+    this.perfilService.listar().subscribe(res => this.perfis = res);
+  }
+
+  salvar() {
+    if (this.editando && this.novoPerfil.id) {
+      this.perfilService.atualizar(this.novoPerfil.id, this.novoPerfil).subscribe(() => {
+        this.cancelar();
+        this.carregarPerfis();
+      });
     } else {
-      this.servicoPerfil.atualizarPerfil(this.editIndex, this.novoPerfil);
+      this.perfilService.criar(this.novoPerfil).subscribe(() => {
+        this.cancelar();
+        this.carregarPerfis();
+      });
     }
-    this.recarregarPerfis();
   }
 
-  excluirPerfil(index: number) {
-    if (confirm('Deseja excluir este perfil?')) {
-      this.servicoPerfil.excluirPerfil(index);
-      this.recarregarPerfis();
+  editar(perfil: Perfil) {
+    this.novoPerfil = { ...perfil };
+    this.editando = true;
+  }
+
+  excluir(id?: number) {
+    if (id && confirm('Deseja excluir este perfil?')) {
+      this.perfilService.excluir(id).subscribe(() => this.carregarPerfis());
     }
   }
 
   cancelar() {
-    this.editIndex = null;
-    this.novoPerfil = {
+    this.novoPerfil = this.resetPerfil();
+    this.editando = false;
+  }
+
+  resetPerfil(): Perfil {
+    return {
       nome: '',
-      permissoes: {
-        acessaGerirUsuarios: false,
-        acessaDashboard: false,
-        acessaBase: false,
-        acessaChat: false
-      }
+      acessaChat: false,
+      acessaDashboard: false,
+      acessaBase: false,
+      acessaGerirUsuarios: false
     };
   }
-
-  private recarregarPerfis() {
-    this.perfis = this.servicoPerfil.obterPerfis();
-    this.cancelar();
-  }
-
-  abrirModal() {
-    this.modalAberto = true;
-  }
-
-  fecharModal() {
-    this.modalAberto = false;
-    this.cancelar(); // limpa o formulário
-  }
-
-  editarPerfil(index: number) {
-    this.novoPerfil = { ...this.perfis[index] };
-    this.editIndex = index;
-    this.modalAberto = true;
-  }
-
-  toggleActionSelect(index: number) {
-    if (this.openActionIndex === index) {
-      this.openActionIndex = null;
-    } else {
-      this.openActionIndex = index;
-    }
-  }
 }
-
