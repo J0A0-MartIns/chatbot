@@ -3,33 +3,50 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Perfil {
-    id?: number;
+    id_perfil: number;
     nome: string;
-    acessaChat: boolean;
-    acessaDashboard: boolean;
-    acessaBase: boolean;
-    acessaGerirUsuarios: boolean;
 }
 
-@Injectable({ providedIn: 'root' })
-export class PerfilService {
-    private api = 'http://localhost:3000/api/perfil';
+export interface Permissao {
+    id_permissao: number;
+    nome: string;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class AcessoService {
+    private apiUrl = 'http://localhost:3000/api/perfis';
 
     constructor(private http: HttpClient) {}
 
-    listar(): Observable<Perfil[]> {
-        return this.http.get<Perfil[]>(this.api);
+    // Perfis
+    listarPerfis(): Observable<Perfil[]> {
+        return this.http.get<Perfil[]>(this.apiUrl);
     }
 
-    criar(perfil: Perfil): Observable<Perfil> {
-        return this.http.post<Perfil>(this.api, perfil);
+    criarPerfil(nome: string): Observable<any> {
+        return this.http.post(this.apiUrl, { nome });
     }
 
-    atualizar(id: number, perfil: Perfil): Observable<any> {
-        return this.http.put(`${this.api}/${id}`, perfil);
+    atualizarPerfil(id: number, nome: string): Observable<any> {
+        return this.http.put(`${this.apiUrl}/${id}`, { nome });
     }
 
-    excluir(id: number): Observable<any> {
-        return this.http.delete(`${this.api}/${id}`);
+    excluirPerfil(id: number): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/${id}`);
+    }
+
+    // Permissões de um perfil
+    listarPermissoes(idPerfil: number): Observable<Permissao[]> {
+        return this.http.get<Permissao[]>(`${this.apiUrl}/${idPerfil}/permissoes`);
+    }
+
+    atribuirPermissao(idPerfil: number, idPermissao: number): Observable<any> {
+        return this.http.post(`${this.apiUrl}/${idPerfil}/permissoes`, { idPermissao });
+    }
+
+    removerPermissao(idPerfil: number, idPermissao: number): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/${idPerfil}/permissoes/${idPermissao}`);
     }
 }

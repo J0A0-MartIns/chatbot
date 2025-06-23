@@ -1,32 +1,58 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+export interface Documento {
+    id_documento?: number;
+    titulo: string;
+    conteudo: string;
+    palavras_chave: string;
+    data_criacao?: string;
+    vezes_utilizado?: number;
+    ativo?: boolean;
+    usuario_id: number;
+    id_subtema: number;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
 export class BaseService {
-    private api = 'http://localhost:3000/api/documento';
+    private apiUrl = 'http://localhost:3000/api/base';
 
     constructor(private http: HttpClient) {}
 
-    listar() {
-        return this.http.get<any[]>(this.api);
+    // Listar documentos (com filtros opcionais)
+    listar(tema?: number, subtema?: number): Observable<Documento[]> {
+        let params = new HttpParams();
+        if (tema) params = params.set('tema', tema);
+        if (subtema) params = params.set('subtema', subtema);
+
+        return this.http.get<Documento[]>(this.apiUrl, { params });
     }
 
-    buscar(termo: string) {
-        return this.http.get<any[]>(`${this.api}/buscar?termo=${termo}`);
+    // Criar novo documento
+    criar(doc: Documento): Observable<any> {
+        return this.http.post(this.apiUrl, doc);
     }
 
-    criar(doc: any, arquivo: File | null) {
-        const form = new FormData();
-        form.append('dados', JSON.stringify(doc));
-        if (arquivo) form.append('arquivo', arquivo);
-        return this.http.post(this.api, form);
+    // Atualizar documento
+    atualizar(id: number, doc: Partial<Documento>): Observable<any> {
+        return this.http.put(`${this.apiUrl}/${id}`, doc);
     }
 
-    atualizar(id: number, doc: any) {
-        return this.http.put(`${this.api}/${id}`, doc);
+    // Excluir documento
+    excluir(id: number): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/${id}`);
     }
 
-    excluir(id: number) {
-        return this.http.delete(`${this.api}/${id}`);
+    // Ativar/inativar documento
+    alterarStatus(id: number, ativo: boolean): Observable<any> {
+        return this.http.patch(`${this.apiUrl}/${id}/ativo`, { ativo });
+    }
+
+    // Enviar arquivo (se tiver input file)
+    uploadArquivo(formData: FormData): Observable<any> {
+        return this.http.post(`${this.apiUrl}/upload`, formData);
     }
 }

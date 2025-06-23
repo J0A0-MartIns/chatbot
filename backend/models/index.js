@@ -1,16 +1,26 @@
+const fs = require('fs');
+const path = require('path');
 const Sequelize = require('sequelize');
-const sequelize = require('../config/database');
+const config = require(__dirname + '/../config/config.js').development;
 
-const Usuario = require('./usuario')(sequelize, Sequelize.DataTypes);
-const Perfil = require('./perfil')(sequelize, Sequelize.DataTypes);
+const db = {};
+const sequelize = new Sequelize(config.database, config.username, config.password, config);
 
+fs.readdirSync(__dirname)
+    .filter(file => file !== 'index.js' && file.endsWith('.js'))
+    .forEach(file => {
+        const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+        db[model.name] = model;
+    });
 
-Perfil.hasMany(Usuario, { foreignKey: 'perfil_id_perfil' });
-Usuario.belongsTo(Perfil, { foreignKey: 'perfil_id_perfil' });
+// associações
+Object.keys(db).forEach(modelName => {
+    if (db[modelName].associate) {
+        db[modelName].associate(db);
+    }
+});
 
-module.exports = {
-    sequelize,
-    Sequelize,
-    Usuario,
-    Perfil,
-};
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+module.exports = db;

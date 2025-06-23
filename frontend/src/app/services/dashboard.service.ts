@@ -1,15 +1,24 @@
-import {Observable} from "rxjs";
-import {Injectable} from "@angular/core";
-import {environment} from "../environments/environment";
-import {HttpClient} from "@angular/common/http";
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+    providedIn: 'root'
+})
 export class DashboardService {
-    private apiUrl = `${environment.apiUrl}/dashboard`;
+    private apiUrl = 'http://localhost:3000/api/dashboard';
 
     constructor(private http: HttpClient) {}
 
-    resumo(): Observable<any> {
-        return this.http.get(`${this.apiUrl}`);
+    getTotalPerguntas(): Observable<number> {
+        return this.http.get<number>(`${this.apiUrl}/perguntas`);
+    }
+
+    getTotalPendencias(): Observable<number> {
+        return this.http.get<number>(`${this.apiUrl}/pendencias`);
+    }
+
+    getPercentualFeedbacksPositivos(): Observable<number> {
+        return this.http.get<number>(`${this.apiUrl}/feedbacks`);
     }
 }

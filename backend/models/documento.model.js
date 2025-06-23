@@ -1,21 +1,20 @@
 module.exports = (sequelize, DataTypes) => {
-    const Documento = sequelize.define('Documento', {
-        nome: DataTypes.STRING,
-        tema: DataTypes.STRING,
-        microtema: DataTypes.STRING,
-        palavrasChave: {
-            type: DataTypes.ARRAY(DataTypes.STRING),
-            defaultValue: []
+    const DocumentoArquivo = sequelize.define('DocumentoArquivo', {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
         },
-        conteudo: DataTypes.TEXT,
-        arquivo: DataTypes.STRING,
-        ativo: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: true
-        }
+        nome_arquivo: DataTypes.STRING,
+        id_documento: DataTypes.INTEGER
     }, {
-        tableName: 'documentos'
+        tableName: 'documento_arquivo',
+        timestamps: false
     });
 
-    return Documento;
+    DocumentoArquivo.associate = (models) => {
+        DocumentoArquivo.belongsTo(models.BaseConhecimento, { foreignKey: 'id_documento' });
+    };
+
+    return DocumentoArquivo;
 };

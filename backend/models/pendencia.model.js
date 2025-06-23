@@ -1,35 +1,20 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-const Feedback = require('./feedback.model');
+module.exports = (sequelize, DataTypes) => {
+    const Pendencia = sequelize.define('Pendencia', {
+        id_pendencia: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        id_feedback: DataTypes.INTEGER,
+        motivo: DataTypes.STRING
+    }, {
+        tableName: 'pendencia',
+        timestamps: false
+    });
 
-const Pendencia = sequelize.define('Pendencia', {
-    id_pendencia: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    tema: {
-        type: DataTypes.STRING(45)
-    },
-    sub_tema: {
-        type: DataTypes.STRING(45)
-    },
-    feedback_id_feedback_busca: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: Feedback,
-            key: 'id_feedback_busca'
-        }
-    }
-}, {
-    tableName: 'pendencia',
-    timestamps: false
-});
+    Pendencia.associate = (models) => {
+        Pendencia.belongsTo(models.Feedback, { foreignKey: 'id_feedback' });
+    };
 
-Pendencia.belongsTo(Feedback, {
-    foreignKey: 'feedback_id_feedback_busca',
-    as: 'feedback'
-});
-
-module.exports = Pendencia;
+    return Pendencia;
+};
