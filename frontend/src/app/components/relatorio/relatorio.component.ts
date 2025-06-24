@@ -1,151 +1,88 @@
 import { Component, OnInit } from '@angular/core';
-import { ChatMessage } from '../../models/chat-message.model';
-import {NgForOf, NgIf} from "@angular/common";
-import {FormsModule} from "@angular/forms";
+import { ReportService, RelatorioItem } from '../../services/report.service';
 
 @Component({
   selector: 'app-relatorio',
   templateUrl: './relatorio.component.html',
-  imports: [
-    NgIf,
-    NgForOf,
-    FormsModule
-  ],
   styleUrls: ['./relatorio.component.css']
 })
 export class RelatorioComponent implements OnInit {
-
-  dadosFiltrados: { tema: string; quantidade: number }[] = [];
-
-  filtroMes: number = new Date().getMonth() + 1;
-  filtroAno: number = new Date().getFullYear();
-  dataInicio: string = '';
-  dataFim: string = '';
-  anosDisponiveis: number[] = [];
-  meses = [
-    { nome: 'Janeiro', valor: 1 },
-    { nome: 'Fevereiro', valor: 2 },
-    { nome: 'Março', valor: 3 },
-    { nome: 'Abril', valor: 4 },
-    { nome: 'Maio', valor: 5 },
-    { nome: 'Junho', valor: 6 },
-    { nome: 'Julho', valor: 7 },
-    { nome: 'Agosto', valor: 8 },
-    { nome: 'Setembro', valor: 9 },
-    { nome: 'Outubro', valor: 10 },
-    { nome: 'Novembro', valor: 11 },
-    { nome: 'Dezembro', valor: 12 }
-  ];
-  registrosChat: ChatMessage[] = [];
-  registrosFiltrados: ChatMessage[] = [];
-  filtroData: string = '';
+  // Filtros
   filtroTema: string = '';
   filtroMicrotema: string = '';
-  microtemasDisponiveis: string[] = [];
+  dataInicio: string = '';
+  dataFim: string = '';
+
+  // Listas
+  registros: RelatorioItem[] = [];
+  registrosFiltrados: RelatorioItem[] = [];
+
   temasUnicos: string[] = [];
+  microtemasDisponiveis: string[] = [];
+
+  dadosFiltrados: { tema: string, quantidade: number }[] = [];
+
+  constructor(private reportService: ReportService) {}
 
   ngOnInit(): void {
-    this.carregarRegistrosChat();
-    this.temasUnicos = Array.from(new Set(this.registrosChat.map(r => r.tema))).sort();
-    this.registrosFiltrados = [...this.registrosChat];
-    this.definirAnosDisponiveis();
-    this.filtroData = '';
-    this.filtroTema = '';
-    this.atualizarMicrotemasDisponiveis();
+    this.buscarTodosRegistros();
   }
 
-  carregarRegistrosChat(): void {
-    const dados = localStorage.getItem('consultasChatbot');
-    this.registrosChat = dados ? JSON.parse(dados) : [];
-  }
-
-  aplicarFiltroVisualizacoes(): void {
-    this.registrosFiltrados = this.registrosChat.filter(item => {
-      let passaFiltroTema = true;
-      let passaFiltroMicroTema = true;
-      let passaFiltroMes = true;
-      let passaFiltroAno = true;
-
-      if (this.filtroTema) {
-        passaFiltroTema = item.tema === this.filtroTema;
-      }
-
-      if (this.filtroMicrotema) {
-        passaFiltroMicroTema = item.microTema === this.filtroMicrotema;
-      }
-
-      this.atualizarMicrotemasDisponiveis();
-
-      const dataItem = new Date(item.dataHora ?? '');
-      passaFiltroMes = dataItem.getMonth() + 1 === this.filtroMes;
-      passaFiltroAno = dataItem.getFullYear() === this.filtroAno;
-
-      return passaFiltroTema && passaFiltroMicroTema && passaFiltroMes && passaFiltroAno;
+  buscarTodosRegistros(): void {
+    this.reportService.buscarRelatorio({}).subscribe({
+      next: (res) => {
+        this.registros = res;
+        this.registrosFiltrados = res;
+        this.extrairTemasEMicrotemas();
+      },
+      error: () => alert('Erro ao carregar relatórios.')
     });
   }
 
-  formatarData(dataISO?: string): string {
-    if (!dataISO) return '-';
-    const data = new Date(dataISO);
-    if (isNaN(data.getTime())) return '-';
-    return data.toLocaleString();
+  extrairTemasEMicrotemas(): void {
+    const temasSet = new Set<string>();
+    const microtemasSet = new Set<string>();
+
+    this.registros.forEach(item => {
+      if (item.tema) temasSet.add(item.tema);
+      if (item.sub_tema) microtemasSet.add(item.sub_tema);
+    });
+
+    this.temasUnicos = Array.from(temasSet);
+    this.microtemasDisponiveis = Array.from(microtemasSet);
   }
 
-  atualizarMicrotemasDisponiveis(): void {
-    if (!this.filtroTema) {
-      const todosMicrotemas = this.registrosChat.map(r => r.microTema).filter(Boolean);
-      this.microtemasDisponiveis = Array.from(new Set(todosMicrotemas)).sort();
-    } else {
-      const microtemas = this.registrosChat
-          .filter(r => r.tema === this.filtroTema)
-          .map(r => r.microTema)
-          .filter(Boolean);
-      this.microtemasDisponiveis = Array.from(new Set(microtemas)).sort();
-    }
-    if (!this.microtemasDisponiveis.includes(this.filtroMicrotema)) {
-      this.filtroMicrotema = '';
-    }
-  }
-
-  definirAnosDisponiveis(): void {
-    const anosSet = new Set<number>();
-    for (const item of this.registrosChat) {
-      if (item.dataHora) {
-        const ano = new Date(item.dataHora).getFullYear();
-        anosSet.add(ano);
-      }
-    }
-    this.anosDisponiveis = Array.from(anosSet).sort((a, b) => b - a);
+  aplicarFiltroVisualizacoes(): void {
+    this.registrosFiltrados = this.registros.filter(item => {
+      const condTema = this.filtroTema ? item.tema === this.filtroTema : true;
+      const condMicro = this.filtroMicrotema ? item.sub_tema === this.filtroMicrotema : true;
+      return condTema && condMicro;
+    });
   }
 
   filtrarPorPeriodo(): void {
-    const contagemTemas: { [tema: string]: number } = {};
+    this.reportService.buscarRelatorio({
+      dataInicio: this.dataInicio,
+      dataFim: this.dataFim
+    }).subscribe({
+      next: (res) => {
+        const contagem: { [tema: string]: number } = {};
 
-    const dataInicioDate = this.dataInicio ? new Date(this.dataInicio) : null;
-    const dataFimDate = this.dataFim ? new Date(this.dataFim) : null;
+        res.forEach(item => {
+          if (!item.tema) return;
+          contagem[item.tema] = (contagem[item.tema] || 0) + 1;
+        });
 
-    for (const reg of this.registrosChat) {
-      if (!reg.dataHora) continue;
-
-      const data = new Date(reg.dataHora);
-      if (isNaN(data.getTime())) continue;
-
-      if (dataInicioDate && data < dataInicioDate) continue;
-      if (dataFimDate && data > dataFimDate) continue;
-
-      contagemTemas[reg.tema] = (contagemTemas[reg.tema] || 0) + 1;
-    }
-
-    this.dadosFiltrados = Object.entries(contagemTemas).map(([tema, quantidade]) => ({
-      tema,
-      quantidade
-    })).sort((a, b) => b.quantidade - a.quantidade);
+        this.dadosFiltrados = Object.entries(contagem).map(([tema, quantidade]) => ({
+          tema,
+          quantidade
+        }));
+      },
+      error: () => alert('Erro ao filtrar por período.')
+    });
   }
 
-  getTextoAvaliacao(avaliacao?: string | null): string {
-    if (!avaliacao) return 'Sem avaliação';
-    if (avaliacao.toLowerCase() === 'util') return 'Útil';
-    if (avaliacao.toLowerCase() === 'nao-util') return 'Não útil';
-    return 'Sem avaliação';
+  formatarData(data: string): string {
+    return new Date(data).toLocaleString();
   }
 }

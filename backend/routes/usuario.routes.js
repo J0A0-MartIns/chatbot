@@ -8,5 +8,6 @@ router.get('/', authMiddleware, usuarioController.listarUsuarios);
 router.get('/:id', authMiddleware, usuarioController.buscarUsuarioPorId);
 router.put('/:id', authMiddleware, usuarioController.atualizarUsuario);
 router.delete('/:id', authMiddleware, usuarioController.deletarUsuario);
+router.post('/:id/trocar-senha', usuarioController.trocarSenha);
 
 module.exports = router;

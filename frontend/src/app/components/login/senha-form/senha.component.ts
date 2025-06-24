@@ -23,7 +23,7 @@ export class SenhaComponent {
       alert('Informe seu e-mail.');
       return;
     }
-    const users = this.auth.getUsers();
+    const users = this.auth.getUser();
     const user = users.find(u => u.email === this.email);
     if (!user) {
       alert('E-mail não encontrado.');

@@ -27,7 +27,7 @@ export class BaseService {
     }
 
     // Criar novo documento
-    createDocumento(doc: Documento): Observable<any> {
+    criar(doc: Documento): Observable<any> {
         return this.http.post(this.apiUrl, doc);
     }
 
@@ -47,9 +47,7 @@ export class BaseService {
     }
 
     // Upload de arquivo
-    uploadArquivo(file: File): Observable<{ nome: string; tipo: string }> {
-        const formData = new FormData();
-        formData.append('arquivo', file);
-        return this.http.post<{ nome: string; tipo: string }>(`${this.apiUrl}/upload`, formData);
+    uploadArquivo(formData: FormData): Observable<any> {
+        return this.http.post(`${this.apiUrl}/upload`, formData);
     }
 }

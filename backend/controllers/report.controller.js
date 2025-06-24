@@ -54,12 +54,12 @@ const ReportController = {
             });
 
             const resultado = filtrados.map(at => ({
-                pergunta: at.texto_entrada_usuario,
-                resposta: at.resposta_gerada,
-                data: at.data_atendimento,
+                texto_entrada_usuario: at.texto_entrada_usuario,
+                resposta_gerada: at.resposta_gerada,
+                data_atendimento: at.data_atendimento,
                 tema: at.base_chatbot_solucoes[0]?.base_conhecimento?.sub_tema?.tema?.nome || 'N/A',
-                subtema: at.base_chatbot_solucoes[0]?.base_conhecimento?.sub_tema?.nome || 'N/A',
-                avaliado: at.feedback ? at.feedback.avaliacao : null
+                sub_tema: at.base_chatbot_solucoes[0]?.base_conhecimento?.sub_tema?.nome || 'N/A',
+                avaliacao: at.feedback ? at.feedback.avaliacao : null
             }));
 
             return res.json(resultado);

@@ -1,18 +1,26 @@
 import { Component, OnInit } from '@angular/core';
-import { DashboardService } from '../../services/dashboard.service';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-home',
-  templateUrl: './home.component.html'
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  resumo: any;
+  user: any = null;
 
-  constructor(private dashService: DashboardService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
-  ngOnInit() {
-    this.dashService.resumo().subscribe((res) => {
-      this.resumo = res;
-    });
+  ngOnInit(): void {
+    this.user = this.authService.getCurrentUser();
+  }
+
+  irPara(caminho: string): void {
+    this.router.navigate(['/' + caminho]);
+  }
+
+  irParaPerfil(): void {
+    this.router.navigate(['/perfil']);
   }
 }

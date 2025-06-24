@@ -4,13 +4,11 @@ import { Observable } from 'rxjs';
 
 export interface Pendencia {
     id_pendencia: number;
-    data: string;         // Data/Hora da pendência
+    data: string;
     tema: string;
-    microtema: string;    // Use este nome para coerência com o front
+    microtema: string;
     pergunta: string;
     avaliacao?: string | number;
-    motivo?: string;
-    id_feedback?: number;
 }
 
 @Injectable({
@@ -21,16 +19,18 @@ export class PendenciaService {
 
     constructor(private http: HttpClient) {}
 
+    // Listar todas as pendências
     listar(): Observable<Pendencia[]> {
         return this.http.get<Pendencia[]>(this.apiUrl);
     }
 
+    // Excluir uma pendência
     excluir(id: number): Observable<any> {
         return this.http.delete(`${this.apiUrl}/${id}`);
     }
 
-    // Caso queira usar para adicionar direto pela API
-    adicionarComoBase(id: number): Observable<any> {
+    // Adicionar a pendência à base de conhecimento (opcional - se tiver essa rota)
+    criar(id: number): Observable<any> {
         return this.http.post(`${this.apiUrl}/${id}/adicionar`, {});
     }
 }

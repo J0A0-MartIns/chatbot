@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { BaseService, Documento } from '../../services/base.service';
-import { PendenciaService, Pendencia } from '../../services/pending.service';
+import { PendenciaService, Pendencia } from '../../services/pendencia.service';
 
 @Component({
   selector: 'app-pendencia',
@@ -74,19 +74,21 @@ export class PendenciaComponent implements OnInit {
   }
 
   onFileSelected(event: any): void {
-    this.selectedFile = event.target.files?.[0] ?? null;
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+    }
   }
 
   uploadFile(): void {
     if (!this.selectedFile) return;
 
     const formData = new FormData();
-    formData.append('file', this.selectedFile);
-
+    formData.append('arquivo', this.selectedFile);
     this.baseService.uploadArquivo(formData).subscribe({
       next: (resp: any) => {
         if (!this.newDoc.arquivos) this.newDoc.arquivos = [];
-        this.newDoc.arquivos.push(resp.file); // ajuste conforme a resposta da API
+        this.newDoc.arquivos.push(resp.file);
         this.selectedFile = null;
       },
       error: () => alert('Erro ao enviar arquivo.')

@@ -54,4 +54,9 @@ export class UserService {
     excluir(id: number): Observable<any> {
         return this.http.delete(`${this.apiUrl}/${id}`);
     }
+
+    trocarSenha(id: number, dados: { senhaAtual: string, novaSenha: string }): Observable<any> {
+        return this.http.post(`${this.apiUrl}/${id}/trocar-senha`, dados);
+    }
+
 }

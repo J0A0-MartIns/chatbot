@@ -63,6 +63,32 @@ const UserController = {
         } catch (err) {
             return res.status(500).json({ message: 'Erro ao rejeitar.', error: err.message });
         }
+    },
+
+    async trocarSenha(req, res) {
+        const { id } = req.params;
+        const { senhaAtual, novaSenha } = req.body;
+
+        try {
+            const usuario = await Usuario.findByPk(id);
+            if (!usuario) {
+                return res.status(404).json({ mensagem: 'Usuário não encontrado.' });
+            }
+
+            const senhaValida = await bcrypt.compare(senhaAtual, usuario.senha);
+            if (!senhaValida) {
+                return res.status(401).json({ mensagem: 'Senha atual incorreta.' });
+            }
+
+            const novaHash = await bcrypt.hash(novaSenha, 10);
+            usuario.senha = novaHash;
+            await usuario.save();
+
+            return res.json({ mensagem: 'Senha alterada com sucesso.' });
+        } catch (err) {
+            console.error('Erro ao trocar senha:', err);
+            return res.status(500).json({ mensagem: 'Erro interno ao trocar senha.' });
+        }
     }
 };
 
