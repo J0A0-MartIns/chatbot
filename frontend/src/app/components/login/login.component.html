@@ -4,15 +4,15 @@
       <img src="../images/logo_qq.png" alt="Logo Quero-Quero" class="logo" />
       <h2>Colaborador</h2>
       <p class="login-label">Login</p>
-      <form>
-        <input type="email" [(ngModel)]="email" placeholder="E-mail" name="email" required />
-        <input type="password" [(ngModel)]="password" placeholder="Senha" name="password" required />
+        <form (ngSubmit)="login()">
+            <input type="email" [(ngModel)]="email" placeholder="E-mail" name="email" required />
+            <input type="password" [(ngModel)]="password" placeholder="Senha" name="password" required />
 
-        <a [routerLink]="'/senha'">Esqueceu sua senha?</a>
+            <a [routerLink]="'/senha'">Esqueceu sua senha?</a>
 
-        <button type="button" (click)="login()">Entrar</button>
-        <button type="button" [routerLink]="'/cadastro'">Cadastrar</button>
-      </form>
+            <button type="submit">Entrar</button>
+            <button type="button" [routerLink]="'/cadastro'">Cadastrar</button>
+        </form>
     </div>
   </div>
 

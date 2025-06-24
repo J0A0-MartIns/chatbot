@@ -1,30 +1,47 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import {Router, RouterLink} from '@angular/router';
+import { UserService } from '../../services/user.service';
+import {FormsModule} from "@angular/forms";
 
 @Component({
   selector: 'app-cadastro',
+  imports: [
+    FormsModule,
+    RouterLink
+  ],
   templateUrl: './cadastro.component.html'
 })
 export class CadastroComponent {
-  nome = '';
+  name = '';
   email = '';
-  senha = '';
-  tipoPerfil = 'operador';
+  password = '';
+  role = 'Operador'; // valor inicial
+  erro = '';
+  sucesso = '';
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private userService: UserService, private router: Router) {}
 
-  cadastrar() {
-    const dados = {
-      nome: this.nome,
+  register() {
+    if (!this.name || !this.email || !this.password || !this.role) {
+      this.erro = 'Preencha todos os campos.';
+      return;
+    }
+
+    const idPerfil = this.role === 'Administrador' ? 1 : 2;
+
+    this.userService.registrar({
+      nome: this.name,
       email: this.email,
-      senha: this.senha,
-      tipoPerfil: this.tipoPerfil
-    };
-
-    this.auth.register(dados).subscribe(() => {
-      alert('Cadastro enviado com sucesso!');
-      this.router.navigate(['/login']);
+      senha: this.password,
+      id_perfil: idPerfil
+    }).subscribe({
+      next: () => {
+        this.sucesso = 'Cadastro enviado para aprovação!';
+        this.router.navigate(['/login']);
+      },
+      error: () => {
+        this.erro = 'Erro ao cadastrar. Verifique os dados.';
+      }
     });
   }
 }

@@ -1,190 +1,148 @@
-import { Component, HostListener } from '@angular/core';
-import { FormsModule } from "@angular/forms";
-import { CommonModule, NgClass, NgForOf, NgIf } from "@angular/common";
-
-interface Arquivo {
-  nome: string;
-  tipo: string;
-  conteudo: string;
-}
+import { Component, OnInit } from '@angular/core';
+import { BaseService } from '../../services/base.service';
 
 interface Documento {
+  id_documento?: number;
   nome: string;
-  tema?: string;
-  microtema?: string;
-  palavrasChave: string[];
+  tema: string;
+  microtema: string;
   conteudo: string;
-  arquivos?: Arquivo[];
+  palavrasChave: string[];
+  arquivos: { nome: string; tipo: string }[];
   ativo: boolean;
 }
 
 @Component({
   selector: 'app-base',
-  templateUrl: './base.component.html',
-  styleUrls: ['./base.component.css'],
-  imports: [
-    CommonModule,
-    NgIf,
-    NgForOf,
-    FormsModule,
-  ],
-  standalone: true
+  templateUrl: './base.component.html'
 })
-export class BaseComponent {
-  docs: Documento[] = [];
-  newDoc: Documento = this.resetNewDoc();
-  newPalavraChave: string = '';
-  selectedFile: File | null = null;
+export class BaseComponent implements OnInit {
+  documentos: Documento[] = [];
+  termoBuscaTemp = '';
+  showModal = false;
   editIndex: number | null = null;
-  showModal: boolean = false;
-  actionMenuOpen: number | null = null;
   activeMenuIndex: number | null = null;
-  termoBuscaTemp: string = '';
-  filtroNome: string = '';
+
+  newDoc: Documento = this.criarDocVazio();
+  newPalavraChave = '';
+  selectedFile: File | null = null;
+
+  constructor(private baseService: BaseService) {}
 
   ngOnInit(): void {
-    this.loadFromLocalStorage();
+    this.carregarDocumentos();
   }
 
-  loadFromLocalStorage() {
-    const stored = localStorage.getItem('baseConhecimento');
-    this.docs = stored ? JSON.parse(stored) : [];
-  }
-
-  saveToLocalStorage() {
-    localStorage.setItem('baseConhecimento', JSON.stringify(this.docs));
-  }
-
-  aplicarFiltro() {
-    this.filtroNome = this.termoBuscaTemp.trim().toLowerCase();
-  }
-
-  docsFiltrados(): Documento[] {
-    if (!this.filtroNome) return this.docs;
-    return this.docs.filter(doc =>
-        doc.nome.toLowerCase().includes(this.filtroNome)
-    );
-  }
-
-  openModal(isEdit: boolean = false) {
-    this.showModal = true;
-    if (!isEdit) {
-      this.newDoc = this.resetNewDoc();
-      this.editIndex = null;
-    }
-  }
-
-  closeModal() {
-    this.showModal = false;
-  }
-
-  resetNewDoc(): Documento {
+  criarDocVazio(): Documento {
     return {
       nome: '',
       tema: '',
       microtema: '',
-      palavrasChave: [],
       conteudo: '',
+      palavrasChave: [],
       arquivos: [],
       ativo: true
     };
   }
 
-  addPalavraChave() {
-    if (this.newPalavraChave.trim()) {
-      this.newDoc.palavrasChave.push(this.newPalavraChave.toLowerCase().trim());
-      this.newPalavraChave = '';
-    }
+  carregarDocumentos(): void {
+    this.baseService.getDocumentos().subscribe((res) => {
+      this.documentos = res;
+    });
   }
 
-  removePalavraChave(index: number) {
-    this.newDoc.palavrasChave.splice(index, 1);
+  docsFiltrados(): Documento[] {
+    return this.documentos.filter(doc =>
+        doc.nome.toLowerCase().includes(this.termoBuscaTemp.toLowerCase())
+    );
   }
 
-  onFileSelected(event: any) {
-    const file: File = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
-    }
+  aplicarFiltro(): void {
+    // apenas atualiza a tela com docsFiltrados()
   }
 
-  uploadFile() {
-    if (!this.selectedFile) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result as string;
-      const tipo = this.selectedFile!.name.split('.').pop() || 'desconhecido';
-      const arquivo: Arquivo = {
-        nome: this.selectedFile!.name,
-        tipo: tipo.toUpperCase(),
-        conteudo: base64
-      };
-      this.newDoc.arquivos?.push(arquivo);
-      this.selectedFile = null;
-    };
-    reader.readAsDataURL(this.selectedFile);
-  }
-
-  removeArquivo(index: number) {
-    this.newDoc.arquivos?.splice(index, 1);
-  }
-
-  addOrUpdateDoc() {
-    if (!this.newDoc.nome || !this.newDoc.conteudo) return;
-
-    if (this.editIndex === null) {
-      this.docs.push({ ...this.newDoc });
-    } else {
-      this.docs[this.editIndex] = { ...this.newDoc };
-      this.editIndex = null;
-    }
-    this.saveToLocalStorage();
-    this.closeModal();
-    this.resetForm();
-  }
-
-  resetForm() {
-    this.newDoc = this.resetNewDoc();
-    this.newPalavraChave = '';
-  }
-
-  editDoc(index: number) {
-    this.editIndex = index;
-    this.newDoc = JSON.parse(JSON.stringify(this.docs[index]));
-    this.actionMenuOpen = null;
-    this.openModal(true);
-  }
-
-  cancelEdit() {
-    this.newDoc = this.resetNewDoc();
+  openModal(): void {
+    this.newDoc = this.criarDocVazio();
     this.editIndex = null;
-    this.closeModal();
+    this.showModal = true;
   }
 
-  deleteDoc(index: number) {
-    this.docs.splice(index, 1);
-    this.saveToLocalStorage();
-    if (this.editIndex === index) {
-      this.cancelEdit();
-    }
-    this.actionMenuOpen = null;
-  }
-
-  toggleAtivo(index: number) {
-    this.docs[index].ativo = !this.docs[index].ativo;
-    this.saveToLocalStorage();
-    this.actionMenuOpen = null;
+  closeModal(): void {
+    this.showModal = false;
+    this.editIndex = null;
   }
 
   toggleActionMenu(index: number): void {
     this.activeMenuIndex = this.activeMenuIndex === index ? null : index;
   }
 
-  @HostListener('document:click', ['$event'])
-  clickout(event: any) {
-    if (!event.target.closest('.actions-menu')) {
-      this.actionMenuOpen = null;
+  editDoc(index: number): void {
+    this.newDoc = JSON.parse(JSON.stringify(this.documentos[index]));
+    this.editIndex = index;
+    this.showModal = true;
+  }
+
+  cancelEdit(): void {
+    this.closeModal();
+  }
+
+  addOrUpdateDoc(): void {
+    if (this.editIndex !== null && this.newDoc.id_documento) {
+      this.baseService.updateDocumento(this.newDoc.id_documento, this.newDoc).subscribe(() => {
+        this.carregarDocumentos();
+        this.closeModal();
+      });
+    } else {
+      this.baseService.createDocumento(this.newDoc).subscribe(() => {
+        this.carregarDocumentos();
+        this.closeModal();
+      });
     }
+  }
+
+  deleteDoc(index: number): void {
+    const id = this.documentos[index].id_documento!;
+    this.baseService.deleteDocumento(id).subscribe(() => {
+      this.documentos.splice(index, 1);
+    });
+  }
+
+  toggleAtivo(index: number): void {
+    const doc = this.documentos[index];
+    const novoEstado = !doc.ativo;
+    this.baseService.ativarOuDesativar(doc.id_documento!, novoEstado).subscribe(() => {
+      doc.ativo = novoEstado;
+    });
+  }
+
+  addPalavraChave(): void {
+    if (this.newPalavraChave && !this.newDoc.palavrasChave.includes(this.newPalavraChave)) {
+      this.newDoc.palavrasChave.push(this.newPalavraChave);
+      this.newPalavraChave = '';
+    }
+  }
+
+  removePalavraChave(index: number): void {
+    this.newDoc.palavrasChave.splice(index, 1);
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+    }
+  }
+
+  uploadFile(): void {
+    if (this.selectedFile) {
+      this.baseService.uploadArquivo(this.selectedFile).subscribe((res) => {
+        this.newDoc.arquivos.push({ nome: res.nome, tipo: res.tipo });
+        this.selectedFile = null;
+      });
+    }
+  }
+
+  removeArquivo(index: number): void {
+    this.newDoc.arquivos.splice(index, 1);
   }
 }

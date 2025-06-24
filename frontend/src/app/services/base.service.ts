@@ -4,14 +4,13 @@ import { Observable } from 'rxjs';
 
 export interface Documento {
     id_documento?: number;
-    titulo: string;
+    nome: string; // nome do documento
+    tema: string;
+    microtema: string;
     conteudo: string;
-    palavras_chave: string;
-    data_criacao?: string;
-    vezes_utilizado?: number;
-    ativo?: boolean;
-    usuario_id: number;
-    id_subtema: number;
+    palavrasChave: string[]; // array de palavras-chave
+    arquivos: { nome: string; tipo: string }[]; // arquivos enviados
+    ativo: boolean;
 }
 
 @Injectable({
@@ -22,37 +21,35 @@ export class BaseService {
 
     constructor(private http: HttpClient) {}
 
-    // Listar documentos (com filtros opcionais)
-    listar(tema?: number, subtema?: number): Observable<Documento[]> {
-        let params = new HttpParams();
-        if (tema) params = params.set('tema', tema);
-        if (subtema) params = params.set('subtema', subtema);
-
-        return this.http.get<Documento[]>(this.apiUrl, { params });
+    // Listar documentos
+    getDocumentos(): Observable<Documento[]> {
+        return this.http.get<Documento[]>(this.apiUrl);
     }
 
     // Criar novo documento
-    criar(doc: Documento): Observable<any> {
+    createDocumento(doc: Documento): Observable<any> {
         return this.http.post(this.apiUrl, doc);
     }
 
     // Atualizar documento
-    atualizar(id: number, doc: Partial<Documento>): Observable<any> {
+    updateDocumento(id: number, doc: Partial<Documento>): Observable<any> {
         return this.http.put(`${this.apiUrl}/${id}`, doc);
     }
 
     // Excluir documento
-    excluir(id: number): Observable<any> {
+    deleteDocumento(id: number): Observable<any> {
         return this.http.delete(`${this.apiUrl}/${id}`);
     }
 
-    // Ativar/inativar documento
-    alterarStatus(id: number, ativo: boolean): Observable<any> {
+    // Ativar / Inativar
+    ativarOuDesativar(id: number, ativo: boolean): Observable<any> {
         return this.http.patch(`${this.apiUrl}/${id}/ativo`, { ativo });
     }
 
-    // Enviar arquivo (se tiver input file)
-    uploadArquivo(formData: FormData): Observable<any> {
-        return this.http.post(`${this.apiUrl}/upload`, formData);
+    // Upload de arquivo
+    uploadArquivo(file: File): Observable<{ nome: string; tipo: string }> {
+        const formData = new FormData();
+        formData.append('arquivo', file);
+        return this.http.post<{ nome: string; tipo: string }>(`${this.apiUrl}/upload`, formData);
     }
 }

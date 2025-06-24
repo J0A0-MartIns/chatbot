@@ -1,44 +1,41 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { DashboardService } from '../../services/dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
-  pendenciasCount = 0;
   perguntasHojeCount = 0;
+  pendenciasCount = 0;
 
-  constructor(private router: Router) {}
+  constructor(
+      private dashboardService: DashboardService,
+      private router: Router
+  ) {}
 
-  ngOnInit() {
-    this.carregarPendencias();
-    this.carregarPerguntasHoje();
+  ngOnInit(): void {
+    this.carregarIndicadores();
   }
 
-  carregarPendencias() {
-    const pendencias = JSON.parse(localStorage.getItem('pendenciasChatbot') || '[]');
-    this.pendenciasCount = pendencias.length;
+  carregarIndicadores(): void {
+    this.dashboardService.getTotalPerguntas().subscribe({
+      next: qtd => this.perguntasHojeCount = qtd,
+      error: () => this.perguntasHojeCount = 0
+    });
+
+    this.dashboardService.getTotalPendencias().subscribe({
+      next: qtd => this.pendenciasCount = qtd,
+      error: () => this.pendenciasCount = 0
+    });
   }
 
-  carregarPerguntasHoje() {
-    const consultas = JSON.parse(localStorage.getItem('consultasChatbot') || '[]');
-    const hoje = new Date();
-    const hojeStr = hoje.toISOString().split('T')[0];
-
-    this.perguntasHojeCount = consultas.filter((consulta: any) => {
-      if (!consulta.dataHora) return false;
-      const dataConsulta = consulta.dataHora.split('T')[0];
-      return dataConsulta === hojeStr;
-    }).length;
-  }
-
-  irParaRelatorios() {
+  irParaRelatorios(): void {
     this.router.navigate(['/relatorio']);
   }
 
-  irParaPendencias() {
-    this.router.navigate(['/pendencias']);
+  irParaPendencias(): void {
+    this.router.navigate(['/pendencia']);
   }
 }

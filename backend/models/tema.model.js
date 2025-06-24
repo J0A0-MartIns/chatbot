@@ -5,14 +5,20 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             autoIncrement: true
         },
-        nome: DataTypes.STRING
+        nome: {
+            type: DataTypes.STRING(45),
+            allowNull: false
+        }
     }, {
         tableName: 'tema',
         timestamps: false
     });
 
-    Tema.associate = (models) => {
-        Tema.hasMany(models.SubTema, { foreignKey: 'id_tema' });
+    Tema.associate = models => {
+        Tema.hasMany(models.Subtema, {
+            foreignKey: 'id_tema',
+            as: 'subtemas'
+        });
     };
 
     return Tema;

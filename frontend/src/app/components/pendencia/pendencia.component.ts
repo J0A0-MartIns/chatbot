@@ -1,168 +1,123 @@
-import { Component, HostListener } from '@angular/core';
-import { CommonModule, NgClass, NgForOf, NgIf } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-interface Arquivo {
-  nome: string;
-  tipo: string;
-  conteudo: string;
-}
-
-interface Documento {
-  nome: string;
-  tema?: string;
-  microtema?: string;
-  palavrasChave: string[];
-  conteudo: string;
-  pergunta: string;
-  arquivos?: Arquivo[];
-  ativo: boolean;
-}
+import { Component, OnInit } from '@angular/core';
+import { BaseService, Documento } from '../../services/base.service';
+import { PendenciaService, Pendencia } from '../../services/pending.service';
 
 @Component({
   selector: 'app-pendencia',
-  standalone: true,
-  imports: [CommonModule, NgIf, NgForOf, FormsModule],
   templateUrl: './pendencia.component.html',
   styleUrls: ['./pendencia.component.css']
 })
-export class PendenciaComponent {
-  pendencias: any[] = [];
-  docs: Documento[] = [];
+export class PendenciaComponent implements OnInit {
+  pendencias: Pendencia[] = [];
   showModal = false;
   editIndex: number | null = null;
-  indexParaRemoverPendencia: number | null = null;
 
-  newDoc: Documento = this.resetNewDoc();
-  newPalavraChave: string = '';
+  newDoc: Partial<Documento & { pergunta?: string; palavrasChave: string[]; arquivos: any[] }> = {
+    palavrasChave: [],
+    arquivos: []
+  };
+  newPalavraChave = '';
   selectedFile: File | null = null;
 
-  ngOnInit() {
-    const storedPendencias = localStorage.getItem('pendenciasChatbot');
-    this.pendencias = storedPendencias ? JSON.parse(storedPendencias) : [];
+  constructor(
+      private pendenciaService: PendenciaService,
+      private baseService: BaseService
+  ) {}
 
-    const storedDocs = localStorage.getItem('baseConhecimento');
-    this.docs = storedDocs ? JSON.parse(storedDocs) : [];
+  ngOnInit(): void {
+    this.carregarPendencias();
   }
 
-  resetNewDoc(pergunta: string = ''): Documento {
-    return {
-      nome: '',
-      tema: '',
-      microtema: '',
-      palavrasChave: [],
-      conteudo: '',
-      pergunta: pergunta,
-      arquivos: [],
-      ativo: true
-    };
+  carregarPendencias(): void {
+    this.pendenciaService.listar().subscribe({
+      next: (dados) => this.pendencias = dados,
+      error: () => alert('Erro ao carregar pendências.')
+    });
   }
 
-  openModal() {
-    this.showModal = true;
+  formatarData(dataStr: string): string {
+    const dt = new Date(dataStr);
+    return dt.toLocaleString();
   }
 
-  closeModal() {
-    this.showModal = false;
-    this.resetForm();
-  }
-
-  resetForm() {
-    this.newDoc = this.resetNewDoc();
-    this.newPalavraChave = '';
-    this.selectedFile = null;
-    this.editIndex = null;
-    this.indexParaRemoverPendencia = null;
-  }
-
-  formatarData(dataISO?: string): string {
-    if (!dataISO) return '-';
-    const data = new Date(dataISO);
-    if (isNaN(data.getTime())) return '-';
-    return data.toLocaleString();
-  }
-
-  adicionarPendenciaNaBase(pendencia: any, index: number) {
+  adicionarPendenciaNaBase(pendencia: Pendencia, index: number): void {
     this.newDoc = {
-      nome: `Resposta para: ${pendencia.pergunta}`,
+      nome: '', // pode preencher com título padrão se quiser
       tema: pendencia.tema,
       microtema: pendencia.microtema,
-      palavrasChave: [],
       conteudo: '',
+      palavrasChave: [],
       arquivos: [],
-      ativo: true,
       pergunta: pendencia.pergunta
     };
-    this.indexParaRemoverPendencia = index;
+    this.editIndex = index;
     this.showModal = true;
   }
 
-  addOrUpdateDoc() {
-    if (!this.newDoc.nome || !this.newDoc.conteudo) return;
-
-    if (this.editIndex === null) {
-      this.docs.push({ ...this.newDoc });
-    } else {
-      this.docs[this.editIndex] = { ...this.newDoc };
-    }
-
-    localStorage.setItem('baseConhecimento', JSON.stringify(this.docs));
-
-    if (this.indexParaRemoverPendencia !== null) {
-      this.pendencias.splice(this.indexParaRemoverPendencia, 1);
-      localStorage.setItem('pendenciasChatbot', JSON.stringify(this.pendencias));
-      this.indexParaRemoverPendencia = null;
-    }
-
-    this.closeModal();
+  closeModal(): void {
+    this.showModal = false;
+    this.editIndex = null;
+    this.newDoc = { palavrasChave: [], arquivos: [] };
+    this.newPalavraChave = '';
+    this.selectedFile = null;
   }
 
-  addPalavraChave() {
-    if (this.newPalavraChave.trim()) {
-      this.newDoc.palavrasChave.push(this.newPalavraChave.toLowerCase().trim());
+  addPalavraChave(): void {
+    if (this.newPalavraChave.trim() && !this.newDoc.palavrasChave!.includes(this.newPalavraChave.trim())) {
+      this.newDoc.palavrasChave!.push(this.newPalavraChave.trim());
       this.newPalavraChave = '';
     }
   }
 
-  removePalavraChave(index: number) {
-    this.newDoc.palavrasChave.splice(index, 1);
+  removePalavraChave(i: number): void {
+    this.newDoc.palavrasChave!.splice(i, 1);
   }
 
-  onFileSelected(event: any) {
-    const file: File = event.target.files[0];
-    if (file) this.selectedFile = file;
+  onFileSelected(event: any): void {
+    this.selectedFile = event.target.files?.[0] ?? null;
   }
 
-  uploadFile() {
+  uploadFile(): void {
     if (!this.selectedFile) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result as string;
-      const tipo = this.selectedFile!.name.split('.').pop() || 'desconhecido';
-      const arquivo: Arquivo = {
-        nome: this.selectedFile!.name,
-        tipo: tipo.toUpperCase(),
-        conteudo: base64
-      };
-      this.newDoc.arquivos?.push(arquivo);
-      this.selectedFile = null;
-    };
-    reader.readAsDataURL(this.selectedFile);
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+
+    this.baseService.uploadArquivo(formData).subscribe({
+      next: (resp: any) => {
+        if (!this.newDoc.arquivos) this.newDoc.arquivos = [];
+        this.newDoc.arquivos.push(resp.file); // ajuste conforme a resposta da API
+        this.selectedFile = null;
+      },
+      error: () => alert('Erro ao enviar arquivo.')
+    });
   }
 
-  removeArquivo(index: number) {
-    this.newDoc.arquivos?.splice(index, 1);
+  removeArquivo(i: number): void {
+    this.newDoc.arquivos!.splice(i, 1);
   }
 
-  excluirPendencia(index: number) {
-    this.pendencias.splice(index, 1);
-    localStorage.setItem('pendenciasChatbot', JSON.stringify(this.pendencias));
+  addOrUpdateDoc(): void {
+    if (!this.newDoc.nome || !this.newDoc.conteudo) return;
+
+    // Chama o serviço para criar documento na base de conhecimento
+    this.baseService.criar(this.newDoc as Documento).subscribe({
+      next: () => {
+        alert('Documento adicionado com sucesso!');
+        this.excluirPendencia(this.editIndex!);
+        this.closeModal();
+      },
+      error: () => alert('Erro ao adicionar documento.')
+    });
   }
 
-  @HostListener('document:click', ['$event'])
-  clickout(event: any) {
-    if (!event.target.closest('.actions-menu')) {
-    }
+  excluirPendencia(index: number): void {
+    const pend = this.pendencias[index];
+    this.pendenciaService.excluir(pend.id_pendencia!).subscribe({
+      next: () => {
+        this.pendencias.splice(index, 1);
+      },
+      error: () => alert('Erro ao excluir pendência.')
+    });
   }
 }
