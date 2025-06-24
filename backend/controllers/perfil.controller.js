@@ -60,14 +60,12 @@ const ProfileController = {
     // 🔹 Deleta um perfil
     async delete(req, res) {
         const { id } = req.params;
-
         try {
             const perfil = await Profile.findByPk(id);
             if (!perfil) return res.status(404).json({ message: 'Perfil não encontrado.' });
 
             await perfil.destroy();
             return res.json({ message: 'Perfil deletado com sucesso.' });
-
         } catch (err) {
             return res.status(500).json({ message: 'Erro ao deletar perfil.', error: err.message });
         }
