@@ -1,31 +1,31 @@
 import { Component, OnInit } from '@angular/core';
 import { BaseService } from '../../services/base.service';
+import { Documento } from '../../models/documento.model';
+import {FormsModule} from "@angular/forms"; // Importa nosso modelo unificado
 
-interface Documento {
-  id_documento?: number;
-  nome: string;
-  tema: string;
-  microtema: string;
-  conteudo: string;
-  palavrasChave: string[];
-  arquivos: { nome: string; tipo: string }[];
-  ativo: boolean;
-}
+// NOTA IMPORTANTE: Para que *ngIf, *ngFor e [(ngModel)] funcionem,
+// você deve adicionar 'CommonModule' e 'FormsModule' ao array 'imports'
+// do módulo que declara este componente (ex: app.module.ts).
 
 @Component({
   selector: 'app-base',
-  templateUrl: './base.component.html'
+  templateUrl: './base.component.html',
+  imports: [
+    FormsModule
+  ],
+  // Se fosse um componente Standalone, a correção seria aqui:
+  // standalone: true,
+  // imports: [CommonModule, FormsModule]
 })
 export class BaseComponent implements OnInit {
   documentos: Documento[] = [];
-  termoBuscaTemp = '';
+  termoBusca: string = '';
   showModal = false;
-  editIndex: number | null = null;
+  isEditMode = false;
   activeMenuIndex: number | null = null;
 
-  newDoc: Documento = this.criarDocVazio();
-  newPalavraChave = '';
-  selectedFile: File | null = null;
+  // O documento sendo criado/editado no modal
+  docEmEdicao: Documento = this.criarDocVazio();
 
   constructor(private baseService: BaseService) {}
 
@@ -35,114 +35,98 @@ export class BaseComponent implements OnInit {
 
   criarDocVazio(): Documento {
     return {
-      nome: '',
-      tema: '',
-      microtema: '',
+      titulo: '',
       conteudo: '',
-      palavrasChave: [],
-      arquivos: [],
-      ativo: true
+      palavras_chave: '', // Agora é uma string
+      ativo: true,
+      usuario_id: 1, // Placeholder, deve vir do usuário logado
+      id_subtema: 1, // Placeholder, deve vir de um select
     };
   }
 
   carregarDocumentos(): void {
-    this.baseService.getDocumentos().subscribe((res) => {
-      this.documentos = res;
+    this.baseService.getDocumentos().subscribe({
+      next: (data) => this.documentos = data,
+      error: (err) => console.error('Erro ao carregar documentos:', err)
     });
   }
 
   docsFiltrados(): Documento[] {
+    if (!this.termoBusca) {
+      return this.documentos;
+    }
     return this.documentos.filter(doc =>
-        doc.nome.toLowerCase().includes(this.termoBuscaTemp.toLowerCase())
+        doc.titulo.toLowerCase().includes(this.termoBusca.toLowerCase())
     );
   }
 
-  aplicarFiltro(): void {
-    // apenas atualiza a tela com docsFiltrados()
-  }
-
-  openModal(): void {
-    this.newDoc = this.criarDocVazio();
-    this.editIndex = null;
+  abrirModalParaCriar(): void {
+    this.isEditMode = false;
+    this.docEmEdicao = this.criarDocVazio();
     this.showModal = true;
   }
 
-  closeModal(): void {
+  abrirModalParaEditar(doc: Documento): void {
+    this.isEditMode = true;
+    // Cria uma cópia profunda para não alterar a lista diretamente
+    this.docEmEdicao = JSON.parse(JSON.stringify(doc));
+    this.showModal = true;
+  }
+
+  fecharModal(): void {
     this.showModal = false;
-    this.editIndex = null;
+  }
+
+  salvarDocumento(): void {
+    if (this.isEditMode && this.docEmEdicao.id_documento) {
+      // --- Lógica de Atualização ---
+      this.baseService.atualizarDocumento(this.docEmEdicao.id_documento, this.docEmEdicao).subscribe({
+        next: () => {
+          this.carregarDocumentos();
+          this.fecharModal();
+        },
+        error: (err) => console.error('Erro ao atualizar documento:', err)
+      });
+    } else {
+      // --- Lógica de Criação ---
+      this.baseService.criarDocumento(this.docEmEdicao).subscribe({
+        next: () => {
+          this.carregarDocumentos();
+          this.fecharModal();
+        },
+        error: (err) => console.error('Erro ao criar documento:', err)
+      });
+    }
+  }
+
+  excluirDocumento(id: number | undefined): void {
+    if (!id) return;
+    if (confirm('Tem certeza que deseja excluir este documento?')) {
+      this.baseService.excluirDocumento(id).subscribe({
+        next: () => {
+          this.documentos = this.documentos.filter(d => d.id_documento !== id);
+        },
+        error: (err) => console.error('Erro ao excluir documento:', err)
+      });
+    }
+  }
+
+  toggleAtivo(doc: Documento): void {
+    if (!doc.id_documento) return;
+    const novoStatus = !doc.ativo;
+    this.baseService.atualizarAtivo(doc.id_documento, novoStatus).subscribe({
+      next: (docAtualizado) => {
+        // Atualiza o documento na lista local
+        const index = this.documentos.findIndex(d => d.id_documento === doc.id_documento);
+        if (index !== -1) {
+          this.documentos[index].ativo = docAtualizado.ativo;
+        }
+      },
+      error: (err) => console.error('Erro ao alterar status:', err)
+    });
   }
 
   toggleActionMenu(index: number): void {
     this.activeMenuIndex = this.activeMenuIndex === index ? null : index;
-  }
-
-  editDoc(index: number): void {
-    this.newDoc = JSON.parse(JSON.stringify(this.documentos[index]));
-    this.editIndex = index;
-    this.showModal = true;
-  }
-
-  cancelEdit(): void {
-    this.closeModal();
-  }
-
-  addOrUpdateDoc(): void {
-    if (this.editIndex !== null && this.newDoc.id_documento) {
-      this.baseService.updateDocumento(this.newDoc.id_documento, this.newDoc).subscribe(() => {
-        this.carregarDocumentos();
-        this.closeModal();
-      });
-    } else {
-      this.baseService.createDocumento(this.newDoc).subscribe(() => {
-        this.carregarDocumentos();
-        this.closeModal();
-      });
-    }
-  }
-
-  deleteDoc(index: number): void {
-    const id = this.documentos[index].id_documento!;
-    this.baseService.deleteDocumento(id).subscribe(() => {
-      this.documentos.splice(index, 1);
-    });
-  }
-
-  toggleAtivo(index: number): void {
-    const doc = this.documentos[index];
-    const novoEstado = !doc.ativo;
-    this.baseService.ativarOuDesativar(doc.id_documento!, novoEstado).subscribe(() => {
-      doc.ativo = novoEstado;
-    });
-  }
-
-  addPalavraChave(): void {
-    if (this.newPalavraChave && !this.newDoc.palavrasChave.includes(this.newPalavraChave)) {
-      this.newDoc.palavrasChave.push(this.newPalavraChave);
-      this.newPalavraChave = '';
-    }
-  }
-
-  removePalavraChave(index: number): void {
-    this.newDoc.palavrasChave.splice(index, 1);
-  }
-
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
-    }
-  }
-
-  uploadFile(): void {
-    if (this.selectedFile) {
-      this.baseService.uploadArquivo(this.selectedFile).subscribe((res) => {
-        this.newDoc.arquivos.push({ nome: res.nome, tipo: res.tipo });
-        this.selectedFile = null;
-      });
-    }
-  }
-
-  removeArquivo(index: number): void {
-    this.newDoc.arquivos.splice(index, 1);
   }
 }

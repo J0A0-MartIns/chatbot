@@ -1,22 +1,37 @@
 <div class="login-container">
-  <div class="login-left">
-    <div class="login-content">
-      <img src="../images/logo_qq.png" alt="Logo Quero-Quero" class="logo" />
-      <h2>Colaborador</h2>
-      <p class="login-label">Login</p>
-        <form (ngSubmit)="login()">
-            <input type="email" [(ngModel)]="email" placeholder="E-mail" name="email" required />
-            <input type="password" [(ngModel)]="password" placeholder="Senha" name="password" required />
+    <div class="login-left">
+        <div class="login-content">
+            <!-- CORREÇÃO: Caminho do asset atualizado para o padrão do Angular -->
+            <img src="assets/images/logo_qq.png" alt="Logo Quero-Quero" class="logo" />
+            <h2>Colaborador</h2>
+            <p class="login-label">Login</p>
 
-            <a [routerLink]="'/senha'">Esqueceu sua senha?</a>
+            <form (ngSubmit)="login()">
+                <!-- Adicionado: Div para exibir mensagens de erro para o usuário -->
+                <div *ngIf="erro" class="alert alert-error">
+                    {{ erro }}
+                </div>
 
-            <button type="submit">Entrar</button>
-            <button type="button" [routerLink]="'/cadastro'">Cadastrar</button>
-        </form>
+                <input type="email" [(ngModel)]="email" placeholder="E-mail" name="email" required />
+
+                <!-- CORREÇÃO: O [(ngModel)] agora está ligado à propriedade 'senha' do componente .ts -->
+                <input type="password" [(ngModel)]="senha" placeholder="Senha" name="senha" required />
+
+                <!-- O link para "Esqueceu a senha" pode ser descomentado quando a funcionalidade for criada -->
+                <!-- <a [routerLink]="'/senha'">Esqueceu sua senha?</a> -->
+
+                <!-- CORREÇÃO: Botão com estado de loading para melhor experiência do usuário -->
+                <button type="submit" [disabled]="isLoading">
+                    {{ isLoading ? 'Entrando...' : 'Entrar' }}
+                </button>
+
+                <button type="button" class="button-secondary" [routerLink]="'/cadastro'">Ainda não tenho cadastro</button>
+            </form>
+        </div>
     </div>
-  </div>
 
-  <div class="login-right">
-    <img src="../images/mascote_quero_quero.jpg" alt="Mascote Quero-Quero" />
-  </div>
+    <div class="login-right">
+        <!-- CORREÇÃO: Caminho do asset atualizado para o padrão do Angular -->
+        <img src="assets/images/mascote_quero_quero.jpg" alt="Mascote Quero-Quero" />
+    </div>
 </div>

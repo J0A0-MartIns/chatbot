@@ -1,36 +1,40 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-export interface Pendencia {
-    id_pendencia: number;
-    data: string;
-    tema: string;
-    microtema: string;
-    pergunta: string;
-    avaliacao?: string | number;
-}
+import { Pendencia, AprovacaoPayload } from '../models/pendencia.model';
+import { environment } from '../environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
 export class PendenciaService {
-    private apiUrl = 'http://localhost:3000/api/pendencias';
+    private apiUrl = `${environment.apiUrl}/pendencias`;
 
     constructor(private http: HttpClient) {}
 
-    // Listar todas as pendências
-    listar(): Observable<Pendencia[]> {
+    /**
+     * Lista todas as pendências de conteúdo.
+     * GET /api/pendencias
+     */
+    listarPendencias(): Observable<Pendencia[]> {
         return this.http.get<Pendencia[]>(this.apiUrl);
     }
 
-    // Excluir uma pendência
-    excluir(id: number): Observable<any> {
+    /**
+     * Rejeita (exclui) uma pendência.
+     * DELETE /api/pendencias/:id
+     */
+    rejeitarPendencia(id: number): Observable<any> {
         return this.http.delete(`${this.apiUrl}/${id}`);
     }
 
-    // Adicionar a pendência à base de conhecimento (opcional - se tiver essa rota)
-    criar(id: number): Observable<any> {
-        return this.http.post(`${this.apiUrl}/${id}/adicionar`, {});
+    /**
+     * Aprova uma pendência.
+     * Envia os dados do novo documento para o back-end, que irá criar o
+     * documento na base de conhecimento e excluir a pendência atomicamente.
+     * POST /api/pendencias/:id/aprovar
+     */
+    aprovarPendencia(id: number, payload: AprovacaoPayload): Observable<any> {
+        return this.http.post(`${this.apiUrl}/${id}/aprovar`, payload);
     }
 }

@@ -1,8 +1,16 @@
+/**
+ * routes/auth.routes.js
+ *
+ * Define os endpoints da API para autenticação.
+ */
+
 const express = require('express');
 const router = express.Router();
-const authController = require('../controllers/authController');
 
+// Importa o controller. A variável 'authController' receberá o objeto exportado.
+const authController = require('../controllers/auth.controller');
+
+// A rota chama a função 'login' de dentro do objeto 'authController'.
 router.post('/login', authController.login);
-router.post('/logout', authController.logout);
 
 module.exports = router;

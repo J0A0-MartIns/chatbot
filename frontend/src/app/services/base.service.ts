@@ -1,53 +1,45 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-export interface Documento {
-    id_documento?: number;
-    nome: string; // nome do documento
-    tema: string;
-    microtema: string;
-    conteudo: string;
-    palavrasChave: string[]; // array de palavras-chave
-    arquivos: { nome: string; tipo: string }[]; // arquivos enviados
-    ativo: boolean;
-}
+import { Documento } from '../models/documento.model'; // Importa nosso novo modelo
+import { environment } from '../environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
 export class BaseService {
-    private apiUrl = 'http://localhost:3000/api/base';
+    // CORREÇÃO: A URL correta do back-end para este recurso
+    private apiUrl = `${environment.apiUrl}/base-conhecimento`;
 
     constructor(private http: HttpClient) {}
 
-    // Listar documentos
+    // GET /api/base-conhecimento
     getDocumentos(): Observable<Documento[]> {
         return this.http.get<Documento[]>(this.apiUrl);
     }
 
-    // Criar novo documento
-    criar(doc: Documento): Observable<any> {
-        return this.http.post(this.apiUrl, doc);
+    // POST /api/base-conhecimento
+    criarDocumento(doc: Documento): Observable<Documento> {
+        return this.http.post<Documento>(this.apiUrl, doc);
     }
 
-    // Atualizar documento
-    updateDocumento(id: number, doc: Partial<Documento>): Observable<any> {
-        return this.http.put(`${this.apiUrl}/${id}`, doc);
+    // PUT /api/base-conhecimento/:id
+    atualizarDocumento(id: number, doc: Partial<Documento>): Observable<Documento> {
+        return this.http.put<Documento>(`${this.apiUrl}/${id}`, doc);
     }
 
-    // Excluir documento
-    deleteDocumento(id: number): Observable<any> {
+    // DELETE /api/base-conhecimento/:id
+    excluirDocumento(id: number): Observable<any> {
         return this.http.delete(`${this.apiUrl}/${id}`);
     }
 
-    // Ativar / Inativar
-    ativarOuDesativar(id: number, ativo: boolean): Observable<any> {
-        return this.http.patch(`${this.apiUrl}/${id}/ativo`, { ativo });
+    // PATCH /api/base-conhecimento/:id/ativo
+    atualizarAtivo(id: number, ativo: boolean): Observable<Documento> {
+        return this.http.patch<Documento>(`${this.apiUrl}/${id}/ativo`, { ativo });
     }
 
-    // Upload de arquivo
-    uploadArquivo(formData: FormData): Observable<any> {
-        return this.http.post(`${this.apiUrl}/upload`, formData);
-    }
+    // A rota de upload de arquivo não existe de forma isolada no back-end.
+    // O upload deve ser tratado de outra forma (ex: enviando um link ou usando um serviço de storage).
+    // Por enquanto, vamos remover este método para evitar erros.
+    // uploadArquivo(...) {}
 }

@@ -1,79 +1,60 @@
 <div class="page-container">
-    <h2>Solicitações de inclusão de material</h2>
+    <h2>Solicitações de Inclusão de Conteúdo</h2>
     <div class="table-container">
         <table class="pendencias-tabela">
             <thead>
             <tr>
-                <th>Data/Hora</th>
-                <th>Tema</th>
-                <th>Microtema</th>
-                <th>Pergunta</th>
-                <th>Avaliação</th>
+                <th>Data da Pergunta</th>
+                <th>Pergunta do Usuário</th>
+                <th>Resposta do Bot</th>
+                <th>Usuário</th>
                 <th>Ações</th>
             </tr>
             </thead>
             <tbody>
+            <!-- CORREÇÃO: Loop e colunas agora usam o modelo de dados correto da API -->
             <tr *ngFor="let pendencia of pendencias; let i = index">
-                <td>{{ formatarData(pendencia.data) }}</td>
-                <td>{{ pendencia.tema }}</td>
-                <td>{{ pendencia.microtema }}</td>
+                <td>{{ formatarData(pendencia.data_criacao) }}</td>
                 <td>{{ pendencia.pergunta }}</td>
-                <td>{{ pendencia.avaliacao || 'Sem avaliação' }}</td>
+                <td>{{ pendencia.resposta }}</td>
+                <td>{{ pendencia.usuario }}</td>
                 <td>
-                    <button (click)="adicionarPendenciaNaBase(pendencia, i)" class="btn-aceitar">Adicionar à Base
-                    </button>
-                    <button (click)="excluirPendencia(i)" class="btn-excluir">Excluir</button>
+                    <button (click)="abrirModalParaAprovar(pendencia)" class="btn-aceitar">Aprovar e Criar Documento</button>
+                    <button (click)="rejeitarPendencia(pendencia.id_pendencia)" class="btn-excluir">Rejeitar</button>
                 </td>
+            </tr>
+            <tr *ngIf="pendencias.length === 0">
+                <td colspan="5" style="text-align: center;">Nenhuma pendência encontrada.</td>
             </tr>
             </tbody>
         </table>
     </div>
 
+    <!-- Modal para Aprovar Pendência -->
     <div class="modal" *ngIf="showModal">
         <div class="modal-content">
-            <span class="close" (click)="closeModal()">&times;</span>
-            <h3>{{ editIndex === null ? 'Adicionar Documento' : 'Editar Documento' }}</h3>
+            <span class="close" (click)="fecharModal()">&times;</span>
+            <h3>Aprovar Pendência e Adicionar à Base</h3>
 
-            <div *ngIf="newDoc.pergunta" class="campo">
-                <label><strong>Pergunta original:</strong></label>
-                <p>{{ newDoc.pergunta }}</p>
+            <div class="campo">
+                <label><strong>Pergunta original do usuário:</strong></label>
+                <p>{{ perguntaOriginal }}</p>
             </div>
 
-            <form>
-                <input type="text" [(ngModel)]="newDoc.nome" name="name" placeholder="Nome" required/>
-                <input type="text" [(ngModel)]="newDoc.tema" name="tema" placeholder="Tema"/>
-                <input type="text" [(ngModel)]="newDoc.microtema" name="microtema" placeholder="Microtema"/>
+            <!-- Formulário para criar o novo documento -->
+            <form (ngSubmit)="confirmarAprovacao()">
+                <input type="text" [(ngModel)]="docParaAprovar.titulo" name="titulo" placeholder="Título do Novo Documento" required/>
 
-                <div>
-                    <input type="text" [(ngModel)]="newPalavraChave" placeholder="Nova Palavra-chave"
-                           name="palavraChave"/>
-                    <button type="button" (click)="addPalavraChave()">Adicionar Palavra-chave</button>
-                </div>
-                <ul>
-                    <li *ngFor="let palavra of newDoc.palavrasChave; let i = index">
-                        {{ palavra }}
-                        <button type="button" (click)="removePalavraChave(i)">Remover</button>
-                    </li>
-                </ul>
+                <!-- O ideal aqui seria um <select> populado com os subtemas da API -->
+                <input type="number" [(ngModel)]="docParaAprovar.id_subtema" name="id_subtema" placeholder="ID do Subtema" required/>
 
-                <textarea [(ngModel)]="newDoc.conteudo" name="conteudo" placeholder="Conteúdo" required></textarea>
+                <textarea [(ngModel)]="docParaAprovar.conteudo" name="conteudo" placeholder="Conteúdo do novo documento..." required></textarea>
 
-                <div>
-                    <input type="file" (change)="onFileSelected($event)" accept=".pdf,.docx"/>
-                    <button type="button" (click)="uploadFile()" [disabled]="!selectedFile">Enviar Arquivo</button>
-                    <ul>
-                        <li *ngFor="let arquivo of newDoc.arquivos; let i = index">
-                            {{ arquivo.nome }} ({{ arquivo.tipo }})
-                            <button type="button" (click)="removeArquivo(i)">Remover</button>
-                        </li>
-                    </ul>
-                </div>
+                <input type="text" [(ngModel)]="docParaAprovar.palavras_chave" name="palavras_chave" placeholder="Palavras-chave (separadas por vírgula)"/>
 
                 <div class="modal-buttons">
-                    <button type="button" (click)="addOrUpdateDoc()" [disabled]="!newDoc.nome || !newDoc.conteudo">
-                        {{ editIndex === null ? 'Adicionar' : 'Atualizar' }}
-                    </button>
-                    <button type="button" (click)="closeModal()">Cancelar</button>
+                    <button type="submit">Confirmar Aprovação</button>
+                    <button type="button" (click)="fecharModal()">Cancelar</button>
                 </div>
             </form>
         </div>

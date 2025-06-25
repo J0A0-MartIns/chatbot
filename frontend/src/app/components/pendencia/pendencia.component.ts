@@ -1,125 +1,102 @@
 import { Component, OnInit } from '@angular/core';
-import { BaseService, Documento } from '../../services/base.service';
-import { PendenciaService, Pendencia } from '../../services/pendencia.service';
+import { PendenciaService } from '../../services/pendencia.service';
+import { Pendencia, AprovacaoPayload } from '../../models/pendencia.model';
+import {FormsModule} from "@angular/forms";
+import {NgForOf, NgIf} from "@angular/common";
+
+// NOTA: Garanta que 'CommonModule' e 'FormsModule' estão no 'imports'
+// do módulo que declara este componente (ex: app.module.ts).
 
 @Component({
   selector: 'app-pendencia',
   templateUrl: './pendencia.component.html',
+  imports: [
+    FormsModule,
+    NgIf,
+    NgForOf
+  ],
   styleUrls: ['./pendencia.component.css']
 })
 export class PendenciaComponent implements OnInit {
   pendencias: Pendencia[] = [];
   showModal = false;
-  editIndex: number | null = null;
 
-  newDoc: Partial<Documento & { pergunta?: string; palavrasChave: string[]; arquivos: any[] }> = {
-    palavrasChave: [],
-    arquivos: []
-  };
-  newPalavraChave = '';
-  selectedFile: File | null = null;
+  // O documento que será criado a partir da pendência
+  docParaAprovar: AprovacaoPayload = this.criarPayloadVazio();
+  // ID da pendência que está sendo aprovada
+  pendenciaIdAtual: number | null = null;
+  perguntaOriginal = '';
 
-  constructor(
-      private pendenciaService: PendenciaService,
-      private baseService: BaseService
-  ) {}
+  constructor(private pendenciaService: PendenciaService) {}
 
   ngOnInit(): void {
     this.carregarPendencias();
   }
 
   carregarPendencias(): void {
-    this.pendenciaService.listar().subscribe({
-      next: (dados) => this.pendencias = dados,
-      error: () => alert('Erro ao carregar pendências.')
+    this.pendenciaService.listarPendencias().subscribe(data => {
+      this.pendencias = data;
     });
   }
 
-  formatarData(dataStr: string): string {
-    const dt = new Date(dataStr);
-    return dt.toLocaleString();
+  criarPayloadVazio(): AprovacaoPayload {
+    return {
+      titulo: '',
+      conteudo: '',
+      palavras_chave: '',
+      id_subtema: 0, // Ou um valor padrão
+    };
   }
 
-  adicionarPendenciaNaBase(pendencia: Pendencia, index: number): void {
-    this.newDoc = {
-      nome: '', // pode preencher com título padrão se quiser
-      tema: pendencia.tema,
-      microtema: pendencia.microtema,
-      conteudo: '',
-      palavrasChave: [],
-      arquivos: [],
-      pergunta: pendencia.pergunta
+  // Abre o modal com os dados da pendência para aprovação
+  abrirModalParaAprovar(pendencia: Pendencia): void {
+    this.pendenciaIdAtual = pendencia.id_pendencia;
+    this.perguntaOriginal = pendencia.pergunta;
+    // Preenche o formulário com sugestões
+    this.docParaAprovar = {
+      titulo: pendencia.pergunta, // Sugere a pergunta como título
+      conteudo: pendencia.resposta, // Sugere a resposta antiga como base para o conteúdo
+      palavras_chave: '',
+      id_subtema: 0 // O admin deve selecionar
     };
-    this.editIndex = index;
     this.showModal = true;
   }
 
-  closeModal(): void {
+  fecharModal(): void {
     this.showModal = false;
-    this.editIndex = null;
-    this.newDoc = { palavrasChave: [], arquivos: [] };
-    this.newPalavraChave = '';
-    this.selectedFile = null;
+    this.pendenciaIdAtual = null;
+    this.docParaAprovar = this.criarPayloadVazio();
+    this.perguntaOriginal = '';
   }
 
-  addPalavraChave(): void {
-    if (this.newPalavraChave.trim() && !this.newDoc.palavrasChave!.includes(this.newPalavraChave.trim())) {
-      this.newDoc.palavrasChave!.push(this.newPalavraChave.trim());
-      this.newPalavraChave = '';
+  // Função chamada pelo formulário do modal
+  confirmarAprovacao(): void {
+    if (!this.pendenciaIdAtual || !this.docParaAprovar.titulo || !this.docParaAprovar.conteudo || !this.docParaAprovar.id_subtema) {
+      alert('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    this.pendenciaService.aprovarPendencia(this.pendenciaIdAtual, this.docParaAprovar).subscribe({
+      next: () => {
+        alert('Pendência aprovada e adicionada à base com sucesso!');
+        this.carregarPendencias(); // Recarrega a lista para remover a pendência aprovada
+        this.fecharModal();
+      },
+      error: (err) => alert(`Erro ao aprovar pendência: ${err.error?.message || 'Tente novamente.'}`)
+    });
+  }
+
+  rejeitarPendencia(id: number | undefined): void {
+    if (!id) return;
+    if (confirm('Tem certeza que deseja rejeitar e excluir esta pendência?')) {
+      this.pendenciaService.rejeitarPendencia(id).subscribe({
+        next: () => this.carregarPendencias(),
+        error: (err) => alert(`Erro ao rejeitar pendência: ${err.error?.message || 'Tente novamente.'}`)
+      });
     }
   }
 
-  removePalavraChave(i: number): void {
-    this.newDoc.palavrasChave!.splice(i, 1);
-  }
-
-  onFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
-    }
-  }
-
-  uploadFile(): void {
-    if (!this.selectedFile) return;
-
-    const formData = new FormData();
-    formData.append('arquivo', this.selectedFile);
-    this.baseService.uploadArquivo(formData).subscribe({
-      next: (resp: any) => {
-        if (!this.newDoc.arquivos) this.newDoc.arquivos = [];
-        this.newDoc.arquivos.push(resp.file);
-        this.selectedFile = null;
-      },
-      error: () => alert('Erro ao enviar arquivo.')
-    });
-  }
-
-  removeArquivo(i: number): void {
-    this.newDoc.arquivos!.splice(i, 1);
-  }
-
-  addOrUpdateDoc(): void {
-    if (!this.newDoc.nome || !this.newDoc.conteudo) return;
-
-    // Chama o serviço para criar documento na base de conhecimento
-    this.baseService.criar(this.newDoc as Documento).subscribe({
-      next: () => {
-        alert('Documento adicionado com sucesso!');
-        this.excluirPendencia(this.editIndex!);
-        this.closeModal();
-      },
-      error: () => alert('Erro ao adicionar documento.')
-    });
-  }
-
-  excluirPendencia(index: number): void {
-    const pend = this.pendencias[index];
-    this.pendenciaService.excluir(pend.id_pendencia!).subscribe({
-      next: () => {
-        this.pendencias.splice(index, 1);
-      },
-      error: () => alert('Erro ao excluir pendência.')
-    });
+  formatarData(dataStr: string): string {
+    return new Date(dataStr).toLocaleString('pt-BR');
   }
 }

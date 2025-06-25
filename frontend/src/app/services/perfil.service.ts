@@ -1,52 +1,59 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-export interface Perfil {
-    id_perfil: number;
-    nome: string;
-}
-
-export interface Permissao {
-    id_permissao: number;
-    nome: string;
-}
+import { Perfil, Permissao } from '../models/perfil.model';
+import { environment } from '../environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
-export class AcessoService {
-    private apiUrl = 'http://localhost:3000/api/perfis';
+export class PerfilService {
+    private perfilApiUrl = `${environment.apiUrl}/perfis`;
+    private permissaoApiUrl = `${environment.apiUrl}/permissoes`; // Rota para buscar permissões
 
     constructor(private http: HttpClient) {}
 
-    // Perfis
-    listarPerfis(): Observable<Perfil[]> {
-        return this.http.get<Perfil[]>(this.apiUrl);
+    /**
+     * Busca todos os perfis, incluindo suas permissões associadas.
+     * GET /api/perfis
+     */
+    getPerfis(): Observable<Perfil[]> {
+        return this.http.get<Perfil[]>(this.perfilApiUrl);
     }
 
-    criarPerfil(nome: string): Observable<any> {
-        return this.http.post(this.apiUrl, { nome });
+    /**
+     * Busca a lista de TODAS as permissões disponíveis no sistema.
+     * Essencial para popular os checkboxes no formulário de criação/edição.
+     * GET /api/permissoes
+     */
+    getTodasPermissoes(): Observable<Permissao[]> {
+        return this.http.get<Permissao[]>(this.permissaoApiUrl);
     }
 
-    atualizarPerfil(id: number, nome: string): Observable<any> {
-        return this.http.put(`${this.apiUrl}/${id}`, { nome });
+    /**
+     * Cria um novo perfil.
+     * O back-end espera o nome do perfil e um array de IDs de permissão.
+     * POST /api/perfis
+     */
+    criarPerfil(nome: string, permissoesIds: number[]): Observable<Perfil> {
+        const payload = { nome, permissoes: permissoesIds };
+        return this.http.post<Perfil>(this.perfilApiUrl, payload);
     }
 
+    /**
+     * Atualiza um perfil existente.
+     * PUT /api/perfis/:id
+     */
+    atualizarPerfil(id: number, nome: string, permissoesIds: number[]): Observable<Perfil> {
+        const payload = { nome, permissoes: permissoesIds };
+        return this.http.put<Perfil>(`${this.perfilApiUrl}/${id}`, payload);
+    }
+
+    /**
+     * Exclui um perfil.
+     * DELETE /api/perfis/:id
+     */
     excluirPerfil(id: number): Observable<any> {
-        return this.http.delete(`${this.apiUrl}/${id}`);
-    }
-
-    // Permissões de um perfil
-    listarPermissoes(idPerfil: number): Observable<Permissao[]> {
-        return this.http.get<Permissao[]>(`${this.apiUrl}/${idPerfil}/permissoes`);
-    }
-
-    atribuirPermissao(idPerfil: number, idPermissao: number): Observable<any> {
-        return this.http.post(`${this.apiUrl}/${idPerfil}/permissoes`, { idPermissao });
-    }
-
-    removerPermissao(idPerfil: number, idPermissao: number): Observable<any> {
-        return this.http.delete(`${this.apiUrl}/${idPerfil}/permissoes/${idPermissao}`);
+        return this.http.delete(`${this.perfilApiUrl}/${id}`);
     }
 }

@@ -22,5 +22,6 @@ router.use('/atendimentos', atendimentoRoutes);
 //router.use('/solucoes', solucaoRoutes);
 router.use('/feedbacks', feedbackRoutes);
 router.use('/pendencias', pendenciaRoutes);
+router.use('/auth', pendenciaRoutes);
 
 module.exports = router;

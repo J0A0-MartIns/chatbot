@@ -117,6 +117,70 @@ const UserController = {
     },
 
     /**
+     * @description Lista todos os usuários pendentes de aprovação.
+     * @route GET /usuarios/pendentes
+     */
+    async listarPendentes(req, res) {
+        try {
+            const usuariosPendentes = await UsuarioPendente.findAll({
+                include: [{ model: Perfil, as: 'Perfil' }]
+            });
+            return res.status(200).json(usuariosPendentes);
+        } catch (err) {
+            return res.status(500).json({ message: 'Erro ao listar usuários pendentes.', error: err.message });
+        }
+    },
+
+    /**
+     * @description Aprova um usuário pendente, criando-o na tabela de usuários ativos.
+     * @route POST /usuarios/pendentes/:id/aprovar
+     */
+    async aprovarPendente(req, res) {
+        const { id } = req.params;
+        try {
+            const pendente = await UsuarioPendente.findByPk(id);
+            if (!pendente) {
+                return res.status(404).json({ message: 'Solicitação pendente não encontrada.' });
+            }
+
+            // A senha já está no formato correto (texto plano) na tabela pendente
+            // Vamos gerar o hash para o usuário ativo.
+            const hash = await bcrypt.hash(pendente.senha, 10);
+
+            await Usuario.create({
+                nome: pendente.nome,
+                email: pendente.email,
+                senha: hash,
+                id_perfil: pendente.id_perfil,
+                ativo: true
+            });
+
+            await pendente.destroy(); // Remove o registro da tabela de pendentes
+            return res.status(200).json({ message: 'Usuário aprovado com sucesso.' });
+
+        } catch (err) {
+            return res.status(500).json({ message: 'Erro ao aprovar usuário.', error: err.message });
+        }
+    },
+
+    /**
+     * @description Rejeita e exclui uma solicitação de usuário pendente.
+     * @route DELETE /usuarios/pendentes/:id
+     */
+    async rejeitarPendente(req, res) {
+        const { id } = req.params;
+        try {
+            const deletadoCount = await UsuarioPendente.destroy({ where: { id_usuario_pendente: id } });
+            if (deletadoCount === 0) {
+                return res.status(404).json({ message: 'Solicitação pendente não encontrada.' });
+            }
+            return res.status(204).send();
+        } catch (err) {
+            return res.status(500).json({ message: 'Erro ao rejeitar solicitação.', error: err.message });
+        }
+    },
+
+    /**
      * @description Troca a senha do usuário.
      * @route POST /:id/trocar-senha
      */

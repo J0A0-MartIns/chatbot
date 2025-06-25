@@ -1,65 +1,99 @@
 import { Component, OnInit } from '@angular/core';
-import { AcessoService } from '../../services/acesso.service';
+import { PerfilService } from '../../services/perfil.service';
+import { Perfil, Permissao } from '../../models/perfil.model';
+import {NgForOf} from "@angular/common";
+import {FormsModule} from "@angular/forms";
 
-interface PerfilComPermissoes {
-  id_perfil?: number;
-  nome: string;
-  permissoes: {
-    acessaGerirUsuarios: boolean;
-    acessaDashboard: boolean;
-    acessaBase: boolean;
-    acessaChat: boolean;
-  };
-}
+// NOTA: Garanta que 'CommonModule' e 'FormsModule' estão no 'imports'
+// do módulo que declara este componente (ex: app.module.ts).
 
 @Component({
   selector: 'app-acesso',
-  templateUrl: './acesso.component.html'
+  templateUrl: './acesso.component.html',
+  imports: [
+    NgForOf,
+    FormsModule
+  ],
+  styleUrls: ['./acesso.component.css']
 })
 export class AcessoComponent implements OnInit {
-  perfis: PerfilComPermissoes[] = [];
-  novoPerfil: PerfilComPermissoes = this.criarPerfilVazio();
+  perfis: Perfil[] = [];
+  todasAsPermissoes: Permissao[] = [];
+
   modalAberto = false;
-  editIndex: number | null = null;
+  isEditMode = false;
   openActionIndex: number | null = null;
 
-  constructor(private acessoService: AcessoService) {}
+  // Dados do perfil sendo criado/editado no modal
+  perfilEmEdicao: { id?: number; nome: string } = { nome: '' };
+  // Mapa para controlar os checkboxes: Map<id_permissao, isChecked>
+  permissoesSelecionadas = new Map<number, boolean>();
+
+  constructor(private perfilService: PerfilService) {}
 
   ngOnInit(): void {
     this.carregarPerfis();
-  }
-
-  criarPerfilVazio(): PerfilComPermissoes {
-    return {
-      nome: '',
-      permissoes: {
-        acessaGerirUsuarios: false,
-        acessaDashboard: false,
-        acessaBase: false,
-        acessaChat: false
-      }
-    };
+    this.carregarTodasPermissoes();
   }
 
   carregarPerfis(): void {
-    this.acessoService.getPerfisComPermissoes().subscribe((res) => {
-      this.perfis = res.map((perfil: any) => ({
-        id_perfil: perfil.id_perfil,
-        nome: perfil.nome,
-        permissoes: {
-          acessaGerirUsuarios: perfil.permissoes.includes('acessaGerirUsuarios'),
-          acessaDashboard: perfil.permissoes.includes('acessaDashboard'),
-          acessaBase: perfil.permissoes.includes('acessaBase'),
-          acessaChat: perfil.permissoes.includes('acessaChat')
-        }
-      }));
-    });
+    this.perfilService.getPerfis().subscribe(data => this.perfis = data);
   }
 
-  abrirModal(): void {
-    this.novoPerfil = this.criarPerfilVazio();
-    this.editIndex = null;
+  carregarTodasPermissoes(): void {
+    this.perfilService.getTodasPermissoes().subscribe(data => this.todasAsPermissoes = data);
+  }
+
+  abrirModalParaCriar(): void {
+    this.isEditMode = false;
+    this.perfilEmEdicao = { nome: '' };
+    this.permissoesSelecionadas.clear(); // Limpa seleções anteriores
     this.modalAberto = true;
+  }
+
+  abrirModalParaEditar(perfil: Perfil): void {
+    this.isEditMode = true;
+    this.perfilEmEdicao = { id: perfil.id_perfil, nome: perfil.nome };
+
+    // Preenche o mapa de checkboxes com base nas permissões atuais do perfil
+    this.permissoesSelecionadas.clear();
+    const permissoesDoPerfilIds = new Set(perfil.Permissaos.map(p => p.id_permissao));
+    this.todasAsPermissoes.forEach(p => {
+      this.permissoesSelecionadas.set(p.id_permissao, permissoesDoPerfilIds.has(p.id_permissao));
+    });
+
+    this.modalAberto = true;
+  }
+
+  togglePermissao(id_permissao: number): void {
+    const currentState = this.permissoesSelecionadas.get(id_permissao) || false;
+    this.permissoesSelecionadas.set(id_permissao, !currentState);
+  }
+
+  salvarPerfil(): void {
+    const nome = this.perfilEmEdicao.nome;
+    const permissoesIds = Array.from(this.permissoesSelecionadas.entries())
+        .filter(([id, isSelected]) => isSelected)
+        .map(([id]) => id);
+
+    if (this.isEditMode && this.perfilEmEdicao.id) {
+      this.perfilService.atualizarPerfil(this.perfilEmEdicao.id, nome, permissoesIds).subscribe(() => {
+        this.carregarPerfis();
+        this.fecharModal();
+      });
+    } else {
+      this.perfilService.criarPerfil(nome, permissoesIds).subscribe(() => {
+        this.carregarPerfis();
+        this.fecharModal();
+      });
+    }
+  }
+
+  excluirPerfil(id: number | undefined): void {
+    if (!id) return;
+    if(confirm('Tem certeza que deseja excluir este perfil? Esta ação não pode ser desfeita.')) {
+      this.perfilService.excluirPerfil(id).subscribe(() => this.carregarPerfis());
+    }
   }
 
   fecharModal(): void {
@@ -68,42 +102,5 @@ export class AcessoComponent implements OnInit {
 
   toggleActionSelect(index: number): void {
     this.openActionIndex = this.openActionIndex === index ? null : index;
-  }
-
-  editarPerfil(index: number): void {
-    this.novoPerfil = JSON.parse(JSON.stringify(this.perfis[index]));
-    this.editIndex = index;
-    this.modalAberto = true;
-  }
-
-  excluirPerfil(index: number): void {
-    const id = this.perfis[index].id_perfil!;
-    this.acessoService.excluirPerfil(id).subscribe(() => {
-      this.perfis.splice(index, 1);
-    });
-  }
-
-  salvarPerfil(): void {
-    const permissoesSelecionadas = Object.keys(this.novoPerfil.permissoes).filter(
-        (chave) => this.novoPerfil.permissoes[chave as keyof typeof this.novoPerfil.permissoes]
-    );
-
-    const payload = {
-      nome: this.novoPerfil.nome,
-      permissoes: permissoesSelecionadas
-    };
-
-    if (this.editIndex !== null && this.novoPerfil.id_perfil) {
-      const id = this.novoPerfil.id_perfil;
-      this.acessoService.atualizarPerfil(id, payload).subscribe(() => {
-        this.carregarPerfis();
-        this.fecharModal();
-      });
-    } else {
-      this.acessoService.criarPerfil(payload).subscribe(() => {
-        this.carregarPerfis();
-        this.fecharModal();
-      });
-    }
   }
 }

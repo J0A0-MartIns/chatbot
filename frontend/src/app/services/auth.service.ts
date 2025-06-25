@@ -1,38 +1,73 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { tap } from 'rxjs/operators';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../environments/environment';
+import { Usuario } from '../models/user.model';
 
-@Injectable({ providedIn: 'root' })
+// Interface para a resposta do login
+export interface AuthResponse {
+    token: string;
+    usuario: Usuario;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
 export class AuthService {
-    private api = 'http://localhost:3000/api/usuario';
+    // CORREÇÃO: A URL correta para o recurso de autenticação
+    private apiUrl = `${environment.apiUrl}/auth`;
+
+    // Armazena os dados do usuário em memória para acesso rápido
+    private currentUser: Usuario | null = null;
 
     constructor(private http: HttpClient) {}
 
-    login(email: string, password: string) {
-        return this.http.post<any>(`${this.api}/login`, { email, password }).pipe(
-            tap(res => {
-                localStorage.setItem('usuario', JSON.stringify(res.usuario));
-                localStorage.setItem('token', res.token);
-            })
+    /**
+     * Autentica um usuário e armazena o token e os dados do usuário.
+     * Corresponde a: POST /api/auth/login
+     */
+    login(email: string, password: string): Observable<AuthResponse> {
+        return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { email, password }).pipe(
+            tap(response => this.setSession(response))
         );
     }
 
-    registrar(usuario: any) {
-        return this.http.post(`${this.api}/registrar`, usuario);
+    logout(): void {
+        // Limpa a sessão do localStorage e da memória
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+        this.currentUser = null;
     }
 
-    logout() {
-        localStorage.removeItem('usuario');
-        localStorage.removeItem('token');
+    private setSession(authResponse: AuthResponse): void {
+        localStorage.setItem('authToken', authResponse.token);
+
+        const userData = JSON.stringify(authResponse.usuario);
+        localStorage.setItem('currentUser', userData);
+
+        this.currentUser = authResponse.usuario;
     }
 
-    getCurrentUser() {
-        const usuario = localStorage.getItem('usuario');
-        return usuario ? JSON.parse(usuario) : null;
+    /**
+     * Pega o usuário logado a partir do estado do serviço ou do localStorage.
+     */
+    getUser(): Usuario | null {
+        if (this.currentUser) {
+            return this.currentUser;
+        }
+        const userJson = localStorage.getItem('currentUser');
+        if (userJson) {
+            this.currentUser = JSON.parse(userJson);
+            return this.currentUser;
+        }
+        return null;
     }
 
-    getToken() {
-        return localStorage.getItem('token');
+    getToken(): string | null {
+        return localStorage.getItem('authToken');
     }
 
+    isLoggedIn(): boolean {
+        return !!this.getToken();
+    }
 }

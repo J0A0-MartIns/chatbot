@@ -1,79 +1,69 @@
 <div class="page-container">
-    <div class="page-left">
+    <div class="page-content">
         <h2>Gerenciar Perfis de Acesso</h2>
-        <button class="open-modal-btn" (click)="abrirModal()">Criar PerfilModel</button>
-        <div class="page-content">
+        <button class="open-modal-btn" (click)="abrirModalParaCriar()">Criar Perfil</button>
 
-            <div class="modal-backdrop" *ngIf="modalAberto">
-                <div class="modal">
-                    <h3>{{ editIndex === null ? 'Novo PerfilModel' : 'Editar PerfilModel' }}</h3>
-                    <form (ngSubmit)="salvarPerfil()">
-                        <input type="text" placeholder="Nome do PerfilModel" [(ngModel)]="novoPerfil.nome" name="nome" required />
+        <!-- Modal de Criação/Edição -->
+        <div class="modal-backdrop" *ngIf="modalAberto">
+            <div class="modal">
+                <h3>{{ isEditMode ? 'Editar Perfil' : 'Novo Perfil' }}</h3>
+                <form (ngSubmit)="salvarPerfil()">
+                    <input type="text" placeholder="Nome do Perfil" [(ngModel)]="perfilEmEdicao.nome" name="nome" required />
 
-                        <fieldset>
-                            <legend>Permissões</legend>
-                            <label>
-                                <input type="checkbox" [(ngModel)]="novoPerfil.permissoes.acessaGerirUsuarios" name="acessaGerirUsuarios" />
-                                Gerenciar Usuários
-                            </label>
-                            <label>
-                                <input type="checkbox" [(ngModel)]="novoPerfil.permissoes.acessaDashboard" name="acessaDashboard" />
-                                Acessar Dashboard
-                            </label>
-                            <label>
-                                <input type="checkbox" [(ngModel)]="novoPerfil.permissoes.acessaBase" name="acessaBase" />
-                                Acessar Base
-                            </label>
-                            <label>
-                                <input type="checkbox" [(ngModel)]="novoPerfil.permissoes.acessaChat" name="acessaChat" />
-                                Acessar Chat
-                            </label>
-                        </fieldset>
+                    <fieldset>
+                        <legend>Permissões</legend>
+                        <!-- Loop dinâmico para criar os checkboxes -->
+                        <label *ngFor="let permissao of todasAsPermissoes">
+                            <input
+                                    type="checkbox"
+                                    [checked]="permissoesSelecionadas.get(permissao.id_permissao)"
+                                    (change)="togglePermissao(permissao.id_permissao)"
+                            />
+                            {{ permissao.nome }}
+                        </label>
+                    </fieldset>
 
-                        <div class="modal-buttons">
-                            <button type="submit">{{ editIndex === null ? 'Adicionar' : 'Salvar' }}</button>
-                            <button type="button" (click)="fecharModal()">Cancelar</button>
-                        </div>
-                    </form>
-                </div>
+                    <div class="modal-buttons">
+                        <button type="submit">{{ isEditMode ? 'Salvar Alterações' : 'Adicionar Perfil' }}</button>
+                        <button type="button" (click)="fecharModal()">Cancelar</button>
+                    </div>
+                </form>
             </div>
+        </div>
 
-            <div class="table-container">
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Nome do PerfilModel</th>
-                        <th>Permissões</th>
-                        <th>Ações</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr *ngFor="let perfil of perfis; let i = index">
-                        <td>{{ perfil.nome }}</td>
-                        <td>
-                            <ul>
-                                <li *ngIf="perfil.permissoes.acessaGerirUsuarios">Gerenciar Usuários</li>
-                                <li *ngIf="perfil.permissoes.acessaDashboard">Dashboard</li>
-                                <li *ngIf="perfil.permissoes.acessaBase">Base</li>
-                                <li *ngIf="perfil.permissoes.acessaChat">Chat</li>
-                            </ul>
-                        </td>
-                        <td>
-                            <div class="dropdown" [class.open]="openActionIndex === i">
-                                <button (click)="toggleActionSelect(i)" class="dropdown-toggle">
-                                    Opções <span class="material-icons">arrow_drop_down</span>
-                                </button>
-                                <div class="dropdown-menu" *ngIf="openActionIndex === i">
-                                    <button (click)="editarPerfil(i)">Editar</button>
-                                    <button (click)="excluirPerfil(i)" class="delete-button">Excluir</button>
-                                </div>
+        <!-- Tabela de Perfis -->
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>Nome do Perfil</th>
+                    <th>Permissões Atribuídas</th>
+                    <th>Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let perfil of perfis; let i = index">
+                    <td>{{ perfil.nome }}</td>
+                    <td>
+                        <!-- Loop para listar as permissões que o perfil possui -->
+                        <ul>
+                            <li *ngFor="let p of perfil.Permissaos">{{ p.nome }}</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <div class="dropdown" [class.open]="openActionIndex === i">
+                            <button (click)="toggleActionSelect(i)" class="dropdown-toggle">
+                                Opções <span class="material-icons">arrow_drop_down</span>
+                            </button>
+                            <div class="dropdown-menu" *ngIf="openActionIndex === i">
+                                <button (click)="abrirModalParaEditar(perfil)">Editar</button>
+                                <button (click)="excluirPerfil(perfil.id_perfil)" class="delete-button">Excluir</button>
                             </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

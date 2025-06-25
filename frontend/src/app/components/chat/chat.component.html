@@ -1,38 +1,38 @@
 <div class="page-container">
-    <div class="page-left">
-        <div class="page-content">
-            <h2><i class="fas fa-question-circle"></i> Quero Ajuda</h2>
+    <div class="page-content">
+        <h2><i class="fas fa-question-circle"></i> Quero Ajuda</h2>
 
-            <form (ngSubmit)="enviarPergunta()">
-                <label>Tema:</label>
-                <select [(ngModel)]="chat.tema" name="tema" (change)="onTemaChange()" required>
-                    <option value="">Selecione um tema</option>
-                    <option *ngFor="let t of temasDisponiveis" [value]="t">{{ t }}</option>
-                </select>
+        <form (ngSubmit)="enviarPergunta()">
+            <label for="tema">Tema:</label>
+            <select id="tema" [(ngModel)]="idTemaSelecionado" name="tema" (change)="onTemaChange()" required>
+                <option [ngValue]="null">Selecione um tema</option>
+                <option *ngFor="let t of temasDisponiveis" [ngValue]="t.id_tema">{{ t.nome }}</option>
+            </select>
 
-                <label>Micro-tema:</label>
-                <select [(ngModel)]="chat.microTema" name="microTema" required>
-                    <option value="">Selecione um micro-tema</option>
-                    <option *ngFor="let mt of microTemasRelacionados" [value]="mt">{{ mt }}</option>
-                </select>
+            <label for="subtema">Subtema:</label>
+            <select id="subtema" [(ngModel)]="idSubtemaSelecionado" name="subtema" required [disabled]="!idTemaSelecionado">
+                <option [ngValue]="null">Selecione um subtema</option>
+                <option *ngFor="let st of subtemasDisponiveis" [ngValue]="st.id_subtema">{{ st.nome }}</option>
+            </select>
 
-                <label>Pergunta:</label>
-                <textarea [(ngModel)]="chat.pergunta" name="pergunta" rows="4" required></textarea>
+            <label for="pergunta">Pergunta:</label>
+            <textarea id="pergunta" [(ngModel)]="pergunta" name="pergunta" rows="4" required></textarea>
 
-                <button type="submit"><i class="fas fa-paper-plane"></i> Enviar</button>
-            </form>
+            <button type="submit" [disabled]="isLoading">
+                <i class="fas fa-paper-plane"></i> {{ isLoading ? 'Enviando...' : 'Enviar' }}
+            </button>
+        </form>
 
-            <div *ngIf="chat.resposta" class="resposta">
-                <h3>Resposta:</h3>
-                <p>{{ chat.resposta }}</p>
+        <div *ngIf="respostaChat" class="resposta-container">
+            <h3>Resposta:</h3>
+            <p class="resposta-texto">{{ respostaChat }}</p>
 
-                <div class="avaliacao">
-                    <span>Avalie esta resposta:</span>
-                    <button (click)="avaliar('util')" [disabled]="chat.avaliacao">Foi útil</button>
-                    <button (click)="avaliar('nao-util')" [disabled]="chat.avaliacao">Não foi útil</button>
-                    <p *ngIf="chat.avaliacao"><strong>Obrigado!</strong></p>
-                </div>
+            <div class="avaliacao" *ngIf="!feedbackEnviado">
+                <span>Esta resposta foi útil?</span>
+                <button (click)="avaliar(true)" class="btn-util">Sim</button>
+                <button (click)="avaliar(false)" class="btn-nao-util">Não</button>
             </div>
+            <p *ngIf="feedbackEnviado" class="feedback-agradecimento"><strong>Obrigado pelo seu feedback!</strong></p>
         </div>
     </div>
 </div>

@@ -1,170 +1,107 @@
 import { Component, OnInit } from '@angular/core';
-import { UserService, Usuario } from '../../services/user.service';
-
-interface UsuarioView {
-    id_usuario?: number;
-    name: string;
-    email: string;
-    role: string;
-}
+import { UserService } from '../../services/user.service';
+import { PerfilService } from '../../services/perfil.service';
+import { Usuario, UsuarioPendente, UsuarioPayload } from '../../models/user.model';
+import { Perfil } from '../../models/perfil.model';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-usuario',
-    templateUrl: './usuario.component.html'
+    standalone: true,
+    imports: [CommonModule, FormsModule],
+    templateUrl: './usuario.component.html',
+    styleUrls: ['./usuario.component.css']
 })
 export class UsuarioComponent implements OnInit {
-    users: UsuarioView[] = [];
-    pendingUsers: UsuarioView[] = [];
-    perfis: { id_perfil: number; nome: string }[] = [];
+    usuariosAtivos: Usuario[] = [];
+    usuariosPendentes: UsuarioPendente[] = [];
+    perfis: Perfil[] = [];
 
-    newUser: UsuarioView = { name: '', email: '', role: 'Operador' };
-    termoBuscaTemp = '';
-    showModal = false;
+    termoBusca = '';
+    showUserModal = false;
     showPendingModal = false;
-    editIndex: number | null = null;
+    isEditMode = false;
     openActionIndex: number | null = null;
-    successMessage = '';
 
-    constructor(private userService: UserService) {}
+    usuarioEmEdicao: Partial<UsuarioPayload> & { id?: number } = {};
+
+    constructor(
+        private userService: UserService,
+        private perfilService: PerfilService
+    ) {}
 
     ngOnInit(): void {
-        this.carregarUsuarios();
-        this.carregarPendentes();
-        this.carregarPerfis();
+        this.carregarDados();
     }
 
-    carregarUsuarios(): void {
-        this.userService.getUsuarios().subscribe(users => {
-            this.users = users.map(u => ({
-                id_usuario: u.id_usuario,
-                name: u.nome,
-                email: u.email,
-                role: this.getRoleName(u.id_perfil)
-            }));
-        });
+    carregarDados(): void {
+        this.userService.getUsuarios().subscribe(data => this.usuariosAtivos = data);
+        this.userService.getUsuariosPendentes().subscribe(data => this.usuariosPendentes = data);
+        this.perfilService.getPerfis().subscribe(data => this.perfis = data);
     }
 
-    carregarPendentes(): void {
-        this.userService.getPendentes().subscribe(pendentes => {
-            this.pendingUsers = pendentes.map(p => ({
-                id_usuario: p.id_usuario,
-                name: p.nome,
-                email: p.email,
-                role: this.getRoleName(p.id_perfil)
-            }));
-        });
-    }
-
-    carregarPerfis(): void {
-        this.perfis = [
-            { id_perfil: 1, nome: 'Administrador' },
-            { id_perfil: 2, nome: 'Operador' }
-        ];
-    }
-
-    getRoleName(id_perfil: number): string {
-        const perfil = this.perfis.find(p => p.id_perfil === id_perfil);
-        return perfil ? perfil.nome : 'Operador';
-    }
-
-    getPerfilId(nome: string): number {
-        const perfil = this.perfis.find(p => p.nome === nome);
-        return perfil ? perfil.id_perfil : 2;
-    }
-
-    usersFiltrados(): UsuarioView[] {
-        const termo = this.termoBuscaTemp.toLowerCase();
-        return this.users.filter(u =>
-            u.name.toLowerCase().includes(termo) || u.email.toLowerCase().includes(termo)
+    usuariosFiltrados(): Usuario[] {
+        if (!this.termoBusca) return this.usuariosAtivos;
+        return this.usuariosAtivos.filter(u =>
+            u.nome.toLowerCase().includes(this.termoBusca.toLowerCase())
         );
     }
 
-    openModal(): void {
-        this.newUser = { name: '', email: '', role: 'Operador' };
-        this.editIndex = null;
-        this.showModal = true;
-        this.successMessage = '';
+    abrirModalParaCriar(): void {
+        this.isEditMode = false;
+        this.usuarioEmEdicao = { id_perfil: this.perfis.find(p => p.nome === 'Operador')?.id_perfil || 2 };
+        this.showUserModal = true;
     }
 
-    closeModal(): void {
-        this.showModal = false;
-        this.successMessage = '';
-    }
-
-    openPendingModal(): void {
-        this.showPendingModal = true;
-    }
-
-    closePendingModal(): void {
-        this.showPendingModal = false;
-    }
-
-    addOrUpdateUser(): void {
-        const payload: Usuario = {
-            nome: this.newUser.name,
-            email: this.newUser.email,
-            senha: '123456',
-            id_perfil: this.getPerfilId(this.newUser.role)
+    abrirModalParaEditar(usuario: Usuario): void {
+        this.isEditMode = true;
+        this.usuarioEmEdicao = {
+            id: usuario.id_usuario,
+            nome: usuario.nome,
+            email: usuario.email,
+            id_perfil: usuario.id_perfil
         };
+        this.showUserModal = true;
+    }
 
-        if (this.editIndex !== null) {
-            const id = this.users[this.editIndex].id_usuario!;
-            this.userService.atualizar(id, payload).subscribe(() => {
-                this.successMessage = 'Usuário atualizado com sucesso!';
-                this.carregarUsuarios();
-                this.closeModal();
+    salvarUsuario(): void {
+        if (this.isEditMode && this.usuarioEmEdicao.id) {
+            this.userService.atualizarUsuario(this.usuarioEmEdicao.id, this.usuarioEmEdicao).subscribe(() => {
+                this.carregarDados();
+                this.fecharModalUsuario();
             });
         } else {
-            this.userService.registrar(payload).subscribe(() => {
-                this.successMessage = 'Usuário adicionado com sucesso!';
-                this.carregarUsuarios();
-                this.closeModal();
+            const payload = { ...this.usuarioEmEdicao, senha: 'Mudar@123' } as UsuarioPayload;
+            this.userService.criarUsuarioAtivo(payload).subscribe(() => {
+                this.carregarDados();
+                this.fecharModalUsuario();
             });
         }
     }
 
-    editUser(index: number): void {
-        const user = this.users[index];
-        this.editIndex = index;
-        this.newUser = { ...user };
-        this.showModal = true;
+    desativarUsuario(id: number): void {
+        if (confirm('Tem certeza que deseja desativar este usuário?')) {
+            this.userService.desativarUsuario(id).subscribe(() => this.carregarDados());
+        }
     }
 
-    deleteUser(index: number): void {
-        const id = this.users[index].id_usuario!;
-        this.userService.excluir(id).subscribe(() => {
-            this.carregarUsuarios();
-        });
+    aprovarUsuarioPendente(id: number): void {
+        this.userService.aprovarPendente(id).subscribe(() => this.carregarDados());
     }
 
+    rejeitarUsuarioPendente(id: number): void {
+        this.userService.rejeitarPendente(id).subscribe(() => this.carregarDados());
+    }
+
+    fecharModalUsuario(): void { this.showUserModal = false; }
+    abrirModalPendentes(): void { this.showPendingModal = true; }
+    fecharModalPendentes(): void { this.showPendingModal = false; }
+
+    /**
+     * CORREÇÃO: Função adicionada para controlar o menu dropdown de ações.
+     */
     toggleActionSelect(index: number): void {
         this.openActionIndex = this.openActionIndex === index ? null : index;
-    }
-
-    approvePendingUser(index: number): void {
-        const id = this.pendingUsers[index].id_usuario!;
-        this.userService.aprovar(id).subscribe(() => {
-            this.pendingUsers.splice(index, 1);
-            this.carregarUsuarios();
-        });
-    }
-
-    rejectPendingUser(index: number): void {
-        const id = this.pendingUsers[index].id_usuario!;
-        this.userService.rejeitar(id).subscribe(() => {
-            this.pendingUsers.splice(index, 1);
-        });
-    }
-
-    editPendingUser(index: number): void {
-        const pending = this.pendingUsers[index];
-        this.editIndex = null;
-        this.newUser = {
-            name: pending.name,
-            email: pending.email,
-            role: pending.role
-        };
-        this.showPendingModal = false;
-        this.showModal = true;
     }
 }
