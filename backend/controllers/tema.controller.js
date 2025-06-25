@@ -1,53 +1,101 @@
+/**
+ * controllers/tema.controller.js
+ *
+ * Este arquivo gerencia a lógica de negócio para as operações de CRUD
+ * relacionadas aos Temas da base de conhecimento.
+ */
+
 const { Tema } = require('../models');
 
-module.exports = {
-    async listar(req, res) {
+const TemaController = {
+    /**
+     * @description Cria um novo tema.
+     * @route POST /temas
+     */
+    async criarTema(req, res) {
+        const { nome } = req.body;
+        if (!nome) {
+            return res.status(400).json({ message: 'O nome do tema é obrigatório.' });
+        }
+        try {
+            const temaExistente = await Tema.findOne({ where: { nome } });
+            if (temaExistente) {
+                return res.status(409).json({ message: 'Um tema com este nome já existe.' });
+            }
+            const tema = await Tema.create({ nome });
+            return res.status(201).json(tema);
+        } catch (err) {
+            return res.status(500).json({ message: 'Erro ao criar tema.', error: err.message });
+        }
+    },
+
+    /**
+     * @description Lista todos os temas.
+     * @route GET /temas
+     */
+    async listarTemas(req, res) {
         try {
             const temas = await Tema.findAll();
-            res.json(temas);
+            return res.status(200).json(temas);
         } catch (err) {
-            res.status(500).json({ error: 'Erro ao buscar temas' });
+            return res.status(500).json({ message: 'Erro ao buscar temas.', error: err.message });
         }
     },
 
-    async buscarPorId(req, res) {
+    /**
+     * @description Busca um tema pelo seu ID.
+     * @route GET /temas/:id
+     */
+    async buscarTemaPorId(req, res) {
         try {
             const tema = await Tema.findByPk(req.params.id);
-            if (!tema) return res.status(404).json({ error: 'Tema não encontrado' });
-            res.json(tema);
+            if (!tema) {
+                return res.status(404).json({ message: 'Tema não encontrado.' });
+            }
+            return res.status(200).json(tema);
         } catch (err) {
-            res.status(500).json({ error: 'Erro ao buscar tema' });
+            return res.status(500).json({ message: 'Erro ao buscar tema.', error: err.message });
         }
     },
 
-    async criar(req, res) {
+    /**
+     * @description Atualiza um tema existente.
+     * @route PUT /temas/:id
+     */
+    async atualizarTema(req, res) {
+        const { id } = req.params;
+        const { nome } = req.body;
+        if (!nome) {
+            return res.status(400).json({ message: 'O nome do tema é obrigatório.' });
+        }
         try {
-            const tema = await Tema.create(req.body);
-            res.status(201).json(tema);
+            const tema = await Tema.findByPk(id);
+            if (!tema) {
+                return res.status(404).json({ message: 'Tema não encontrado.' });
+            }
+            await tema.update({ nome });
+            return res.status(200).json(tema);
         } catch (err) {
-            res.status(500).json({ error: 'Erro ao criar tema' });
+            return res.status(500).json({ message: 'Erro ao atualizar tema.', error: err.message });
         }
     },
 
-    async atualizar(req, res) {
+    /**
+     * @description Remove um tema.
+     * @route DELETE /temas/:id
+     */
+    async removerTema(req, res) {
         try {
             const tema = await Tema.findByPk(req.params.id);
-            if (!tema) return res.status(404).json({ error: 'Tema não encontrado' });
-            await tema.update(req.body);
-            res.json(tema);
-        } catch (err) {
-            res.status(500).json({ error: 'Erro ao atualizar tema' });
-        }
-    },
-
-    async deletar(req, res) {
-        try {
-            const tema = await Tema.findByPk(req.params.id);
-            if (!tema) return res.status(404).json({ error: 'Tema não encontrado' });
+            if (!tema) {
+                return res.status(404).json({ message: 'Tema não encontrado.' });
+            }
             await tema.destroy();
-            res.status(204).send();
+            return res.status(204).send();
         } catch (err) {
-            res.status(500).json({ error: 'Erro ao deletar tema' });
+            return res.status(500).json({ message: 'Erro ao deletar tema.', error: err.message });
         }
     }
 };
+
+module.exports = TemaController;

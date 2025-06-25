@@ -1,22 +1,81 @@
+/**
+ * controllers/sessao_usuario.controller.js
+ *
+ * Gerencia a lógica de negócio para as sessões de usuário,
+ * incluindo listagem por usuário e o processo de logout (finalizar sessão).
+ */
+
 const { SessaoUsuario, Usuario, AtendimentoChatbot } = require('../models');
 
-module.exports = {
+const SessaoController = {
+    /**
+     * @description Lista TODAS as sessões. Útil para administradores.
+     * @route (Não utilizada nas rotas atuais, mas disponível)
+     */
     async listar(req, res) {
         try {
+            // Inclui os modelos associados para um retorno de dados mais completo.
             const sessoes = await SessaoUsuario.findAll({ include: [Usuario, AtendimentoChatbot] });
-            res.json(sessoes);
+            return res.status(200).json(sessoes);
         } catch (err) {
-            res.status(500).json({ error: 'Erro ao buscar sessões' });
+            return res.status(500).json({ message: 'Erro ao buscar sessões', error: err.message });
         }
     },
 
+    /**
+     * @description Lista todas as sessões de UM usuário específico.
+     * @route GET /sessoes/usuario/:id
+     */
+    async listarPorUsuario(req, res) {
+        const { id } = req.params; // Pega o ID do usuário da URL.
+        try {
+            const sessoes = await SessaoUsuario.findAll({
+                where: { usuario_id: id }, // Filtra as sessões pelo ID do usuário.
+                include: [Usuario, AtendimentoChatbot]
+            });
+            return res.status(200).json(sessoes);
+        } catch (err) {
+            return res.status(500).json({ message: 'Erro ao buscar sessões do usuário.', error: err.message });
+        }
+    },
+
+    /**
+     * @description Finaliza uma sessão ativa (processo de logout).
+     * @route POST /sessoes/logout
+     */
+    async finalizarSessao(req, res) {
+        // Assume que o ID da sessão a ser finalizada vem no corpo da requisição.
+        // Ou poderia ser o ID do usuário logado: req.user.id
+        const { id_sessao } = req.body;
+
+        if (!id_sessao) {
+            return res.status(400).json({ message: 'O ID da sessão é obrigatório para o logout.' });
+        }
+
+        try {
+            const sessao = await SessaoUsuario.findByPk(id_sessao);
+            if (!sessao) {
+                return res.status(404).json({ message: 'Sessão não encontrada.' });
+            }
+
+            // Atualiza a sessão com a data e hora de fim.
+            sessao.data_fim = new Date();
+            await sessao.save();
+
+            return res.status(200).json({ message: 'Logout realizado com sucesso.' });
+        } catch (err) {
+            return res.status(500).json({ message: 'Erro ao finalizar sessão.', error: err.message });
+        }
+    },
+
+    // Manter as outras funções de CRUD pode ser útil para gerenciamento futuro.
     async buscarPorId(req, res) {
         try {
             const sessao = await SessaoUsuario.findByPk(req.params.id, { include: [Usuario, AtendimentoChatbot] });
-            if (!sessao) return res.status(404).json({ error: 'Sessão não encontrada' });
+            if (!sessao) return res.status(404).json({ message: 'Sessão não encontrada' });
             res.json(sessao);
         } catch (err) {
-            res.status(500).json({ error: 'Erro ao buscar sessão' });
+            res.status(500).json({ message: 'Erro ao buscar sessão' });
         }
     },
 
@@ -25,29 +84,9 @@ module.exports = {
             const sessao = await SessaoUsuario.create(req.body);
             res.status(201).json(sessao);
         } catch (err) {
-            res.status(500).json({ error: 'Erro ao criar sessão' });
-        }
-    },
-
-    async atualizar(req, res) {
-        try {
-            const sessao = await SessaoUsuario.findByPk(req.params.id);
-            if (!sessao) return res.status(404).json({ error: 'Sessão não encontrada' });
-            await sessao.update(req.body);
-            res.json(sessao);
-        } catch (err) {
-            res.status(500).json({ error: 'Erro ao atualizar sessão' });
-        }
-    },
-
-    async deletar(req, res) {
-        try {
-            const sessao = await SessaoUsuario.findByPk(req.params.id);
-            if (!sessao) return res.status(404).json({ error: 'Sessão não encontrada' });
-            await sessao.destroy();
-            res.status(204).send();
-        } catch (err) {
-            res.status(500).json({ error: 'Erro ao deletar sessão' });
+            res.status(500).json({ message: 'Erro ao criar sessão' });
         }
     }
 };
+
+module.exports = SessaoController;

@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
 
     BaseConhecimento.associate = (models) => {
         BaseConhecimento.belongsTo(models.Usuario, { foreignKey: 'usuario_id' });
-        BaseConhecimento.belongsTo(models.SubTema, { foreignKey: 'id_subtema' });
+        BaseConhecimento.belongsTo(models.Subtema, { foreignKey: 'id_subtema' });
         BaseConhecimento.hasMany(models.DocumentoArquivo, { foreignKey: 'id_documento' });
         BaseConhecimento.hasMany(models.BaseChatbotSolucao, { foreignKey: 'base_id' });
     };
