@@ -1,6 +1,4 @@
 /**
- * controllers/tema.controller.js
- *
  * Este arquivo gerencia a lógica de negócio para as operações de CRUD
  * relacionadas aos Temas da base de conhecimento.
  */

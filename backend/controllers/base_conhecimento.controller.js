@@ -1,11 +1,9 @@
 /**
- * controllers/base_conhecimento.controller.js
- *
  * Gerencia toda a lógica de negócio para os documentos da Base de Conhecimento.
  */
 
-// Importa os modelos necessários. Corrigi 'SubTema' para 'Subtema' para consistência.
-const { BaseConhecimento, Subtema, Tema, Usuario, DocumentoArquivo } = require('../models');
+//Sequelize para usar transações
+const { BaseConhecimento, Subtema, Tema, Usuario, DocumentoArquivo, sequelize } = require('../models');
 
 const BaseConhecimentoController = {
     /**
@@ -13,8 +11,7 @@ const BaseConhecimentoController = {
      * @route POST /base-conhecimento
      */
     async criarDocumento(req, res) {
-        const { titulo, conteudo, palavras_chave, id_subtema, arquivos } = req.body;
-        // O ID do usuário deve vir do token de autenticação para segurança.
+        const { titulo, conteudo, palavras_chave, id_subtema } = req.body;
         const usuario_id = req.user.id;
 
         if (!titulo || !conteudo || !id_subtema) {
@@ -28,17 +25,8 @@ const BaseConhecimentoController = {
                 palavras_chave,
                 id_subtema,
                 usuario_id,
-                ativo: true // Documentos são criados como ativos por padrão
+                ativo: true
             });
-
-            // Se houver arquivos anexados, cria os registros correspondentes.
-            if (arquivos && Array.isArray(arquivos) && arquivos.length > 0) {
-                const arquivosParaCriar = arquivos.map(nome_arquivo => ({
-                    nome_arquivo,
-                    id_documento: novoDocumento.id_documento
-                }));
-                await DocumentoArquivo.bulkCreate(arquivosParaCriar);
-            }
 
             return res.status(201).json(novoDocumento);
         } catch (err) {
@@ -54,8 +42,14 @@ const BaseConhecimentoController = {
         try {
             const documentos = await BaseConhecimento.findAll({
                 include: [
-                    { model: Subtema, include: [Tema] },
-                    { model: Usuario, attributes: ['id_usuario', 'nome', 'email'] }, // Não retornar senha
+                    {
+                        model: Subtema,
+                        include: [{
+                            model: Tema,
+                            as: 'tema'
+                        }]
+                    },
+                    { model: Usuario, attributes: ['id_usuario', 'nome', 'email'] },
                     { model: DocumentoArquivo }
                 ],
                 order: [['data_criacao', 'DESC']]
@@ -74,7 +68,7 @@ const BaseConhecimentoController = {
         try {
             const documento = await BaseConhecimento.findByPk(req.params.id, {
                 include: [
-                    { model: Subtema, include: [Tema] },
+                    { model: Subtema, include: [{ model: Tema, as: 'tema' }] },
                     { model: Usuario, attributes: ['id_usuario', 'nome', 'email'] },
                     { model: DocumentoArquivo }
                 ]
@@ -126,7 +120,7 @@ const BaseConhecimentoController = {
      */
     async atualizarAtivo(req, res) {
         const { id } = req.params;
-        const { ativo } = req.body; // Espera um booleano: true ou false
+        const { ativo } = req.body;
 
         if (typeof ativo !== 'boolean') {
             return res.status(400).json({ message: 'O campo "ativo" deve ser um valor booleano (true ou false).' });
@@ -146,21 +140,57 @@ const BaseConhecimentoController = {
     },
 
     /**
-     * @description Exclui um documento.
+     * @description Exclui um documento e, em seguida, verifica e remove
+     * temas e subtemas que se tornaram órfãos.
      * @route DELETE /base-conhecimento/:id
      */
     async excluirDocumento(req, res) {
+        const { id } = req.params;
+        const transacao = await sequelize.transaction();
+
         try {
-            const documento = await BaseConhecimento.findByPk(req.params.id);
+            const documento = await BaseConhecimento.findByPk(id, { transaction: transacao });
             if (!documento) {
+                await transacao.rollback();
                 return res.status(404).json({ message: 'Documento não encontrado.' });
             }
-            // Exclui os arquivos associados primeiro para manter a integridade do banco.
-            await DocumentoArquivo.destroy({ where: { id_documento: req.params.id } });
-            await documento.destroy();
+
+            const idSubtema = documento.id_subtema;
+
+            // 1. Apaga o documento
+            await documento.destroy({ transaction: transacao });
+
+            // 2. Verifica se o subtema ficou órfão
+            if (idSubtema) {
+                const subtema = await Subtema.findByPk(idSubtema, { transaction: transacao });
+                if (subtema) {
+                    const idTema = subtema.id_tema;
+
+                    const countDocsInSubtema = await BaseConhecimento.count({ where: { id_subtema: idSubtema }, transaction: transacao });
+
+                    if (countDocsInSubtema === 0) {
+                        // Se não houver mais documentos, apaga o subtema
+                        await subtema.destroy({ transaction: transacao });
+
+                        // 3. Verifica se o tema pai ficou órfão
+                        const countSubtemasInTema = await Subtema.count({ where: { id_tema: idTema }, transaction: transacao });
+
+                        if (countSubtemasInTema === 0) {
+                            // Se não houver mais subtemas, apaga o tema
+                            await Tema.destroy({ where: { id_tema: idTema }, transaction: transacao });
+                        }
+                    }
+                }
+            }
+
+            //Confirma as alterações se der certo
+            await transacao.commit();
             return res.status(204).send();
+
         } catch (err) {
-            return res.status(500).json({ message: 'Erro ao excluir documento.', error: err.message });
+            //Desfaz todas as alterações se der errado
+            await transacao.rollback();
+            return res.status(500).json({ message: 'Erro ao excluir documento e limpar órfãos.', error: err.message });
         }
     }
 };

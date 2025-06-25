@@ -9,30 +9,30 @@ const router = express.Router();
 
 // Importa o controller e os middlewares.
 const baseConhecimentoController = require('../controllers/base_conhecimento.controller');
-const { authenticateToken, authorizePerfil } = require('../middlewares/auth.middleware');
+const { authenticateToken } = require('../middlewares/auth.middleware');
+const { pode } = require('../middlewares/permissao.middleware');
 
 // --- Definição das Rotas ---
 
-// Rota para criar um documento (Qualquer usuário autenticado)
-router.post('/', authenticateToken, baseConhecimentoController.criarDocumento);
+// Rota para criar um documento (Requer permissão 'criar_documento')
+router.post('/', authenticateToken, pode('criar_documento'), baseConhecimentoController.criarDocumento);
 
-// Rota para listar todos os documentos (Qualquer usuário autenticado)
+// Rota para listar todos os documentos (Apenas autenticado, sem permissão especial)
 router.get('/', authenticateToken, baseConhecimentoController.listarDocumentos);
 
-// Rota para buscar documentos por subtema (Qualquer usuário autenticado)
-// Corrigido de '/microtema/:microtemaId' para um padrão mais limpo.
+// Rota para buscar documentos por subtema
 router.get('/subtema/:id_subtema', authenticateToken, baseConhecimentoController.buscarPorSubtema);
 
-// Rota para buscar um documento por ID (Qualquer usuário autenticado)
+// Rota para buscar um documento por ID
 router.get('/:id', authenticateToken, baseConhecimentoController.buscarDocumentoPorId);
 
-// Rota para atualizar um documento (Apenas Admins)
-router.put('/:id', authenticateToken, authorizePerfil(['Admin']), baseConhecimentoController.atualizarDocumento);
+// Rota para atualizar um documento (Requer permissão 'editar_documento')
+router.put('/:id', authenticateToken, pode('editar_documento'), baseConhecimentoController.atualizarDocumento);
 
-// Rota para ativar/desativar um documento (Apenas Admins)
-router.patch('/:id/ativo', authenticateToken, authorizePerfil(['Admin']), baseConhecimentoController.atualizarAtivo);
+// Rota para ativar/desativar um documento (Requer permissão 'publicar_documento')
+router.patch('/:id/ativo', authenticateToken, pode('publicar_documento'), baseConhecimentoController.atualizarAtivo);
 
-// Rota para excluir um documento (Apenas Admins)
-router.delete('/:id', authenticateToken, authorizePerfil(['Admin']), baseConhecimentoController.excluirDocumento);
+// Rota para excluir um documento (Requer permissão 'deletar_documento')
+router.delete('/:id', authenticateToken, pode('deletar_documento'), baseConhecimentoController.excluirDocumento);
 
 module.exports = router;

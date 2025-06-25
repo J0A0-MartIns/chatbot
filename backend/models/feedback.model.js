@@ -5,15 +5,29 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             autoIncrement: true
         },
-        avaliacao: DataTypes.INTEGER,
-        atendimento_id: DataTypes.INTEGER
+        // A avaliação agora é um booleano para clareza: true = útil, false = não útil
+        avaliacao: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false
+        },
+        // --- ADICIONADO ---
+        // Campo para guardar o comentário do utilizador quando o feedback é negativo.
+        comentario: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+        // A chave estrangeira para o atendimento
+        atendimento_chatbot_id_atendimento: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        }
     }, {
         tableName: 'feedback',
-        timestamps: false
+        timestamps: true // É útil saber quando o feedback foi dado
     });
 
     Feedback.associate = (models) => {
-        Feedback.belongsTo(models.AtendimentoChatbot, { foreignKey: 'atendimento_id' });
+        Feedback.belongsTo(models.AtendimentoChatbot, { foreignKey: 'atendimento_chatbot_id_atendimento' });
         Feedback.hasOne(models.Pendencia, { foreignKey: 'id_feedback' });
     };
 

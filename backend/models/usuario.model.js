@@ -8,14 +8,21 @@ module.exports = (sequelize, DataTypes) => {
         nome: DataTypes.STRING,
         email: DataTypes.STRING,
         senha: DataTypes.STRING,
-        ativo: DataTypes.BOOLEAN,
+
+        // --- CORREÇÃO ---
+        // Substituímos a flag 'ativo' pelo campo 'status'
+        status: {
+            type: DataTypes.STRING, // Em PostgreSQL, você poderia usar DataTypes.ENUM('ativo', 'pendente', 'inativo')
+            allowNull: false,
+            defaultValue: 'pendente'
+        },
         id_perfil: DataTypes.INTEGER
     }, {
         tableName: 'usuario',
         timestamps: false
     });
 
-    Usuario.associate = (models) => {
+Usuario.associate = (models) => {
         Usuario.belongsTo(models.Perfil, { foreignKey: 'id_perfil' });
         Usuario.hasMany(models.BaseConhecimento, { foreignKey: 'usuario_id' });
         Usuario.hasMany(models.SessaoUsuario, { foreignKey: 'usuario_id' });

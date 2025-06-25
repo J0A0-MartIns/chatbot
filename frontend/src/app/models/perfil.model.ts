@@ -1,6 +1,12 @@
-import {Permissoes} from "./permissoes.model";
+// Interface para um objeto de Permissão, como vem da API
+export interface Permissao {
+    id_permissao: number;
+    nome: string; // Ex: 'criar_documento'
+}
 
-export interface PerfilAcesso {
-    nome: string;
-    permissoes: Permissoes;
+// Interface para um objeto de Perfil, incluindo suas permissões associadas
+export interface Perfil {
+    id_perfil: number;
+    nome: string; // Ex: 'Admin'
+    Permissoes: Permissao[]; // O Sequelize usa o nome do modelo no plural por padrão
 }

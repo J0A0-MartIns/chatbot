@@ -1,79 +1,128 @@
 import { Component, OnInit } from '@angular/core';
-import { ChatService, PerguntaPayload, RespostaChat } from '../../services/chatbot.service';
+import { ChatService, PerguntaPayload, FeedbackPayload } from '../../services/chat.service';
+import { TemaService } from '../../services/tema.service';
+import { SubtemaService } from '../../services/subtema.service';
+import { Tema } from '../../models/tema.model';
+import { Subtema } from '../../models/subtema.model';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-chat',
-  templateUrl: './chat.component.html'
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './chat.component.html',
+  styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit {
-  chat = {
-    temaId: 0,
-    subtemaId: 0,
-    pergunta: '',
-    resposta: '',
-    idAtendimento: 0,
-    avaliacao: false
-  };
+  // Estado do formulário
+  idTemaSelecionado: number | null = null;
+  idSubtemaSelecionado: number | null = null;
+  pergunta = '';
 
-  temasDisponiveis: any[] = [];
-  microTemasRelacionados: any[] = [];
+  // Dados para os menus de seleção
+  temasDisponiveis: Tema[] = [];
+  subtemasDisponiveis: Subtema[] = [];
 
-  usuarioId: number = 0;
+  // Estado da conversa
+  respostaChat = '';
+  idAtendimentoAtual: number | null = null;
+  isLoading = false;
 
-  constructor(private chatService: ChatService) {}
+  // Novos estados para a lógica de feedback
+  respostaEncontrada: boolean | null = null;
+  etapaFeedback: 'inicio' | 'comentario' | 'finalizado' = 'inicio';
+  feedbackComentario = '';
+
+  constructor(
+      private chatService: ChatService,
+      private temaService: TemaService,
+      private subtemaService: SubtemaService
+  ) {}
 
   ngOnInit(): void {
-    this.usuarioId = Number(localStorage.getItem('usuarioId') || 0);
-
-    // Aqui você pode chamar um service real para buscar temas do banco, se já existir
     this.carregarTemas();
   }
 
   carregarTemas(): void {
-    // Simulado por enquanto; substitua por chamada real se tiver:
-    this.temasDisponiveis = [
-      { id: 1, nome: 'Atendimento' },
-      { id: 2, nome: 'Financeiro' }
-    ];
+    this.temaService.getTemas().subscribe({
+      next: (data) => this.temasDisponiveis = data,
+      error: (err) => console.error('ERRO AO CARREGAR TEMAS:', err)
+    });
   }
 
   onTemaChange(): void {
-    this.chat.subtemaId = 0;
-    // Aqui também, troque por chamada ao backend real
-    if (this.chat.temaId === 1) {
-      this.microTemasRelacionados = [
-        { id: 10, nome: 'Abertura de chamado' },
-        { id: 11, nome: 'Encerramento' }
-      ];
-    } else if (this.chat.temaId === 2) {
-      this.microTemasRelacionados = [
-        { id: 20, nome: 'Boletos' },
-        { id: 21, nome: 'Reembolso' }
-      ];
-    } else {
-      this.microTemasRelacionados = [];
+    this.idSubtemaSelecionado = null;
+    this.subtemasDisponiveis = [];
+    if (this.idTemaSelecionado) {
+      this.subtemaService.getSubtemasPorTema(this.idTemaSelecionado).subscribe({
+        next: (data) => this.subtemasDisponiveis = data,
+        error: (err) => console.error('ERRO AO CARREGAR SUBTEMAS:', err)
+      });
     }
   }
 
   enviarPergunta(): void {
+    if (!this.pergunta.trim() || !this.idSubtemaSelecionado) {
+      alert('Por favor, selecione tema, subtema e digite sua pergunta.');
+      return;
+    }
+    this.isLoading = true;
+    this.resetarEstadoConversa();
+
     const payload: PerguntaPayload = {
-      texto: this.chat.pergunta,
-      temaId: this.chat.temaId,
-      subtemaId: this.chat.subtemaId,
-      usuarioId: this.usuarioId
+      pergunta: this.pergunta,
+      id_subtema: this.idSubtemaSelecionado
     };
 
-    this.chatService.perguntar(payload).subscribe((res: RespostaChat) => {
-      this.chat.resposta = res.resposta;
-      this.chat.idAtendimento = res.id_atendimento;
-      this.chat.avaliacao = false;
+    this.chatService.perguntar(payload).subscribe({
+      next: (res) => {
+        this.respostaChat = res.resposta;
+        this.idAtendimentoAtual = res.id_atendimento;
+        this.respostaEncontrada = res.encontrado;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.respostaChat = 'Ocorreu um erro ao buscar sua resposta. Tente novamente.';
+        console.error("ERRO AO PERGUNTAR:", err);
+      }
     });
   }
 
-  avaliar(tipo: 'util' | 'nao-util'): void {
-    const avaliacao = tipo === 'util' ? 1 : 0;
-    this.chatService.enviarFeedback(this.chat.idAtendimento, avaliacao).subscribe(() => {
-      this.chat.avaliacao = true;
+  avaliar(foiUtil: boolean): void {
+    if (!this.idAtendimentoAtual) return;
+    if (foiUtil) {
+      this.chatService.enviarFeedback({ id_atendimento: this.idAtendimentoAtual, avaliacao: true })
+          .subscribe(() => this.etapaFeedback = 'finalizado');
+    } else {
+      this.etapaFeedback = 'comentario';
+    }
+  }
+
+  enviarFeedbackNegativo(): void {
+    if (!this.idAtendimentoAtual) return;
+    const payload: FeedbackPayload = {
+      id_atendimento: this.idAtendimentoAtual,
+      avaliacao: false,
+      comentario: this.feedbackComentario
+    };
+    this.chatService.enviarFeedback(payload).subscribe(() => this.etapaFeedback = 'finalizado');
+  }
+
+  enviarComoSugestao(): void {
+    if (!this.idAtendimentoAtual) return;
+    this.chatService.criarPendenciaDireta(this.idAtendimentoAtual).subscribe(() => {
+      this.etapaFeedback = 'finalizado';
+      this.respostaChat = 'Obrigado! A sua pergunta foi enviada para análise.';
     });
+  }
+
+  private resetarEstadoConversa(): void {
+    this.respostaChat = '';
+    this.idAtendimentoAtual = null;
+    this.respostaEncontrada = null;
+    this.etapaFeedback = 'inicio';
+    this.feedbackComentario = '';
   }
 }

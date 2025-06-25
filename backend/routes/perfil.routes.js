@@ -22,9 +22,10 @@ const { authenticateToken, authorizePerfil } = require('../middlewares/auth.midd
 // Apenas usuários autenticados e com perfil 'Admin' podem criar perfis.
 router.post('/', authenticateToken, authorizePerfil(['Admin']), perfilController.criarPerfil);
 
-// Rota para listar todos os perfis.
-// Apenas usuários autenticados podem ver a lista de perfis.
-router.get('/', authenticateToken, perfilController.listarPerfis);
+// --- ROTA PÚBLICA ---
+// CORREÇÃO: Esta rota agora é PÚBLICA para permitir que a tela de cadastro
+// busque a lista de perfis disponíveis para seleção.
+router.get('/', perfilController.listarPerfis);
 
 // Rota para buscar um perfil específico pelo ID.
 // Apenas usuários autenticados podem buscar um perfil.

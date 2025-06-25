@@ -14,13 +14,17 @@ const pendenciaRoutes = require('./pendencia.routes');
 
 router.use('/usuarios', usuarioRoutes);
 router.use('/perfis', perfilRoutes);
+router.use('/permissoes', require('./permissao.routes'));
 router.use('/sessoes', sessaoRoutes);
-router.use('/tema', temaRoutes);
-router.use('/subtema', subTemaRoutes);
+router.use('/temas', temaRoutes);
+router.use('/subtemas', subTemaRoutes);
 router.use('/base', baseConhecimentoRoutes);
 router.use('/atendimentos', atendimentoRoutes);
 //router.use('/solucoes', solucaoRoutes);
 router.use('/feedbacks', feedbackRoutes);
 router.use('/pendencias', pendenciaRoutes);
+router.use('/auth', pendenciaRoutes);
+router.use('/base-conhecimento', require('./base_conhecimento.routes'));
+
 
 module.exports = router;

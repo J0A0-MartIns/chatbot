@@ -1,27 +1,10 @@
 /**
- * controllers/perfil.controller.js
- *
- * Este arquivo gerencia a lógica de negócio para as operações de CRUD (Criar, Ler, Atualizar, Deletar)
- * relacionadas aos perfis de usuário.
+ * Gerencia o CRUD de Perfis e suas associações com Permissões.
  */
 
-// Importa o modelo Perfil. Assumi que o nome do modelo definido no Sequelize é 'Perfil'.
-const { Perfil } = require('../models');
+const { Perfil, Permissao } = require('../models');
 
 const PerfilController = {
-    /**
-     * @description Lista todos os perfis cadastrados.
-     * @route GET /perfis
-     */
-    async listarPerfis(req, res) {
-        try {
-            const perfis = await Perfil.findAll();
-            return res.status(200).json(perfis);
-        } catch (err) {
-            // Retorna um erro genérico caso algo dê errado no servidor.
-            return res.status(500).json({ message: 'Erro ao listar perfis.', error: err.message });
-        }
-    },
 
     /**
      * @description Busca um único perfil pelo seu ID.
@@ -41,43 +24,47 @@ const PerfilController = {
     },
 
     /**
-     * @description Cria um novo perfil.
-     * @route POST /perfis
+     * @description Lista todos os perfis, incluindo suas permissões associadas.
+     */
+    async listarPerfis(req, res) {
+        try {
+            const perfis = await Perfil.findAll({
+                include: [{ model: Permissao, as: 'Permissaos', through: { attributes: [] } }],
+                order: [['nome', 'ASC']]
+            });
+            return res.status(200).json(perfis);
+        } catch (err) {
+            return res.status(500).json({ message: 'Erro ao listar perfis.', error: err.message });
+        }
+    },
+
+    /**
+     * @description Cria um novo perfil e associa as permissões enviadas.
      */
     async criarPerfil(req, res) {
-        const { nome } = req.body;
+        const { nome, permissoes } = req.body;
 
-        // Validação básica para garantir que o nome foi enviado.
         if (!nome) {
             return res.status(400).json({ message: 'O nome do perfil é obrigatório.' });
         }
 
         try {
-            // Verifica se um perfil com o mesmo nome já existe para evitar duplicatas.
-            const perfilExistente = await Perfil.findOne({ where: { nome } });
-            if (perfilExistente) {
-                return res.status(409).json({ message: 'Um perfil com este nome já existe.' }); // 409 Conflict
-            }
-
             const novoPerfil = await Perfil.create({ nome });
-            return res.status(201).json(novoPerfil); // 201 Created
-
+            if (permissoes && permissoes.length > 0) {
+                await novoPerfil.setPermissaos(permissoes);
+            }
+            return res.status(201).json(novoPerfil);
         } catch (err) {
             return res.status(500).json({ message: 'Erro ao criar perfil.', error: err.message });
         }
     },
 
     /**
-     * @description Atualiza um perfil existente.
-     * @route PUT /perfis/:id
+     * @description Atualiza um perfil existente e suas permissões.
      */
     async updatePerfil(req, res) {
         const { id } = req.params;
-        const { nome } = req.body;
-
-        if (!nome) {
-            return res.status(400).json({ message: 'O nome do perfil é obrigatório.' });
-        }
+        const { nome, permissoes } = req.body;
 
         try {
             const perfil = await Perfil.findByPk(id);
@@ -86,7 +73,13 @@ const PerfilController = {
             }
 
             perfil.nome = nome;
-            await perfil.save(); // Salva a alteração no banco de dados.
+            await perfil.save();
+
+            //Sincroniza as permissões do perfil com a lista enviada.
+            //Sequelize vai remover as antigas e adicionar as novas automaticamente.
+            if (permissoes) {
+                await perfil.setPermissaos(permissoes);
+            }
 
             return res.status(200).json(perfil);
 
@@ -106,12 +99,8 @@ const PerfilController = {
             if (!perfil) {
                 return res.status(404).json({ message: 'Perfil não encontrado.' });
             }
-
-            // Cuidado: Adicionar lógica para impedir a exclusão de perfis em uso.
-            // Ex: Verificar se algum usuário tem este perfil antes de deletar.
-
             await perfil.destroy();
-            return res.status(204).send(); // 204 No Content - resposta padrão para delete com sucesso.
+            return res.status(204).send();
         } catch (err) {
             return res.status(500).json({ message: 'Erro ao deletar perfil.', error: err.message });
         }
@@ -119,3 +108,5 @@ const PerfilController = {
 };
 
 module.exports = PerfilController;
+
+

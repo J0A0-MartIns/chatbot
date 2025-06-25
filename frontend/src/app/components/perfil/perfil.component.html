@@ -1,55 +1,58 @@
 <div class="page-container" *ngIf="user">
     <div class="page-content">
-        <h2>PerfilModel do Usuário</h2>
+        <h2>Perfil do Usuário</h2>
         <div class="user-info">
             <p><strong>Nome:</strong> {{ user.nome }}</p>
             <p><strong>Email:</strong> {{ user.email }}</p>
-            <p><strong>PerfilModel:</strong> {{ user.id_perfil }}</p>
+            <!-- CORREÇÃO: Mostra o nome do perfil, que é mais amigável -->
+            <p><strong>Perfil:</strong> {{ user.Perfil?.nome || 'Não definido' }}</p>
         </div>
 
-        <button (click)="mostraMudarSenha()" class="btn-change-password">
-            Alterar Senha
+        <button (click)="toggleModalSenha()" class="btn-change-password">
+            {{ !mostrarTrocaSenha ? 'Alterar Senha' : 'Cancelar Alteração' }}
         </button>
 
-        <div class="modal-overlay" *ngIf="mostrarTrocaSenha">
-            <div class="modal">
-                <h3>Alterar Senha</h3>
-                <form (ngSubmit)="mudarSenha()">
-                    <input
-                            type="password"
-                            id="currentPassword"
-                            [(ngModel)]="senhaAtual"
-                            name="currentPassword"
-                            placeholder="Senha Atual"
-                            required
-                    />
+        <!-- Modal/Formulário para Alterar Senha -->
+        <div class="change-password-form" *ngIf="mostrarTrocaSenha">
+            <h3>Alterar Senha</h3>
+            <form (ngSubmit)="mudarSenha()">
+                <input
+                        type="password"
+                        id="currentPassword"
+                        [(ngModel)]="senhaAtual"
+                        name="currentPassword"
+                        placeholder="Senha Atual"
+                        required
+                />
+                <input
+                        type="password"
+                        id="newPassword"
+                        [(ngModel)]="novaSenha"
+                        name="newPassword"
+                        placeholder="Nova Senha"
+                        required
+                />
+                <input
+                        type="password"
+                        id="confirmPassword"
+                        [(ngModel)]="confirmarSenha"
+                        name="confirmPassword"
+                        placeholder="Confirmar Nova Senha"
+                        required
+                />
 
-                    <input
-                            type="password"
-                            id="newPassword"
-                            [(ngModel)]="novaSenha"
-                            name="newPassword"
-                            placeholder="Nova Senha"
-                            required
-                    />
+                <div *ngIf="erro" class="message error">{{ erro }}</div>
 
-                    <input
-                            type="password"
-                            id="confirmPassword"
-                            [(ngModel)]="confirmarSenha"
-                            name="confirmPassword"
-                            placeholder="Confirmar Nova Senha"
-                            required
-                    />
-
-                    <div *ngIf="erro" class="message error">{{ erro }}</div>
-
-                    <div class="modal-buttons">
-                        <button type="submit">Salvar</button>
-                        <button type="button" (click)="mostraMudarSenha()">Cancelar</button>
-                    </div>
-                </form>
-            </div>
+                <div class="modal-buttons">
+                    <button type="submit" [disabled]="isLoading">
+                        {{ isLoading ? 'Salvando...' : 'Salvar Nova Senha' }}
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
+
+<div class="page-container" *ngIf="!user">
+    <p>Carregando perfil...</p>
 </div>

@@ -4,21 +4,35 @@
             <img src="../images/logo_qq.png" alt="Logo Quero-Quero" class="logo" />
             <h2>Colaborador</h2>
             <p class="login-label">Cadastro</p>
-            <form>
-                <input type="text" placeholder="Nome" [(ngModel)]="name" name="name" />
-                <input type="email" placeholder="E-mail" [(ngModel)]="email" name="email" />
-                <select [(ngModel)]="role" name="role">
-                    <option value="Administrador">Administrador</option>
-                    <option value="Operador">Operador</option>
-                </select>
-                <input type="password" placeholder="Senha" [(ngModel)]="password" name="password" />
 
-                <button type="button" (click)="register()">Cadastrar</button>
-                <button type="button" [routerLink]="'/login'">Voltar</button>
+            <form (ngSubmit)="register()">
+                <div *ngIf="erro" class="alert alert-error">{{ erro }}</div>
+
+                <input type="text" placeholder="Nome Completo" [(ngModel)]="nome" name="nome" required />
+                <input type="email" placeholder="E-mail Corporativo" [(ngModel)]="email" name="email" required />
+
+                <!--
+                  --- AQUI ESTÁ A CORREÇÃO PRINCIPAL ---
+                  O select agora é populado dinamicamente com os perfis da API.
+                -->
+                <select [(ngModel)]="perfilId" name="perfilId" required>
+                    <option [ngValue]="null" disabled>-- Selecione seu perfil --</option>
+                    <option *ngFor="let perfil of perfisDisponiveis" [ngValue]="perfil.id_perfil">
+                        {{ perfil.nome }}
+                    </option>
+                </select>
+
+                <input type="password" placeholder="Crie uma Senha" [(ngModel)]="senha" name="senha" required />
+
+                <button type="submit" [disabled]="isLoading">
+                    {{ isLoading ? 'Enviando...' : 'Cadastrar' }}
+                </button>
+
+                <button type="button" class="button-secondary" [routerLink]="'/login'">Voltar para o Login</button>
             </form>
         </div>
     </div>
     <div class="login-right">
-        <img src="images/mascote_quero_quero.jpg" alt="Mascote Quero-Quero" />
+        <img src="assets/images/mascote_quero_quero.jpg" alt="Mascote Quero-Quero" />
     </div>
 </div>

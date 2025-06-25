@@ -1,11 +1,9 @@
 /**
- * controllers/atendimento.controller.js
- *
  * Gerencia a lógica de negócio para os atendimentos do chatbot,
  * incluindo o registro de interações e o vínculo com as soluções apresentadas.
  */
 
-// Importa os modelos necessários. Corrigi 'atendimento_chatbot' para o padrão PascalCase.
+// Importa os modelos necessários.
 const { AtendimentoChatbot, BaseConhecimento, BaseChatbotSolucao, SessaoUsuario } = require('../models');
 
 const AtendimentoController = {
@@ -14,7 +12,7 @@ const AtendimentoController = {
      * @route POST /atendimentos
      */
     async criarAtendimento(req, res) {
-        // Assume que id_sessao e pergunta_usuario são enviados no corpo.
+        // id_sessao e pergunta_usuario são enviados no corpo da req.
         const { id_sessao, pergunta_usuario } = req.body;
         if (!id_sessao || !pergunta_usuario) {
             return res.status(400).json({ message: 'Os campos id_sessao e pergunta_usuario são obrigatórios.' });
@@ -128,7 +126,7 @@ const AtendimentoController = {
             if (!atendimento) {
                 return res.status(404).json({ message: 'Atendimento não encontrado.' });
             }
-            // Exclui primeiro as soluções vinculadas para evitar erros de chave estrangeira.
+            // Exclui primeiro as soluções vinculadas, assim evita possíveis erros de chave estrangeira.
             await BaseChatbotSolucao.destroy({ where: { atendimento_id: req.params.id } });
             await atendimento.destroy();
             return res.status(204).send();

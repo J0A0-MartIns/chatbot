@@ -1,125 +1,163 @@
 import { Component, OnInit } from '@angular/core';
-import { BaseService, Documento } from '../../services/base.service';
-import { PendenciaService, Pendencia } from '../../services/pendencia.service';
+import { lastValueFrom } from 'rxjs';
+import { PendenciaService } from '../../services/pendencia.service';
+import { Pendencia, AprovacaoPayload } from '../../models/pendencia.model';
+import { TemaService } from '../../services/tema.service';
+import { SubtemaService } from '../../services/subtema.service';
+import { Tema } from '../../models/tema.model';
+import { Subtema } from '../../models/subtema.model';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-pendencia',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './pendencia.component.html',
   styleUrls: ['./pendencia.component.css']
 })
 export class PendenciaComponent implements OnInit {
   pendencias: Pendencia[] = [];
+  temas: Tema[] = [];
+  subtemasDoTemaSelecionado: Subtema[] = [];
   showModal = false;
-  editIndex: number | null = null;
 
-  newDoc: Partial<Documento & { pergunta?: string; palavrasChave: string[]; arquivos: any[] }> = {
-    palavrasChave: [],
-    arquivos: []
-  };
-  newPalavraChave = '';
-  selectedFile: File | null = null;
+  // Propriedades do modal
+  docParaAprovar: AprovacaoPayload;
+  pendenciaIdAtual: number | null = null;
+  perguntaOriginal = '';
+  // --- ADICIONADO: Propriedade para o resumo da pergunta ---
+  perguntaResumo = '';
+  idTemaSelecionadoNoModal: number | null = null;
+  novoTemaNome = '';
+  novoSubtemaNome = '';
 
   constructor(
       private pendenciaService: PendenciaService,
-      private baseService: BaseService
-  ) {}
+      private temaService: TemaService,
+      private subtemaService: SubtemaService
+  ) {
+    this.docParaAprovar = this.criarPayloadVazio();
+  }
 
   ngOnInit(): void {
     this.carregarPendencias();
+    this.carregarTemas();
   }
 
   carregarPendencias(): void {
-    this.pendenciaService.listar().subscribe({
-      next: (dados) => this.pendencias = dados,
-      error: () => alert('Erro ao carregar pendências.')
+    this.pendenciaService.listarPendencias().subscribe({
+      next: (data) => {
+        // --- PONTO DE DEBUG CRUCIAL ---
+        // Verifique a consola do seu navegador (F12) para ver a estrutura destes dados.
+        // Eles devem corresponder à interface Pendencia e ter as propriedades que o seu HTML usa.
+        console.log('Dados de pendências recebidos da API:', data);
+        this.pendencias = data;
+      },
+      error: (err) => {
+        console.error("ERRO ao carregar pendências:", err);
+        alert("Não foi possível carregar as solicitações. Verifique a consola para mais detalhes.");
+      }
     });
   }
 
-  formatarData(dataStr: string): string {
-    const dt = new Date(dataStr);
-    return dt.toLocaleString();
+  carregarTemas(): void {
+    this.temaService.getTemas().subscribe(data => this.temas = data);
   }
 
-  adicionarPendenciaNaBase(pendencia: Pendencia, index: number): void {
-    this.newDoc = {
-      nome: '', // pode preencher com título padrão se quiser
-      tema: pendencia.tema,
-      microtema: pendencia.microtema,
-      conteudo: '',
-      palavrasChave: [],
-      arquivos: [],
-      pergunta: pendencia.pergunta
+  onTemaChangeNoModal(): void {
+    this.subtemasDoTemaSelecionado = [];
+    if (this.docParaAprovar) {
+      this.docParaAprovar.id_subtema = 0;
+    }
+    if (this.idTemaSelecionadoNoModal) {
+      this.subtemaService.getSubtemasPorTema(this.idTemaSelecionadoNoModal)
+          .subscribe(data => this.subtemasDoTemaSelecionado = data);
+    }
+  }
+
+  abrirModalParaAprovar(pendencia: Pendencia): void {
+    this.pendenciaIdAtual = pendencia.id_pendencia;
+    this.perguntaOriginal = pendencia.pergunta;
+    // --- ADICIONADO: Cria um resumo da pergunta para o modal ---
+    this.perguntaResumo = pendencia.pergunta.length > 150
+        ? pendencia.pergunta.substring(0, 150) + '...'
+        : pendencia.pergunta;
+
+    this.docParaAprovar = {
+      titulo: pendencia.pergunta,
+      conteudo: pendencia.resposta,
+      palavras_chave: '',
+      id_subtema: 0,
     };
-    this.editIndex = index;
+    this.idTemaSelecionadoNoModal = null;
+    this.novoTemaNome = '';
+    this.novoSubtemaNome = '';
+    this.subtemasDoTemaSelecionado = [];
     this.showModal = true;
   }
 
-  closeModal(): void {
+  fecharModal(): void {
     this.showModal = false;
-    this.editIndex = null;
-    this.newDoc = { palavrasChave: [], arquivos: [] };
-    this.newPalavraChave = '';
-    this.selectedFile = null;
   }
 
-  addPalavraChave(): void {
-    if (this.newPalavraChave.trim() && !this.newDoc.palavrasChave!.includes(this.newPalavraChave.trim())) {
-      this.newDoc.palavrasChave!.push(this.newPalavraChave.trim());
-      this.newPalavraChave = '';
+  async confirmarAprovacao(): Promise<void> {
+    try {
+      if (!this.pendenciaIdAtual) return;
+
+      let temaIdFinal: number;
+      if (this.novoTemaNome.trim()) {
+        const novoTema = await lastValueFrom(this.temaService.criarTema(this.novoTemaNome.trim()));
+        temaIdFinal = novoTema.id_tema;
+      } else if (this.idTemaSelecionadoNoModal) {
+        temaIdFinal = this.idTemaSelecionadoNoModal;
+      } else {
+        alert('Por favor, selecione ou crie um tema.');
+        return;
+      }
+
+      let subtemaIdFinal: number;
+      if (this.novoSubtemaNome.trim()) {
+        const novoSubtema = await lastValueFrom(this.subtemaService.criarSubtema(this.novoSubtemaNome.trim(), temaIdFinal));
+        subtemaIdFinal = novoSubtema.id_subtema;
+      } else if (this.docParaAprovar.id_subtema) {
+        subtemaIdFinal = this.docParaAprovar.id_subtema;
+      } else {
+        alert('Por favor, selecione ou crie um subtema.');
+        return;
+      }
+
+      this.docParaAprovar.id_subtema = subtemaIdFinal;
+      await lastValueFrom(this.pendenciaService.aprovarPendencia(this.pendenciaIdAtual, this.docParaAprovar));
+
+      alert('Pendência aprovada e adicionada à base com sucesso!');
+      this.carregarPendencias();
+      this.carregarTemas();
+      this.fecharModal();
+
+    } catch (error) {
+      console.error('Erro ao aprovar pendência:', error);
+      alert('Ocorreu um erro ao aprovar a pendência.');
     }
   }
 
-  removePalavraChave(i: number): void {
-    this.newDoc.palavrasChave!.splice(i, 1);
-  }
-
-  onFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
+  rejeitarPendencia(id: number | undefined): void {
+    if (!id) return;
+    if (confirm('Tem a certeza que deseja rejeitar esta solicitação?')) {
+      this.pendenciaService.rejeitarPendencia(id).subscribe(() => this.carregarPendencias());
     }
   }
 
-  uploadFile(): void {
-    if (!this.selectedFile) return;
-
-    const formData = new FormData();
-    formData.append('arquivo', this.selectedFile);
-    this.baseService.uploadArquivo(formData).subscribe({
-      next: (resp: any) => {
-        if (!this.newDoc.arquivos) this.newDoc.arquivos = [];
-        this.newDoc.arquivos.push(resp.file);
-        this.selectedFile = null;
-      },
-      error: () => alert('Erro ao enviar arquivo.')
-    });
+  formatarData(dataStr: string): string {
+    return new Date(dataStr).toLocaleString('pt-BR');
   }
 
-  removeArquivo(i: number): void {
-    this.newDoc.arquivos!.splice(i, 1);
-  }
-
-  addOrUpdateDoc(): void {
-    if (!this.newDoc.nome || !this.newDoc.conteudo) return;
-
-    // Chama o serviço para criar documento na base de conhecimento
-    this.baseService.criar(this.newDoc as Documento).subscribe({
-      next: () => {
-        alert('Documento adicionado com sucesso!');
-        this.excluirPendencia(this.editIndex!);
-        this.closeModal();
-      },
-      error: () => alert('Erro ao adicionar documento.')
-    });
-  }
-
-  excluirPendencia(index: number): void {
-    const pend = this.pendencias[index];
-    this.pendenciaService.excluir(pend.id_pendencia!).subscribe({
-      next: () => {
-        this.pendencias.splice(index, 1);
-      },
-      error: () => alert('Erro ao excluir pendência.')
-    });
+  private criarPayloadVazio(): AprovacaoPayload {
+    return {
+      titulo: '',
+      conteudo: '',
+      palavras_chave: '',
+      id_subtema: 0,
+    };
   }
 }

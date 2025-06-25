@@ -1,62 +1,66 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-export interface Usuario {
-    id_usuario?: number;
-    nome: string;
-    email: string;
-    senha?: string;
-    id_perfil: number;
-    ativo?: boolean;
-}
+import { UsuarioPayload, TrocarSenhaPayload, Usuario, CriarUsuarioResponse } from '../models/usuario.model';
+import { environment } from '../environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
 export class UserService {
-    private apiUrl = 'http://localhost:3000/api/usuarios';
-    private authUrl = 'http://localhost:3000/api/auth';
+    private apiUrl = `${environment.apiUrl}/usuarios`;
 
     constructor(private http: HttpClient) {}
 
-    // Usuários ativos
+    // --- MÉTODOS PÚBLICOS (TELA DE CADASTRO) ---
+    /** Envia uma solicitação de registo (cria um utilizador pendente). */
+    registrar(dadosUsuario: UsuarioPayload): Observable<any> {
+        return this.http.post(this.apiUrl, dadosUsuario);
+    }
+
+    // --- MÉTODO PARA O UTILIZADOR LOGADO ---
+    /** Altera a senha do utilizador logado. */
+    trocarSenha(id: number, payload: TrocarSenhaPayload): Observable<any> {
+        return this.http.post(`${this.apiUrl}/${id}/trocar-senha`, payload);
+    }
+
+    // --- MÉTODOS PARA ADMINS (TELA DE GESTÃO) ---
+
+    /** Busca todos os utilizadores ATIVOS. */
     getUsuarios(): Observable<Usuario[]> {
         return this.http.get<Usuario[]>(this.apiUrl);
     }
 
-    // Usuários pendentes
-    getPendentes(): Observable<Usuario[]> {
-        return this.http.get<Usuario[]>(`${this.apiUrl}/pendentes`);
+    /** Cria um novo utilizador diretamente como ATIVO. */
+    // CORREÇÃO: O tipo de retorno agora é o correto para corresponder à resposta da API.
+    criarUsuarioAtivo(dadosUsuario: UsuarioPayload): Observable<CriarUsuarioResponse> {
+        return this.http.post<CriarUsuarioResponse>(`${this.apiUrl}/criar-ativo`, dadosUsuario);
     }
 
-    // Cadastrar novo usuário pendente (registro)
-    registrar(usuario: Usuario): Observable<any> {
-        return this.http.post(`${this.authUrl}/register`, usuario);
+    /** Atualiza os dados de um utilizador ativo. */
+    atualizarUsuario(id: number, dadosUsuario: Partial<UsuarioPayload>): Observable<Usuario> {
+        return this.http.put<Usuario>(`${this.apiUrl}/${id}`, dadosUsuario);
     }
 
-    // Aprovar pendente
-    aprovar(id: number): Observable<any> {
-        return this.http.post(`${this.apiUrl}/aprovar/${id}`, {});
-    }
-
-    // Rejeitar pendente
-    rejeitar(id: number): Observable<any> {
-        return this.http.delete(`${this.apiUrl}/rejeitar/${id}`);
-    }
-
-    // Atualizar usuário
-    atualizar(id: number, dados: Partial<Usuario>): Observable<any> {
-        return this.http.put(`${this.apiUrl}/${id}`, dados);
-    }
-
-    // Excluir usuário
-    excluir(id: number): Observable<any> {
+    /** Desativa (soft delete) um utilizador ativo. */
+    desativarUsuario(id: number): Observable<any> {
         return this.http.delete(`${this.apiUrl}/${id}`);
     }
 
-    trocarSenha(id: number, dados: { senhaAtual: string, novaSenha: string }): Observable<any> {
-        return this.http.post(`${this.apiUrl}/${id}/trocar-senha`, dados);
+    // --- MÉTODOS PARA GERIR PENDÊNCIAS ---
+
+    /** Busca todos os utilizadores PENDENTES. */
+    getUsuariosPendentes(): Observable<Usuario[]> {
+        return this.http.get<Usuario[]>(`${this.apiUrl}/pendentes`);
     }
 
+    /** Aprova uma solicitação pendente. */
+    aprovarPendente(id: number): Observable<any> {
+        return this.http.post(`${this.apiUrl}/pendentes/${id}/aprovar`, {});
+    }
+
+    /** Rejeita (exclui) uma solicitação pendente. */
+    rejeitarPendente(id: number): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/pendentes/${id}`);
+    }
 }

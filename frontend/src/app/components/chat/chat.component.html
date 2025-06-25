@@ -1,38 +1,63 @@
 <div class="page-container">
-    <div class="page-left">
-        <div class="page-content">
-            <h2><i class="fas fa-question-circle"></i> Quero Ajuda</h2>
+    <div class="page-content">
+        <h2><i class="fas fa-question-circle"></i> Quero Ajuda</h2>
+        <p class="subtitle">Selecione o assunto e descreva sua dúvida para que eu possa ajudar.</p>
 
-            <form (ngSubmit)="enviarPergunta()">
-                <label>Tema:</label>
-                <select [(ngModel)]="chat.tema" name="tema" (change)="onTemaChange()" required>
-                    <option value="">Selecione um tema</option>
-                    <option *ngFor="let t of temasDisponiveis" [value]="t">{{ t }}</option>
-                </select>
+        <form (ngSubmit)="enviarPergunta()">
+            <!-- Menus de seleção para Tema e Subtema -->
+            <label for="tema">Tema:</label>
+            <select id="tema" [(ngModel)]="idTemaSelecionado" name="tema" (change)="onTemaChange()" required>
+                <option [ngValue]="null" disabled>-- Selecione um tema --</option>
+                <option *ngFor="let t of temasDisponiveis" [ngValue]="t.id_tema">{{ t.nome }}</option>
+            </select>
 
-                <label>Micro-tema:</label>
-                <select [(ngModel)]="chat.microTema" name="microTema" required>
-                    <option value="">Selecione um micro-tema</option>
-                    <option *ngFor="let mt of microTemasRelacionados" [value]="mt">{{ mt }}</option>
-                </select>
+            <label for="subtema">Subtema:</label>
+            <select id="subtema" [(ngModel)]="idSubtemaSelecionado" name="subtema" required [disabled]="!idTemaSelecionado">
+                <option [ngValue]="null" disabled>-- Selecione um subtema --</option>
+                <option *ngFor="let st of subtemasDisponiveis" [ngValue]="st.id_subtema">{{ st.nome }}</option>
+            </select>
 
-                <label>Pergunta:</label>
-                <textarea [(ngModel)]="chat.pergunta" name="pergunta" rows="4" required></textarea>
+            <!-- Campo para a pergunta do utilizador -->
+            <label for="pergunta">Qual é a sua dúvida?</label>
+            <textarea id="pergunta" [(ngModel)]="pergunta" name="pergunta" rows="4" placeholder="Ex: Como faço para emitir a segunda via de um boleto?" required></textarea>
 
-                <button type="submit"><i class="fas fa-paper-plane"></i> Enviar</button>
-            </form>
+            <button type="submit" [disabled]="isLoading || !idSubtemaSelecionado">
+                <i class="fas fa-paper-plane"></i> {{ isLoading ? 'A procurar...' : 'Enviar Pergunta' }}
+            </button>
+        </form>
 
-            <div *ngIf="chat.resposta" class="resposta">
-                <h3>Resposta:</h3>
-                <p>{{ chat.resposta }}</p>
+        <!-- Container de Resposta que muda de acordo com o estado da conversa -->
+        <div *ngIf="respostaChat" class="resposta-container">
+            <h3>Resposta:</h3>
+            <p class="resposta-texto">{{ respostaChat }}</p>
 
-                <div class="avaliacao">
-                    <span>Avalie esta resposta:</span>
-                    <button (click)="avaliar('util')" [disabled]="chat.avaliacao">Foi útil</button>
-                    <button (click)="avaliar('nao-util')" [disabled]="chat.avaliacao">Não foi útil</button>
-                    <p *ngIf="chat.avaliacao"><strong>Obrigado!</strong></p>
+            <!-- CENÁRIO 1: RESPOSTA FOI ENCONTRADA -->
+            <div *ngIf="respostaEncontrada === true">
+                <!-- Etapa 1: Avaliação inicial de útil/não útil -->
+                <div *ngIf="etapaFeedback === 'inicio'" class="avaliacao">
+                    <span>Esta resposta foi útil?</span>
+                    <button (click)="avaliar(true)" class="btn-util">Sim</button>
+                    <button (click)="avaliar(false)" class="btn-nao-util">Não</button>
+                </div>
+                <!-- Etapa 2: Formulário para o comentário de feedback negativo -->
+                <div *ngIf="etapaFeedback === 'comentario'" class="feedback-negativo-form">
+                    <label for="comentario">Por favor, diga-nos o que estava a procurar para que possamos melhorar:</label>
+                    <textarea id="comentario" [(ngModel)]="feedbackComentario" name="comentario" rows="3"></textarea>
+                    <button (click)="enviarFeedbackNegativo()">Enviar Feedback</button>
                 </div>
             </div>
+
+            <!-- CENÁRIO 2: RESPOSTA NÃO FOI ENCONTRADA -->
+            <div *ngIf="respostaEncontrada === false && etapaFeedback === 'inicio'">
+                <div class="avaliacao">
+                    <button (click)="enviarComoSugestao()" class="btn-sugestao">Sim, registar a minha dúvida</button>
+                </div>
+            </div>
+
+            <!-- Etapa Final: Mensagem de agradecimento após o feedback -->
+            <p *ngIf="etapaFeedback === 'finalizado'" class="feedback-agradecimento">
+                <strong>Obrigado pelo seu feedback!</strong>
+            </p>
         </div>
     </div>
 </div>

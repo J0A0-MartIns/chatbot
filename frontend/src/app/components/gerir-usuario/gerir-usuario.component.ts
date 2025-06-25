@@ -3,15 +3,15 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-gerenciar-usuario',
-  templateUrl: './gerenciar-usuario.component.html',
-  styleUrls: ['./gerenciar-usuario.component.css']
+  templateUrl: './gerir-usuario.component.html',
+  styleUrls: ['./gerir-usuario.component.css']
 })
 export class GerenciarUsuarioComponent {
 
   constructor(private router: Router) {}
 
   goToUsers() {
-    this.router.navigate(['/usuarios']);
+    this.router.navigate(['/usuario']);
   }
 
   goToRoles() {

@@ -1,109 +1,122 @@
-<div class="page-container">
-    <div class="page-left">
-        <h2>Gerenciar Usuários</h2>
+<div class="page-wrapper">
+    <h2>Gerenciar Usuários</h2>
+    <div class="page-container">
         <div class="filtros-container">
             <input
                     type="text"
-                    [(ngModel)]="termoBuscaTemp"
+                    [(ngModel)]="termoBusca"
                     placeholder="Buscar por nome..."
                     class="input-busca"
                     name="busca"
             />
-            <button type="button" (click)="aplicarFiltro()">Buscar</button>
-        </div>
-        <div class="botao-container">
-            <button class="open-modal-btn" (click)="openModal()">Adicionar Usuário</button>
-            <button class="open-modal-btn" (click)="openPendingModal()">
-                Solicitações Pendentes
-                <span class="badge" *ngIf="pendingUsers.length > 0">{{ pendingUsers.length }}</span>
-            </button>
-        </div>
-        <div class="page-content">
-            <div class="modal-backdrop" *ngIf="showModal">
-                <div class="modal">
-                    <h3>{{ editIndex === null ? 'Adicionar Usuário' : 'Editar Usuário' }}</h3>
-                    <form (ngSubmit)="addOrUpdateUser()">
-                        <input type="text" placeholder="Nome" [(ngModel)]="newUser.name" name="name" required />
-                        <input type="email" placeholder="Email" [(ngModel)]="newUser.email" name="email" required />
-                        <select [(ngModel)]="newUser.role" name="role" required>
-                            <option *ngFor="let perfil of perfis" [value]="perfil.nome">{{ perfil.nome }}</option>
-                        </select>
-
-                        <div class="modal-buttons">
-                            <button type="submit">{{ editIndex === null ? 'Adicionar' : 'Salvar' }}</button>
-                            <button type="button" (click)="closeModal()">Cancelar</button>
-                        </div>
-                        <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
-                    </form>
-                </div>
+            <div class="botao-container">
+                <button class="open-modal-btn" (click)="abrirModalParaCriar()">Adicionar Usuário</button>
+                <button class="open-modal-btn" (click)="abrirModalPendentes()">
+                    Solicitações Pendentes
+                    <span class="badge" *ngIf="usuariosPendentes.length > 0">{{ usuariosPendentes.length }}</span>
+                </button>
             </div>
-            <div class="modal-backdrop" *ngIf="showPendingModal">
-                <div class="modal large">
-                    <h3>Solicitações de Cadastro</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Perfil</th>
+                        <th>Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let user of usuariosFiltrados(); let i = index">
+                        <td>{{ user.nome }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.Perfil?.nome || 'N/A' }}</td>
+                        <td>
+                            <div class="dropdown" [class.open]="openActionIndex === i">
+                                <button class="dropdown-toggle" (click)="toggleActionSelect(i)">
+                                    Opções <span class="material-icons">arrow_drop_down</span>
+                                </button>
+                                <div class="dropdown-menu" *ngIf="openActionIndex === i">
+                                    <button (click)="abrirModalParaEditar(user)">Editar</button>
+                                    <button (click)="desativarUsuario(user.id_usuario)" class="delete-button">
+                                        Desativar
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-                    <div class="pending-table-wrapper">
-                        <table>
-                            <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Cargo</th>
-                                <th>Ações</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr *ngFor="let pending of pendingUsers; let i = index">
-                                <td>{{ pending.name }}</td>
-                                <td>{{ pending.email }}</td>
-                                <td>{{ pending.role }}</td>
-                                <td>
-                                    <button (click)="editPendingUser(i)">Editar</button>
-                                    <button (click)="approvePendingUser(i)">Aprovar</button>
-                                    <button (click)="rejectPendingUser(i)" class="delete-button">Rejeitar</button>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
+        <div class="modal-backdrop" *ngIf="showUserModal">
+            <div class="modal">
+                <h3>{{ isEditMode ? 'Editar Usuário' : 'Adicionar Novo Usuário' }}</h3>
+                <form (ngSubmit)="salvarUsuario()">
+                    <input
+                            type="text"
+                            placeholder="Nome"
+                            [(ngModel)]="usuarioEmEdicao.nome"
+                            name="nome"
+                            required
+                    />
+                    <input
+                            type="email"
+                            placeholder="Email"
+                            [(ngModel)]="usuarioEmEdicao.email"
+                            name="email"
+                            required
+                    />
+                    <select [(ngModel)]="usuarioEmEdicao.id_perfil" name="id_perfil" required>
+                        <option *ngFor="let perfil of perfis" [ngValue]="perfil.id_perfil">
+                            {{ perfil.nome }}
+                        </option>
+                    </select>
 
                     <div class="modal-buttons">
-                        <button (click)="closePendingModal()">Fechar</button>
+                        <button type="submit">{{ isEditMode ? 'Salvar Alterações' : 'Adicionar' }}</button>
+                        <button type="button" (click)="fecharModalUsuario()">Cancelar</button>
                     </div>
-                </div>
+                </form>
             </div>
-            <ul>
-                <div class="table-container">
+        </div>
+        <div class="modal-backdrop" *ngIf="showPendingModal">
+            <div class="modal large">
+                <h3>Solicitações de Cadastro Pendentes</h3>
+                <div class="pending-table-wrapper">
                     <table>
                         <thead>
                         <tr>
                             <th>Nome</th>
                             <th>Email</th>
-                            <th>Cargo</th>
                             <th>Ações</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr *ngFor="let user of usersFiltrados(); let i = index">
-                            <td>{{ user.name }}</td>
-                            <td>{{ user.email }}</td>
-                            <td>{{ user.role }}</td>
+                        <tr *ngFor="let pending of usuariosPendentes">
+                            <td>{{ pending.nome }}</td>
+                            <td>{{ pending.email }}</td>
                             <td>
-                                <div class="dropdown" [class.open]="openActionIndex === i">
-                                    <button (click)="toggleActionSelect(i)" class="dropdown-toggle">
-                                        Opções <span class="material-icons">arrow_drop_down</span>
-                                    </button>
-
-                                    <div class="dropdown-menu" *ngIf="openActionIndex === i">
-                                        <button (click)="editUser(i)">Editar</button>
-                                        <button (click)="deleteUser(i)" class="delete-button">Excluir</button>
-                                    </div>
-                                </div>
+                                <button (click)="aprovarUsuarioPendente(pending.id_usuario)" class="btn-approve">
+                                    Aprovar
+                                </button>
+                                <button (click)="rejeitarUsuarioPendente(pending.id_usuario)" class="btn-reject">
+                                    Rejeitar
+                                </button>
                             </td>
+                        </tr>
+                        <tr *ngIf="usuariosPendentes.length === 0">
+                            <td colspan="3" style="text-align: center;">Nenhuma solicitação pendente.</td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
-            </ul>
+                <div class="modal-buttons">
+                    <button (click)="fecharModalPendentes()">Fechar</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+

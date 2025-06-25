@@ -3,16 +3,24 @@
         <div class="login-content">
             <img src="../images/logo_qq.png" alt="Logo Quero-Quero" class="logo" />
             <h2>Colaborador</h2>
-            <p class="login-label">Recuperar senha</p>
-            <form>
-                <input type="email" [(ngModel)]="email" placeholder="E-mail" name="email" required />
-                <button type="button" (click)="recuperarSenha()">Enviar e-mail</button>
-                <button type="button" (click)="voltar()">Voltar</button>
+            <p class="login-label">Recuperar Senha</p>
+
+            <form (ngSubmit)="solicitarRecuperacao()">
+                <!-- Mensagem de Erro -->
+                <div *ngIf="erro" class="alert alert-error">{{ erro }}</div>
+                <!-- Mensagem de Sucesso -->
+                <div *ngIf="mensagem" class="alert alert-success">{{ mensagem }}</div>
+
+                <input type="email" [(ngModel)]="email" placeholder="Digite seu e-mail de cadastro" name="email" required />
+
+                <button type="submit" [disabled]="isLoading">
+                    {{ isLoading ? 'Enviando...' : 'Enviar Link de Recuperação' }}
+                </button>
+                <button type="button" class="button-secondary" (click)="voltarParaLogin()">Voltar para o Login</button>
             </form>
         </div>
     </div>
-
     <div class="login-right">
-        <img src="../images/mascote_quero_quero.jpg" alt="Mascote Quero-Quero" />
+        <img src="assets/images/mascote_quero_quero.jpg" alt="Mascote Quero-Quero" />
     </div>
 </div>

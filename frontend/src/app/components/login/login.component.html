@@ -1,22 +1,59 @@
 <div class="login-container">
-  <div class="login-left">
-    <div class="login-content">
-      <img src="../images/logo_qq.png" alt="Logo Quero-Quero" class="logo" />
-      <h2>Colaborador</h2>
-      <p class="login-label">Login</p>
-        <form (ngSubmit)="login()">
-            <input type="email" [(ngModel)]="email" placeholder="E-mail" name="email" required />
-            <input type="password" [(ngModel)]="password" placeholder="Senha" name="password" required />
+    <div class="login-left">
+        <div class="login-content">
+            <img src="../images/logo_qq.png" alt="Logo Quero-Quero" class="logo" />
+            <h2>Colaborador</h2>
+            <p class="login-label">Login</p>
 
-            <a [routerLink]="'/senha'">Esqueceu sua senha?</a>
+            <form (ngSubmit)="login()" class="login-form">
+                <div *ngIf="erro" class="alert alert-error">
+                    {{ erro }}
+                </div>
 
-            <button type="submit">Entrar</button>
-            <button type="button" [routerLink]="'/cadastro'">Cadastrar</button>
-        </form>
+                <input
+                        type="email"
+                        [(ngModel)]="email"
+                        placeholder="E-mail"
+                        name="email"
+                        class="login-input"
+                        required
+                />
+                <input
+                        type="password"
+                        [(ngModel)]="senha"
+                        placeholder="Senha"
+                        name="senha"
+                        class="login-input"
+                        required
+                />
+
+                <a [routerLink]="'/senha'" class="forgot-password-link">
+                    Esqueceu sua senha?
+                </a>
+
+                <button
+                        type="submit"
+                        [disabled]="isLoading"
+                        class="login-button"
+                >
+                    {{ isLoading ? 'Entrando...' : 'Entrar' }}
+                </button>
+                <button
+                        type="button"
+                        class="login-button button-secondary"
+                        [routerLink]="'/cadastro'"
+                >
+                    Ainda não tenho cadastro
+                </button>
+            </form>
+        </div>
     </div>
-  </div>
 
-  <div class="login-right">
-    <img src="../images/mascote_quero_quero.jpg" alt="Mascote Quero-Quero" />
-  </div>
+    <div class="login-right">
+        <img
+                src="assets/images/mascote_quero_quero.jpg"
+                alt="Mascote Quero-Quero"
+                class="login-image"
+        />
+    </div>
 </div>

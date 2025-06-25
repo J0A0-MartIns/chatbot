@@ -1,31 +1,42 @@
-const {
-    BaseConhecimento,
-    Pendencia,
-    AtendimentoChatbot,
-    Feedback
-} = require('../models');
+/**
+ * Fornece dados para o dashboard.
+ */
+
+const { AtendimentoChatbot, Pendencia, sequelize } = require('../models');
+const { Op } = require('sequelize');
 
 const DashboardController = {
-    async getEstatisticas(req, res) {
+    /**
+     * @description Busca estatísticas gerais para o Dashboard.
+     * @route GET /dashboard/stats
+     */
+    async getStats(req, res) {
         try {
-            const totalDocumentos = await BaseConhecimento.count({ where: { ativo: 1 } });
-            const totalPendencias = await Pendencia.count();
-            const totalPerguntas = await AtendimentoChatbot.count();
-            const totalFeedbacks = await Feedback.count({ where: { avaliacao: { not: null } } });
-            const totalUteis = await Feedback.count({ where: { avaliacao: 1 } });
+            //Conta as perguntas feitas no dia
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
 
-            const taxaUtilidade = totalFeedbacks > 0
-                ? ((totalUteis / totalFeedbacks) * 100).toFixed(1)
-                : '0.0';
-
-            return res.json({
-                totalDocumentos,
-                totalPendencias,
-                totalPerguntas,
-                taxaUtilidade: `${taxaUtilidade}%`
+            const perguntasHoje = await AtendimentoChatbot.count({
+                where: {
+                    data_atendimento: {
+                        [Op.gte]: hoje
+                    }
+                }
             });
-        } catch (err) {
-            return res.status(500).json({ message: 'Erro ao obter dados do dashboard.', error: err.message });
+
+            //Conta as pendências
+            const totalPendencias = await Pendencia.count();
+
+            //Retorna todos os dados em um único objeto
+            const stats = {
+                perguntasHojeCount: perguntasHoje,
+                pendenciasCount: totalPendencias
+            };
+
+            return res.status(200).json(stats);
+
+        } catch (error) {
+            return res.status(500).json({ message: 'Erro ao buscar estatísticas do dashboard.', error: error.message });
         }
     }
 };

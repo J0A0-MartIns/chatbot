@@ -1,39 +1,46 @@
 import { Component } from '@angular/core';
-import {FormsModule} from "@angular/forms";
-import {Router, RouterLink} from "@angular/router";
-import {AuthService} from "../../../auth/auth.service";
+import { Router } from "@angular/router";
+import { AuthService } from "../../../auth/auth.service";
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-senha',
-  imports: [
-    FormsModule,
-    RouterLink
-  ],
+  standalone: true,
+  imports: [ CommonModule, FormsModule ],
   templateUrl: './senha.component.html',
-  styleUrl: '../login.component.css'
+  styleUrls: ['../login.component.css']
 })
 export class SenhaComponent {
   email = '';
-  password = '';
+  mensagem = '';
+  erro = '';
+  isLoading = false;
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
-  recuperarSenha() {
+  solicitarRecuperacao(): void {
+    this.erro = '';
+    this.mensagem = '';
     if (!this.email) {
-      alert('Informe seu e-mail.');
+      this.erro = 'Por favor, informe seu e-mail.';
       return;
     }
-    const users = this.auth.getUser();
-    const user = users.find(u => u.email === this.email);
-    if (!user) {
-      alert('E-mail não encontrado.');
-      return;
-    }
-    this.auth.setEmailRecuperacao(this.email);
-    this.router.navigate(['/novaSenha']);
+
+    this.isLoading = true;
+    this.authService.forgotPassword(this.email).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        this.mensagem = res.message; // Exibe a mensagem de sucesso da API
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.erro = err.error?.message || 'Ocorreu um erro. Tente novamente.';
+      }
+    });
   }
 
-  voltar() {
+  voltarParaLogin(): void {
     this.router.navigate(['/login']);
   }
 }

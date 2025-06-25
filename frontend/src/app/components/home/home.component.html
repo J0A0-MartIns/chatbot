@@ -4,28 +4,29 @@
             <button class="atalho-button" (click)="irPara('chat')">
                 Soluções
             </button>
-            <button class="atalho-button" *ngIf="user.role == 'Administrador'" (click)="irPara('gestao')">
+
+            <button class="atalho-button" *ngIf="user.Perfil?.nome === 'Admin'" (click)="irPara('gestao')">
                 Usuários
             </button>
-            <button class="atalho-button" *ngIf="user.role == 'Administrador'" (click)="irPara('dashboard')">
+            <button class="atalho-button" *ngIf="user.Perfil?.nome === 'Admin'" (click)="irPara('dashboard')">
                 Dashboard
             </button>
-            <button class="atalho-button" *ngIf="user.role == 'Administrador'" (click)="irPara('base')">
-                 Base do Conhecimento
+            <button class="atalho-button" *ngIf="user.Perfil?.nome === 'Admin'" (click)="irPara('base')">
+                Base do Conhecimento
             </button>
         </div>
     </div>
 
     <div class="page-right">
         <div class="profile-content">
-            <h2>PerfilModel do Usuário</h2>
+            <h2>Perfil do Usuário</h2>
         </div>
         <div class="user-info">
-            <p><i class="fas fa-id-card"></i> <strong>Nome:</strong> {{ user.name }}</p>
-            <p><i class="fas fa-briefcase"></i> <strong>PerfilModel:</strong> {{ user.role }}</p>
+            <p><i class="fas fa-id-card"></i> <strong>Nome:</strong> {{ user.nome }}</p>
+            <p><i class="fas fa-briefcase"></i> <strong>Perfil:</strong> {{ user.Perfil?.nome }}</p>
         </div>
         <button (click)="irParaPerfil()" class="buttonPerfil">
-            <i class="fas fa-user-edit"></i> Editar PerfilModel
+            <i class="fas fa-user-edit"></i> Editar Perfil
         </button>
     </div>
 </div>

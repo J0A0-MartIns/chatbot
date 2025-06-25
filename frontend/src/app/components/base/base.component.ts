@@ -1,148 +1,177 @@
 import { Component, OnInit } from '@angular/core';
+import { lastValueFrom } from 'rxjs';
 import { BaseService } from '../../services/base.service';
-
-interface Documento {
-  id_documento?: number;
-  nome: string;
-  tema: string;
-  microtema: string;
-  conteudo: string;
-  palavrasChave: string[];
-  arquivos: { nome: string; tipo: string }[];
-  ativo: boolean;
-}
+import { Documento } from '../../models/documento.model';
+import { TemaService } from '../../services/tema.service';
+import { SubtemaService } from '../../services/subtema.service';
+import { Tema } from '../../models/tema.model';
+import { Subtema } from '../../models/subtema.model';
+import { AuthService } from '../../auth/auth.service';
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {NgForOf, NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-base',
-  templateUrl: './base.component.html'
+  templateUrl: './base.component.html',
+  imports: [
+    ReactiveFormsModule,
+    NgForOf,
+    FormsModule,
+    NgIf
+  ],
+  styleUrls: ['./base.component.css']
+  // Lembre-se: Garanta que CommonModule e FormsModule estão no array 'imports' do seu app.module.ts
 })
 export class BaseComponent implements OnInit {
+  // Propriedades para a lista e busca
   documentos: Documento[] = [];
-  termoBuscaTemp = '';
-  showModal = false;
-  editIndex: number | null = null;
+  termoBusca: string = '';
+
+  // Propriedades para os dropdowns de seleção
+  temas: Tema[] = [];
+  subtemasDoTemaSelecionado: Subtema[] = [];
+
+  // Propriedades para controlar a UI
+  showModal: boolean = false;
+  isEditMode: boolean = false;
   activeMenuIndex: number | null = null;
 
-  newDoc: Documento = this.criarDocVazio();
-  newPalavraChave = '';
-  selectedFile: File | null = null;
+  // Propriedades do formulário do modal
+  docEmEdicao: Documento;
+  idTemaSelecionadoNoModal: number | null = null;
+  novoTemaNome: string = '';
+  novoSubtemaNome: string = '';
 
-  constructor(private baseService: BaseService) {}
+  constructor(
+      private baseService: BaseService,
+      private temaService: TemaService,
+      private subtemaService: SubtemaService,
+      private authService: AuthService
+  ) {
+    // Inicializa a propriedade aqui para garantir que authService está disponível
+    this.docEmEdicao = this.criarDocVazio();
+  }
 
   ngOnInit(): void {
     this.carregarDocumentos();
+    this.carregarTemas();
   }
 
-  criarDocVazio(): Documento {
-    return {
-      nome: '',
-      tema: '',
-      microtema: '',
-      conteudo: '',
-      palavrasChave: [],
-      arquivos: [],
-      ativo: true
-    };
-  }
-
+  // --- Funções de Carregamento de Dados ---
   carregarDocumentos(): void {
-    this.baseService.getDocumentos().subscribe((res) => {
-      this.documentos = res;
-    });
+    this.baseService.getDocumentos().subscribe(data => this.documentos = data);
   }
 
+  carregarTemas(): void {
+    this.temaService.getTemas().subscribe(data => this.temas = data);
+  }
+
+  // --- Funções de Controle da UI ---
   docsFiltrados(): Documento[] {
+    if (!this.termoBusca.trim()) return this.documentos;
     return this.documentos.filter(doc =>
-        doc.nome.toLowerCase().includes(this.termoBuscaTemp.toLowerCase())
+        doc.titulo.toLowerCase().includes(this.termoBusca.toLowerCase())
     );
   }
 
-  aplicarFiltro(): void {
-    // apenas atualiza a tela com docsFiltrados()
-  }
-
-  openModal(): void {
-    this.newDoc = this.criarDocVazio();
-    this.editIndex = null;
+  abrirModalParaCriar(): void {
+    this.isEditMode = false;
+    this.docEmEdicao = this.criarDocVazio();
+    this.idTemaSelecionadoNoModal = null;
+    this.novoTemaNome = '';
+    this.novoSubtemaNome = '';
+    this.subtemasDoTemaSelecionado = [];
     this.showModal = true;
   }
 
-  closeModal(): void {
+  abrirModalParaEditar(doc: Documento): void {
+    this.isEditMode = true;
+    this.docEmEdicao = JSON.parse(JSON.stringify(doc));
+    this.novoTemaNome = '';
+    this.novoSubtemaNome = '';
+    if (doc.Subtema) {
+      this.idTemaSelecionadoNoModal = doc.Subtema.id_subtema;
+      this.onTemaChangeNoModal();
+    }
+    this.showModal = true;
+  }
+
+  fecharModal(): void {
     this.showModal = false;
-    this.editIndex = null;
   }
 
   toggleActionMenu(index: number): void {
     this.activeMenuIndex = this.activeMenuIndex === index ? null : index;
   }
 
-  editDoc(index: number): void {
-    this.newDoc = JSON.parse(JSON.stringify(this.documentos[index]));
-    this.editIndex = index;
-    this.showModal = true;
-  }
+  // --- Lógica Principal ---
+  async salvarDocumento(): Promise<void> {
+    try {
+      let temaIdFinal: number;
+      if (this.novoTemaNome.trim()) {
+        const novoTema = await lastValueFrom(this.temaService.criarTema(this.novoTemaNome.trim()));
+        temaIdFinal = novoTema.id_tema;
+      } else if (this.idTemaSelecionadoNoModal) {
+        temaIdFinal = this.idTemaSelecionadoNoModal;
+      } else {
+        alert('Por favor, selecione ou crie um tema.');
+        return;
+      }
 
-  cancelEdit(): void {
-    this.closeModal();
-  }
+      let subtemaIdFinal: number;
+      if (this.novoSubtemaNome.trim()) {
+        const novoSubtema = await lastValueFrom(this.subtemaService.criarSubtema(this.novoSubtemaNome.trim(), temaIdFinal));
+        subtemaIdFinal = novoSubtema.id_subtema;
+      } else if (this.docEmEdicao.id_subtema) {
+        subtemaIdFinal = this.docEmEdicao.id_subtema;
+      } else {
+        alert('Por favor, selecione ou crie um subtema.');
+        return;
+      }
 
-  addOrUpdateDoc(): void {
-    if (this.editIndex !== null && this.newDoc.id_documento) {
-      this.baseService.updateDocumento(this.newDoc.id_documento, this.newDoc).subscribe(() => {
-        this.carregarDocumentos();
-        this.closeModal();
-      });
-    } else {
-      this.baseService.createDocumento(this.newDoc).subscribe(() => {
-        this.carregarDocumentos();
-        this.closeModal();
-      });
+      this.docEmEdicao.id_subtema = subtemaIdFinal;
+
+      if (this.isEditMode && this.docEmEdicao.id_documento) {
+        await lastValueFrom(this.baseService.atualizarDocumento(this.docEmEdicao.id_documento, this.docEmEdicao));
+      } else {
+        await lastValueFrom(this.baseService.criarDocumento(this.docEmEdicao));
+      }
+
+      this.carregarDocumentos();
+      this.carregarTemas();
+      this.fecharModal();
+
+    } catch (error) {
+      console.error('Erro ao salvar documento:', error);
+      alert('Ocorreu um erro ao salvar o documento.');
     }
   }
 
-  deleteDoc(index: number): void {
-    const id = this.documentos[index].id_documento!;
-    this.baseService.deleteDocumento(id).subscribe(() => {
-      this.documentos.splice(index, 1);
-    });
-  }
-
-  toggleAtivo(index: number): void {
-    const doc = this.documentos[index];
-    const novoEstado = !doc.ativo;
-    this.baseService.ativarOuDesativar(doc.id_documento!, novoEstado).subscribe(() => {
-      doc.ativo = novoEstado;
-    });
-  }
-
-  addPalavraChave(): void {
-    if (this.newPalavraChave && !this.newDoc.palavrasChave.includes(this.newPalavraChave)) {
-      this.newDoc.palavrasChave.push(this.newPalavraChave);
-      this.newPalavraChave = '';
+  onTemaChangeNoModal(): void {
+    this.subtemasDoTemaSelecionado = [];
+    this.docEmEdicao.id_subtema = 0;
+    if (this.idTemaSelecionadoNoModal) {
+      this.subtemaService.getSubtemasPorTema(this.idTemaSelecionadoNoModal)
+          .subscribe(data => this.subtemasDoTemaSelecionado = data);
     }
   }
 
-  removePalavraChave(index: number): void {
-    this.newDoc.palavrasChave.splice(index, 1);
-  }
-
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
+  excluirDocumento(id: number | undefined): void {
+    if (!id) return;
+    if (confirm('Tem certeza de que deseja excluir este documento?')) {
+      this.baseService.excluirDocumento(id).subscribe(() => this.carregarDocumentos());
     }
   }
 
-  uploadFile(): void {
-    if (this.selectedFile) {
-      this.baseService.uploadArquivo(this.selectedFile).subscribe((res) => {
-        this.newDoc.arquivos.push({ nome: res.nome, tipo: res.tipo });
-        this.selectedFile = null;
-      });
-    }
-  }
-
-  removeArquivo(index: number): void {
-    this.newDoc.arquivos.splice(index, 1);
+  private criarDocVazio(): Documento {
+    const user = this.authService.getUser();
+    return {
+      titulo: '',
+      conteudo: '',
+      palavras_chave: '',
+      ativo: true,
+      usuario_id: user?.id_usuario,
+      id_subtema: 0,
+    };
   }
 }

@@ -1,32 +1,47 @@
 import { Component } from '@angular/core';
-import {Router, RouterLink} from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import {FormsModule} from "@angular/forms";
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../auth/auth.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-login',
+    standalone: true,
     imports: [
         FormsModule,
-        RouterLink
+        RouterLink,
+        CommonModule
     ],
-    templateUrl: './login.component.html'
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
     email = '';
-    password = '';
+    senha = '';
     erro = '';
+    isLoading = false;
 
     constructor(private authService: AuthService, private router: Router) {}
 
-    login() {
-        if (!this.email || !this.password) {
-            this.erro = 'Preencha todos os campos.';
+    login(): void {
+        this.erro = '';
+        if (!this.email || !this.senha) {
+            this.erro = 'Por favor, preencha o e-mail e a senha.';
             return;
         }
 
-        this.authService.login(this.email, this.password).subscribe({
-            next: () => this.router.navigate(['/home']),
-            error: () => this.erro = 'Usuário ou senha inválidos.'
+        this.isLoading = true;
+        this.authService.login(this.email, this.senha).subscribe({
+            next: () => {
+                this.isLoading = false;
+                // Redireciona para a página principal após o login bem-sucedido
+                this.router.navigate(['/home']);
+            },
+            error: (err) => {
+                this.isLoading = false;
+                // Exibe a mensagem de erro específica vinda da API
+                this.erro = err.error?.message || 'Usuário ou senha inválidos. Tente novamente.';
+            }
         });
     }
 }

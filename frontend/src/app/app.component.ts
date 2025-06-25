@@ -1,80 +1,77 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
-import { NgIf } from '@angular/common';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router, NavigationEnd, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 import { AuthService } from './auth/auth.service';
-import { User } from './models/user.model';
-import {AlertModalComponent} from "./components/alerta/alerta.component";
+import { Usuario } from './models/usuario.model';
+import { AlertModalComponent } from './components/alerta/alerta.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NgIf, RouterLink, RouterLinkActive, FormsModule, AlertModalComponent],
+  standalone: true,
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, AlertModalComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
-  title = 'prototipo-chatbot';
+export class AppComponent implements OnInit, OnDestroy {
   isCollapsed = false;
-  showSidebar = true;
-  showTopbar = true;
-  isLoginPage = false;
-  isHomePage = false;
-  expired = false;
-  expiredMessage = '';
-  sessionExpiredHandled = false;
+  showLayout = false; // Única variável para controlar a visibilidade do layout principal
+  user: Usuario | null = null;
 
-  user: User | null = null;
+  sessionExpired = false;
+  private sessionSub: Subscription | undefined;
 
-  constructor(private router: Router, private authService: AuthService) {
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        const currentUrl = event.urlAfterRedirects;
-
-        this.isLoginPage = ['/login', '/cadastro', '/senha', '/novaSenha'].includes(currentUrl);
-        this.isHomePage = ['/home'].includes(currentUrl);
-        this.showSidebar = !this.isLoginPage && !this.isHomePage;
-        this.showTopbar = !this.isLoginPage;
-      }
-    });
-  }
+  constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit() {
-    this.user = this.authService.getCurrentUser();
-
-    setInterval(() => {
-      const user = this.authService.getCurrentUser();
-
-      if (!user && !this.expired && !this.sessionExpiredHandled) {
-        this.expiredMessage = 'Sua sessão expirou por inatividade. Faça login novamente.';
-        this.expired = true;
-        this.sessionExpiredHandled = true;
+    // Escuta as mudanças de rota para atualizar a UI
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.showLayout = this.authService.isLoggedIn();
+        if (this.showLayout) {
+          this.user = this.authService.getUser();
+        } else {
+          this.user = null;
+        }
       }
+    });
 
-      if (user && this.expired) {
-        this.expired = false;
-        this.expiredMessage = '';
-        this.sessionExpiredHandled = false;
-      }
-    }, 10000);
+    // Lógica para o modal de sessão expirada (a ser implementada no AuthService)
+    // this.sessionSub = this.authService.sessionExpired$.subscribe(() => {
+    //   this.sessionExpired = true;
+    // });
+  }
+
+  ngOnDestroy() {
+    if (this.sessionSub) {
+      this.sessionSub.unsubscribe();
+    }
   }
 
   onModalClose() {
-    this.expired = false;
-    this.expiredMessage = '';
-    if (!this.authService.getCurrentUser()) {
-      this.authService.logout();
-    }
-    this.router.navigate(['/login']);
+    this.sessionExpired = false;
   }
 
-  toggleSidebar() {
+  /**
+   * Verifica se o utilizador tem acesso a uma página/módulo inteiro.
+   * Retorna true se o utilizador tiver PELO MENOS UMA permissão que inclua
+   * uma das palavras-chave fornecidas.
+   */
+  temAcessoAPagina(chaves: string[]): boolean {
+    if (!this.user || !this.user.Perfil || !this.user.Perfil.Permissoes) {
+      return false;
+    }
+    // Retorna true se encontrar pelo menos uma permissão que corresponda a uma das palavras-chave
+    return this.user.Perfil.Permissoes.some(p =>
+        chaves.some(chave => p.nome.includes(chave))
+    );
+  }
+
+  toggleSidebar(): void {
     this.isCollapsed = !this.isCollapsed;
   }
 
-  logout() {
+  logout(): void {
     this.authService.logout();
-    this.router.navigate(['/login']);
   }
-
 }

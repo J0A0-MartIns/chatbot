@@ -1,109 +1,78 @@
 <div class="page-container">
     <div class="page-content">
         <h2>Base de Conhecimento</h2>
-        <button (click)="openModal()" class="add-button">Adicionar Conteúdo</button>
+        <button (click)="abrirModalParaCriar()" class="add-button">Adicionar Conteúdo</button>
 
         <div class="filtros-container">
-            <input
-                    type="text"
-                    [(ngModel)]="termoBuscaTemp"
-                    placeholder="Buscar por nome do documento..."
-                    class="input-busca"
-                    name="busca"
-            />
+            <input type="text" [(ngModel)]="termoBusca" placeholder="Buscar por título..." class="input-busca" name="busca" />
         </div>
-        <button type="button" (click)="aplicarFiltro()" class="add-button filter-button">
-            <i class="material-icons">filter_list</i>Filtrar
-        </button>
+
         <div class="table-container">
             <table>
                 <thead>
                 <tr>
-                    <th>Nome</th>
+                    <th>Título</th>
                     <th>Tema</th>
-                    <th>Microtema</th>
+                    <th>Subtema</th>
                     <th>Conteúdo</th>
-                    <th>Palavras-chave</th>
-                    <th>Anexo</th>
-                    <th>Ativar</th>
                     <th>Ações</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr *ngFor="let doc of docsFiltrados(); let i = index">
-                    <td>{{ doc.nome }}</td>
-                    <td>{{ doc.tema }}</td>
-                    <td>{{ doc.microtema }}</td>
-                    <td>{{ doc.conteudo }}</td>
-                    <td>
-              <span *ngFor="let palavra of doc.palavrasChave; let j = index">
-                {{ palavra }}<span *ngIf="j < doc.palavrasChave.length - 1">, </span>
-              </span>
-                    </td>
-                    <td>{{ doc.arquivos }}</td>
-                    <td>
-                        <label class="switch">
-                            <input type="checkbox" [checked]="doc.ativo" (change)="toggleAtivo(i)">
-                            <span class="slider"></span>
-                        </label>
-                    </td>
+                    <td>{{ doc.titulo }}</td>
+                    <td>{{ doc.Tema?.nome || 'N/A' }}</td>
+                    <td>{{ doc.Subtema?.nome || 'N/A' }}</td>
+                    <td>{{ doc.conteudo.substring(0, 70) }}...</td>
                     <td class="action-menu-container">
                         <div class="dropdown-container">
-                            <button class="icon-button" (click)="toggleActionMenu(i)">
-                                ⋮
-                            </button>
+                            <button class="icon-button" (click)="toggleActionMenu(i)">⋮</button>
                             <div class="dropdown-menu" *ngIf="activeMenuIndex === i">
-                                <button (click)="editDoc(i)">Editar</button>
-                                <button (click)="deleteDoc(i)">Excluir</button>
+                                <button (click)="abrirModalParaEditar(doc)">Editar</button>
+                                <button (click)="excluirDocumento(doc.id_documento)" class="delete-button">Excluir</button>
                             </div>
                         </div>
+                    </td>
+                </tr>
+                <tr *ngIf="docsFiltrados().length === 0">
+                    <td colspan="4" class="empty-table-message">
+                        Nenhum documento encontrado. Clique em "Adicionar Conteúdo" para criar o primeiro.
                     </td>
                 </tr>
                 </tbody>
             </table>
         </div>
 
+        <!-- Modal para Adicionar/Editar Documento -->
         <div class="modal" *ngIf="showModal">
             <div class="modal-content">
-                <span class="close" (click)="closeModal()">&times;</span>
-                <h3>{{ editIndex === null ? 'Adicionar Documento' : 'Editar Documento' }}</h3>
+                <span class="close" (click)="fecharModal()">&times;</span>
+                <h3>{{ isEditMode ? 'Editar Documento' : 'Adicionar Documento' }}</h3>
 
-                <form>
-                    <input type="text" [(ngModel)]="newDoc.nome" name="name" placeholder="Nome" required/>
-                    <input type="text" [(ngModel)]="newDoc.tema" name="tema" placeholder="Tema"/>
-                    <input type="text" [(ngModel)]="newDoc.microtema" name="microtema" placeholder="Microtema"/>
+                <form (ngSubmit)="salvarDocumento()">
+                    <input type="text" [(ngModel)]="docEmEdicao.titulo" name="titulo" placeholder="Título do Documento" required/>
 
-                    <div>
-                        <input type="text" [(ngModel)]="newPalavraChave" placeholder="Nova Palavra-chave"
-                               name="palavraChave"/>
-                        <button type="button" (click)="addPalavraChave()">Adicionar Palavra-chave</button>
-                    </div>
-                    <ul>
-                        <li *ngFor="let palavra of newDoc.palavrasChave; let i = index">
-                            {{ palavra }}
-                            <button type="button" (click)="removePalavraChave(i)">Remover</button>
-                        </li>
-                    </ul>
+                    <label for="tema-modal">Tema:</label>
+                    <select id="tema-modal" name="tema" [(ngModel)]="idTemaSelecionadoNoModal" (change)="onTemaChangeNoModal()" [disabled]="novoTemaNome.trim() !== ''">
+                        <option [ngValue]="null">-- Escolha um Tema Existente --</option>
+                        <option *ngFor="let tema of temas" [ngValue]="tema.id_tema">{{ tema.nome }}</option>
+                    </select>
+                    <span class="ou-text">ou</span>
+                    <input type="text" [(ngModel)]="novoTemaNome" name="novoTemaNome" placeholder="Crie um Novo Tema" [disabled]="!!idTemaSelecionadoNoModal">
 
+                    <label for="subtema-modal">Subtema:</label>
+                    <select id="subtema-modal" name="id_subtema" [(ngModel)]="docEmEdicao.id_subtema" [disabled]="novoSubtemaNome.trim() !== '' || !idTemaSelecionadoNoModal">
+                        <option [ngValue]="0" disabled>-- Escolha um Subtema --</option>
+                        <option *ngFor="let subtema of subtemasDoTemaSelecionado" [ngValue]="subtema.id_subtema">{{ subtema.nome }}</option>
+                    </select>
+                    <span class="ou-text">ou</span>
+                    <input type="text" [(ngModel)]="novoSubtemaNome" name="novoSubtemaNome" placeholder="Crie um Novo Subtema" [disabled]="!!docEmEdicao.id_subtema && docEmEdicao.id_subtema > 0">
 
-                    <textarea [(ngModel)]="newDoc.conteudo" name="conteudo" placeholder="Conteúdo" required></textarea>
-
-                    <div>
-                        <input type="file" (change)="onFileSelected($event)" accept=".pdf,.docx"/>
-                        <button type="button" (click)="uploadFile()" [disabled]="!selectedFile">Enviar Arquivo</button>
-                        <ul>
-                            <li *ngFor="let arquivo of newDoc.arquivos; let i = index">
-                                {{ arquivo.nome }} ({{ arquivo.tipo }})
-                                <button type="button" (click)="removeArquivo(i)">Remover</button>
-                            </li>
-                        </ul>
-                    </div>
+                    <textarea [(ngModel)]="docEmEdicao.conteudo" name="conteudo" placeholder="Conteúdo do documento..." required></textarea>
+                    <input type="text" [(ngModel)]="docEmEdicao.palavras_chave" name="palavras_chave" placeholder="Palavras-chave (separadas por vírgula)"/>
 
                     <div class="modal-buttons">
-                        <button type="button" (click)="addOrUpdateDoc()" [disabled]="!newDoc.nome || !newDoc.conteudo">
-                            {{ editIndex === null ? 'Adicionar' : 'Atualizar' }}
-                        </button>
-                        <button type="button" *ngIf="editIndex !== null" (click)="cancelEdit()">Cancelar</button>
+                        <button type="submit">{{ isEditMode ? 'Atualizar' : 'Adicionar' }}</button>
                     </div>
                 </form>
             </div>

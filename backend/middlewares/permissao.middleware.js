@@ -1,6 +1,4 @@
 /**
- * middlewares/permission.middleware.js
- *
  * Este middleware é o coração do sistema RBAC (Role-Based Access Control).
  * Ele verifica se o perfil do usuário logado possui uma permissão específica.
  */
@@ -14,7 +12,7 @@ const { Usuario, Perfil, Permissao } = require('../models');
  */
 const pode = (permissaoNecessaria) => {
     return async (req, res, next) => {
-        // O ID do usuário deve ter sido adicionado à requisição pelo middleware 'authenticateToken'
+        //O ID do usuário DEVE ter sido adicionado à requisição pelo middleware 'authenticateToken'
         const userId = req.user.id;
 
         if (!userId) {
@@ -28,21 +26,19 @@ const pode = (permissaoNecessaria) => {
                     model: Perfil,
                     include: {
                         model: Permissao,
-                        // as: 'Permissoes' // O alias aqui deve bater com a definição na associação
                     }
                 }
             });
 
-            if (!usuario || !usuario.Perfil || !usuario.Perfil.Permissaos) {
+            if (!usuario || !usuario.Perfil || !usuario.Perfil.Permissoes) {
                 return res.status(403).json({ message: 'Acesso negado. Perfil ou permissões não encontrados.' });
             }
 
-            // Pega a lista de nomes de permissões do perfil do usuário.
-            const permissoesDoUsuario = usuario.Perfil.Permissaos.map(p => p.nome);
+            const permissoesDoUsuario = usuario.Perfil.Permissoes.map(p => p.nome);
 
             // Verifica se a permissão necessária está na lista de permissões do usuário.
             if (permissoesDoUsuario.includes(permissaoNecessaria)) {
-                // Se o usuário tem a permissão, continua para a próxima função (o controller).
+                //Se o usuário tem a permissão, continua para a próxima função (o controller).
                 return next();
             } else {
                 // Se não tem a permissão, retorna um erro de 'Acesso Proibido'.
