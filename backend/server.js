@@ -36,7 +36,7 @@ const PORT = process.env.PORT || 3000;
 
 // Lembrete: Após o banco de dados estar sincronizado, mude { force: true }
 // de volta para { alter: true } ou remova a opção para não perder seus dados a cada reinicialização.
-db.sequelize.sync({alter: true}).then(() => {
+db.sequelize.sync().then(() => {
     app.listen(PORT, () => {
         console.log(`Servidor rodando em http://localhost:${PORT}`);
     });

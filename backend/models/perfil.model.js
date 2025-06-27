@@ -12,11 +12,14 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Perfil.associate = (models) => {
-        Perfil.hasMany(models.Usuario, { foreignKey: 'id_perfil' });
+        Perfil.hasMany(models.Usuario, { foreignKey: 'id_perfil', as: 'Perfil' }); // Adicionamos um alias aqui por consistência
+
+        // --- CORREÇÃO: Adicionado o alias 'Permissaos' ---
         Perfil.belongsToMany(models.Permissao, {
-            through: models.PerfilPermissao,
+            through: 'perfil_permissao',
             foreignKey: 'id_perfil',
-            otherKey: 'id_permissao'
+            otherKey: 'id_permissao',
+            as: 'Permissoes'
         });
     };
 

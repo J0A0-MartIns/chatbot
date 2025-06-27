@@ -28,19 +28,38 @@
 
             <nav class="menu">
                 <ul>
-                    <!-- Links que todos os utilizadores logados veem -->
-                    <li><a routerLink="/home" routerLinkActive="active"><span class="material-icons">home</span><span class="text" *ngIf="!isCollapsed">Início</span></a></li>
-                    <li><a routerLink="/chat" routerLinkActive="active"><span class="material-icons">question_answer</span><span class="text" *ngIf="!isCollapsed">Buscar Solução</span></a></li>
+                    <!-- Links comuns -->
+                    <li>
+                        <a routerLink="/home" routerLinkActive="ativo">
+                            <span class="material-icons">home</span>
+                            <span class="text" *ngIf="!isCollapsed">Início</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a routerLink="/chat" routerLinkActive="ativo">
+                            <span class="material-icons">question_answer</span>
+                            <span class="text" *ngIf="!isCollapsed">Buscar Solução</span>
+                        </a>
+                    </li>
 
-                    <!-- CORREÇÃO: Links agora usam as chaves corretas para a função temAcessoAPagina -->
+                    <!-- Links condicionais -->
                     <li *ngIf="temAcessoAPagina(['dashboard', 'relatorio', 'pendencia'])">
-                        <a routerLink="/dashboard" routerLinkActive="active"><span class="material-icons">insights</span><span class="text" *ngIf="!isCollapsed">Dashboard & Relatórios</span></a>
+                        <a routerLink="/dashboard" routerLinkActive="ativo">
+                            <span class="material-icons">insights</span>
+                            <span class="text" *ngIf="!isCollapsed">Dashboard & Relatórios</span>
+                        </a>
                     </li>
                     <li *ngIf="temAcessoAPagina(['usuario', 'perfi', 'permis'])">
-                        <a routerLink="/gestao" routerLinkActive="active"><span class="material-icons">manage_accounts</span><span class="text" *ngIf="!isCollapsed">Gestão de Utilizadores</span></a>
+                        <a routerLink="/gestao" routerLinkActive="ativo">
+                            <span class="material-icons">manage_accounts</span>
+                            <span class="text" *ngIf="!isCollapsed">Gestão de Utilizadores</span>
+                        </a>
                     </li>
                     <li *ngIf="temAcessoAPagina(['documento', 'categoria'])">
-                        <a routerLink="/base" routerLinkActive="active"><span class="material-icons">library_books</span><span class="text" *ngIf="!isCollapsed">Base de Conhecimento</span></a>
+                        <a routerLink="/base" routerLinkActive="ativo">
+                            <span class="material-icons">library_books</span>
+                            <span class="text" *ngIf="!isCollapsed">Base de Conhecimento</span>
+                        </a>
                     </li>
                 </ul>
             </nav>
@@ -52,12 +71,12 @@
     </div>
 </div>
 
-<!-- Para as páginas públicas (login, registo), onde não há layout principal -->
-<div *ngIf="!showLayout">
+<!-- Para páginas públicas -->
+<div *ngIf="!showLayout" class="full-screen-content">
     <router-outlet></router-outlet>
 </div>
 
-<!-- O seu componente de alerta para sessão expirada -->
+<!-- Alerta de sessão expirada -->
 <app-alerta
         *ngIf="sessionExpired"
         title="Sessão Expirada"

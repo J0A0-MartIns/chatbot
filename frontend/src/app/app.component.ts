@@ -15,7 +15,7 @@ import { AlertModalComponent } from './components/alerta/alerta.component';
 })
 export class AppComponent implements OnInit, OnDestroy {
   isCollapsed = false;
-  showLayout = false; // Única variável para controlar a visibilidade do layout principal
+  showLayout = false;
   user: Usuario | null = null;
 
   sessionExpired = false;
@@ -24,7 +24,6 @@ export class AppComponent implements OnInit, OnDestroy {
   constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit() {
-    // Escuta as mudanças de rota para atualizar a UI
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.showLayout = this.authService.isLoggedIn();
@@ -35,11 +34,6 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       }
     });
-
-    // Lógica para o modal de sessão expirada (a ser implementada no AuthService)
-    // this.sessionSub = this.authService.sessionExpired$.subscribe(() => {
-    //   this.sessionExpired = true;
-    // });
   }
 
   ngOnDestroy() {
@@ -53,18 +47,38 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Verifica se o utilizador tem acesso a uma página/módulo inteiro.
-   * Retorna true se o utilizador tiver PELO MENOS UMA permissão que inclua
-   * uma das palavras-chave fornecidas.
+   * CORREÇÃO: Adicionada depuração detalhada para ver o que a função está a fazer.
    */
   temAcessoAPagina(chaves: string[]): boolean {
-    if (!this.user || !this.user.Perfil || !this.user.Perfil.Permissoes) {
+    console.log(`--- A verificar acesso para as chaves: [${chaves.join(', ')}] ---`);
+
+    if (!this.user || !this.user.Perfil || !this.user.Perfil.Permissoes || this.user.Perfil.Permissoes.length === 0) {
+      console.log('-> Acesso negado: O objeto user, Perfil ou a lista de Permissaos está vazia ou ausente.');
       return false;
     }
-    // Retorna true se encontrar pelo menos uma permissão que corresponda a uma das palavras-chave
-    return this.user.Perfil.Permissoes.some(p =>
-        chaves.some(chave => p.nome.includes(chave))
-    );
+
+    // Mostra todas as permissões que o utilizador tem
+    const nomesPermissoes = this.user.Perfil.Permissoes.map(p => p.nome);
+    console.log('A verificar contra as seguintes permissões do utilizador:', nomesPermissoes);
+
+    const temAcesso = this.user.Perfil.Permissoes.some(permissao => {
+      // Garante que a propriedade 'nome' existe e a converte para minúsculas
+      const nomePermissao = (permissao.nome || '').toLowerCase();
+
+      // Itera sobre as chaves de busca (ex: 'usuario', 'perfi')
+      return chaves.some(chave => {
+        const resultado = nomePermissao.includes(chave.toLowerCase());
+        // Mostra cada comparação individual
+        // console.log(`A comparar "${nomePermissao}" com a chave "${chave}": ${resultado}`);
+        if (resultado) {
+          console.log(`%c-> MATCH ENCONTRADO! A permissão "${nomePermissao}" inclui a chave "${chave}".`, 'color: green; font-weight: bold;');
+        }
+        return resultado;
+      });
+    });
+
+    console.log(`-> Resultado final para [${chaves.join(', ')}]: ${temAcesso}`);
+    return temAcesso;
   }
 
   toggleSidebar(): void {
