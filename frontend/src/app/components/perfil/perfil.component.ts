@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UserService } from '../../services/user.service';
+import { UsuarioService } from '../../services/usuario.service';
 // A importação está correta
 import { Usuario, TrocarSenhaPayload } from '../../models/usuario.model';
 import { AuthService } from '../../auth/auth.service';
@@ -25,7 +25,7 @@ export class PerfilComponent implements OnInit {
     mostrarTrocaSenha = false;
 
     constructor(
-        private userService: UserService,
+        private userService: UsuarioService,
         private authService: AuthService
     ) {}
 

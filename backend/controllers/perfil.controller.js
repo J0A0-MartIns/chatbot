@@ -29,7 +29,7 @@ const PerfilController = {
     async listarPerfis(req, res) {
         try {
             const perfis = await Perfil.findAll({
-                include: [{ model: Permissao, as: 'Permissaos', through: { attributes: [] } }],
+                include: [{ model: Permissao, as: 'Permissoes', through: { attributes: [] } }],
                 order: [['nome', 'ASC']]
             });
             return res.status(200).json(perfis);
@@ -51,7 +51,7 @@ const PerfilController = {
         try {
             const novoPerfil = await Perfil.create({ nome });
             if (permissoes && permissoes.length > 0) {
-                await novoPerfil.setPermissaos(permissoes);
+                await novoPerfil.setPermissoes(permissoes);
             }
             return res.status(201).json(novoPerfil);
         } catch (err) {

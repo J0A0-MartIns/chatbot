@@ -50,16 +50,14 @@ export class AppComponent implements OnInit, OnDestroy {
    * CORREÇÃO: Adicionada depuração detalhada para ver o que a função está a fazer.
    */
   temAcessoAPagina(chaves: string[]): boolean {
-    console.log(`--- A verificar acesso para as chaves: [${chaves.join(', ')}] ---`);
 
     if (!this.user || !this.user.Perfil || !this.user.Perfil.Permissoes || this.user.Perfil.Permissoes.length === 0) {
-      console.log('-> Acesso negado: O objeto user, Perfil ou a lista de Permissaos está vazia ou ausente.');
       return false;
     }
 
-    // Mostra todas as permissões que o utilizador tem
+
+    // Mostra todas as permissões
     const nomesPermissoes = this.user.Perfil.Permissoes.map(p => p.nome);
-    console.log('A verificar contra as seguintes permissões do utilizador:', nomesPermissoes);
 
     const temAcesso = this.user.Perfil.Permissoes.some(permissao => {
       // Garante que a propriedade 'nome' existe e a converte para minúsculas
@@ -68,16 +66,11 @@ export class AppComponent implements OnInit, OnDestroy {
       // Itera sobre as chaves de busca (ex: 'usuario', 'perfi')
       return chaves.some(chave => {
         const resultado = nomePermissao.includes(chave.toLowerCase());
-        // Mostra cada comparação individual
-        // console.log(`A comparar "${nomePermissao}" com a chave "${chave}": ${resultado}`);
-        if (resultado) {
-          console.log(`%c-> MATCH ENCONTRADO! A permissão "${nomePermissao}" inclui a chave "${chave}".`, 'color: green; font-weight: bold;');
-        }
+
         return resultado;
       });
     });
 
-    console.log(`-> Resultado final para [${chaves.join(', ')}]: ${temAcesso}`);
     return temAcesso;
   }
 

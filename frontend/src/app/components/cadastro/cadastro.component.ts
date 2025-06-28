@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core'; // Importa OnInit
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UserService } from '../../services/user.service';
+import { UsuarioService } from '../../services/usuario.service';
 import { PerfilService } from '../../services/perfil.service'; // <-- 1. Importa o PerfilService
 import { UsuarioPayload } from '../../models/usuario.model';
 import { Perfil } from '../../models/perfil.model'; // Importa o modelo de Perfil
@@ -29,7 +29,7 @@ export class CadastroComponent implements OnInit { // Implementa OnInit
   isLoading = false;
 
   constructor(
-      private userService: UserService,
+      private userService: UsuarioService,
       private perfilService: PerfilService, // <-- 2. Injeta o serviço
       private router: Router
   ) {}

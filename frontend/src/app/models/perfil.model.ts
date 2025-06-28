@@ -1,12 +1,12 @@
-// Interface para um objeto de Permissão, como vem da API
+// Interface para um objeto de Permissão
 export interface Permissao {
     id_permissao: number;
-    nome: string; // Ex: 'criar_documento'
+    nome: string;
 }
 
-// Interface para um objeto de Perfil, incluindo suas permissões associadas
+// Interface para um objeto de Perfil
 export interface Perfil {
     id_perfil: number;
-    nome: string; // Ex: 'Admin'
-    Permissoes: Permissao[]; // O Sequelize usa o nome do modelo no plural por padrão
+    nome: string;
+    Permissoes: Permissao[];
 }

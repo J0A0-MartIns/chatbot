@@ -1,25 +1,28 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { UsuarioPayload, TrocarSenhaPayload, Usuario, CriarUsuarioResponse } from '../models/usuario.model';
+import {
+    UsuarioPayload,
+    TrocarSenhaPayload,
+    Usuario,
+    CriarUsuarioResponse
+} from '../models/usuario.model'; // Garante que todas as interfaces são importadas
 import { environment } from '../environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
-export class UserService {
+export class UsuarioService {
     private apiUrl = `${environment.apiUrl}/usuarios`;
 
     constructor(private http: HttpClient) {}
 
-    // --- MÉTODOS PÚBLICOS (TELA DE CADASTRO) ---
-    /** Envia uma solicitação de registo (cria um utilizador pendente). */
+    /** Envia uma solicitação de registo (cria um usuário pendente). */
     registrar(dadosUsuario: UsuarioPayload): Observable<any> {
         return this.http.post(this.apiUrl, dadosUsuario);
     }
 
-    // --- MÉTODO PARA O UTILIZADOR LOGADO ---
-    /** Altera a senha do utilizador logado. */
+    /** Altera a senha do usuário já logado. */
     trocarSenha(id: number, payload: TrocarSenhaPayload): Observable<any> {
         return this.http.post(`${this.apiUrl}/${id}/trocar-senha`, payload);
     }
@@ -32,7 +35,6 @@ export class UserService {
     }
 
     /** Cria um novo utilizador diretamente como ATIVO. */
-    // CORREÇÃO: O tipo de retorno agora é o correto para corresponder à resposta da API.
     criarUsuarioAtivo(dadosUsuario: UsuarioPayload): Observable<CriarUsuarioResponse> {
         return this.http.post<CriarUsuarioResponse>(`${this.apiUrl}/criar-ativo`, dadosUsuario);
     }
@@ -49,7 +51,7 @@ export class UserService {
 
     // --- MÉTODOS PARA GERIR PENDÊNCIAS ---
 
-    /** Busca todos os utilizadores PENDENTES. */
+    /** Busca todos os utilizadores PENDENTES (com status: 'pendente'). */
     getUsuariosPendentes(): Observable<Usuario[]> {
         return this.http.get<Usuario[]>(`${this.apiUrl}/pendentes`);
     }

@@ -73,6 +73,7 @@ const UserController = {
             const formattedUsers = users.map(user => formatUserResponse(user));
             return res.status(200).json(formattedUsers);
         } catch (err) {
+            console.error("Erro ao listar utilizadores:", err);
             return res.status(500).json({ message: 'Erro ao listar utilizadores.', error: err.message });
         }
     },
@@ -108,6 +109,7 @@ const UserController = {
             });
             return res.status(200).json(usuariosPendentes.map(user => formatUserResponse(user)));
         } catch (err) {
+            console.error("Erro ao listar pendentes:", err);
             return res.status(500).json({ message: 'Erro ao listar utilizadores pendentes.', error: err.message });
         }
     },

@@ -16,27 +16,19 @@ const errorHandler = require('./middlewares/errorHandler');
 app.use(cors());
 app.use(express.json());
 
-
-// --- REGISTRO DAS ROTAS ---
-// É importante registrar a rota de autenticação ANTES das rotas gerais.
-app.use('/api/auth', authRoutes); // <-- ADIÇÃO 2: Diz ao Express para usar as rotas de auth sob o prefixo /api/auth
+app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/relatorios', relatorioRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/senha', passwordRoutes);
-app.use('/api', routes); // Carrega todas as outras rotas (usuários, perfis, etc.) sob /api
+app.use('/api', routes);
 
-
-// --- MIDDLEWARE DE ERRO ---
 app.use(errorHandler);
 
-
-// --- INICIALIZAÇÃO DO SERVIDOR ---
 const PORT = process.env.PORT || 3000;
 
-// Lembrete: Após o banco de dados estar sincronizado, mude { force: true }
-// de volta para { alter: true } ou remova a opção para não perder seus dados a cada reinicialização.
-db.sequelize.sync().then(() => {
+
+db.sequelize.sync(/*{ alter: true }*/).then(() => {
     app.listen(PORT, () => {
         console.log(`Servidor rodando em http://localhost:${PORT}`);
     });

@@ -4,6 +4,7 @@ import { TemaService } from '../../services/tema.service';
 import { SubtemaService } from '../../services/subtema.service';
 import { Tema } from '../../models/tema.model';
 import { Subtema } from '../../models/subtema.model';
+import { Documento } from '../../models/documento.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -15,7 +16,7 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit {
-  // Estado do formulário
+  // Estado do formulário de pergunta
   idTemaSelecionado: number | null = null;
   idSubtemaSelecionado: number | null = null;
   pergunta = '';
@@ -24,12 +25,11 @@ export class ChatComponent implements OnInit {
   temasDisponiveis: Tema[] = [];
   subtemasDisponiveis: Subtema[] = [];
 
-  // Estado da conversa
-  respostaChat = '';
-  idAtendimentoAtual: number | null = null;
+  // Estado da conversa e da UI
   isLoading = false;
-
-  // Novos estados para a lógica de feedback
+  solucoesEncontradas: Documento[] = [];
+  respostaGenerica = '';
+  idAtendimentoAtual: number | null = null;
   respostaEncontrada: boolean | null = null;
   etapaFeedback: 'inicio' | 'comentario' | 'finalizado' = 'inicio';
   feedbackComentario = '';
@@ -77,14 +77,18 @@ export class ChatComponent implements OnInit {
 
     this.chatService.perguntar(payload).subscribe({
       next: (res) => {
-        this.respostaChat = res.resposta;
         this.idAtendimentoAtual = res.id_atendimento;
         this.respostaEncontrada = res.encontrado;
+        if (res.encontrado && res.solucoes.length > 0) {
+          this.solucoesEncontradas = res.solucoes;
+        } else {
+          this.respostaGenerica = 'Desculpe, não encontrei uma resposta para sua pergunta neste subtema. Deseja que eu registe a sua dúvida como uma sugestão?';
+        }
         this.isLoading = false;
       },
       error: (err) => {
         this.isLoading = false;
-        this.respostaChat = 'Ocorreu um erro ao buscar sua resposta. Tente novamente.';
+        this.respostaGenerica = 'Ocorreu um erro ao processar sua pergunta. Tente novamente mais tarde.';
         console.error("ERRO AO PERGUNTAR:", err);
       }
     });
@@ -114,12 +118,13 @@ export class ChatComponent implements OnInit {
     if (!this.idAtendimentoAtual) return;
     this.chatService.criarPendenciaDireta(this.idAtendimentoAtual).subscribe(() => {
       this.etapaFeedback = 'finalizado';
-      this.respostaChat = 'Obrigado! A sua pergunta foi enviada para análise.';
+      this.respostaGenerica = 'Obrigado! A sua dúvida foi enviada como uma sugestão para a nossa equipa.';
     });
   }
 
   private resetarEstadoConversa(): void {
-    this.respostaChat = '';
+    this.solucoesEncontradas = [];
+    this.respostaGenerica = '';
     this.idAtendimentoAtual = null;
     this.respostaEncontrada = null;
     this.etapaFeedback = 'inicio';

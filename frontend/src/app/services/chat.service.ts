@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
+import {Documento} from "../models/documento.model";
 
 // Interface para o que enviamos ao fazer uma pergunta
 export interface PerguntaPayload {
@@ -9,11 +10,11 @@ export interface PerguntaPayload {
     id_subtema: number;
 }
 
-// Interface para o que recebemos como resposta
+// CORREÇÃO: A resposta agora contém um array de soluções
 export interface RespostaChat {
     id_atendimento: number;
-    resposta: string;
-    encontrado: boolean; // Flag que nos diz se uma resposta foi encontrada
+    solucoes: Documento[];
+    encontrado: boolean;
 }
 
 // Interface para o que enviamos ao dar um feedback

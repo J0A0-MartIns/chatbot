@@ -1,5 +1,5 @@
 /**
- * Lógica de chat atualizada com busca por palavra-chave e criação de pendências.
+ * Lógica de chat com busca por palavra-chave e criação de pendências.
  */
 
 const { AtendimentoChatbot, Feedback, SessaoUsuario, BaseConhecimento, Pendencia, sequelize } = require('../models');
@@ -18,29 +18,28 @@ const ChatController = {
         }
 
         try {
-            //Busca por Palavras-Chave
+            // --- 1. Lógica de Busca por Múltiplos Documentos ---
             const palavras = pergunta.toLowerCase().split(' ').filter(p => p.length > 2);
-            let documento = null;
+            let documentos = []; // Agora é um array
 
             if (palavras.length > 0) {
                 const condicoesDeBusca = palavras.map(p => ({
                     palavras_chave: { [Op.iLike]: `%${p}%` }
                 }));
-                documento = await BaseConhecimento.findOne({
+                documentos = await BaseConhecimento.findAll({ // Usa findAll em vez de findOne
                     where: {
                         id_subtema: id_subtema,
                         [Op.or]: condicoesDeBusca
                     },
+                    limit: 5, // Limita a 5 soluções para não sobrecarregar
                     order: [['data_criacao', 'DESC']]
                 });
             }
 
-            const respostaEncontrada = !!documento;
-            const resposta = respostaEncontrada
-                ? documento.conteudo
-                : 'Desculpe, não encontrei uma resposta para sua pergunta neste momento. Deseja registrar a sua dúvida como uma sugestão de conteúdo?';
+            const respostaEncontrada = documentos.length > 0;
+            const respostaGenerica = 'Desculpe, não encontrei uma resposta para sua pergunta neste subtema. Deseja que eu registe a sua dúvida como uma sugestão?';
 
-            //Registra o Atendimento
+            // --- 2. Registar o Atendimento ---
             const [sessao] = await SessaoUsuario.findOrCreate({
                 where: { usuario_id, data_logout: null },
                 defaults: { usuario_id }
@@ -49,13 +48,19 @@ const ChatController = {
             const atendimento = await AtendimentoChatbot.create({
                 id_sessao: sessao.id_sessao,
                 pergunta_usuario: pergunta,
-                resposta_chatbot: resposta,
+                resposta_chatbot: respostaEncontrada ? `Encontrei ${documentos.length} soluções.` : respostaGenerica,
             });
 
-            //Retorna a resposta e a flag de sucesso
+            // --- 3. Associar as Soluções ao Atendimento ---
+            if (respostaEncontrada) {
+                // O Sequelize magicamente cria este método para associar os documentos
+                await atendimento.addBaseConhecimentos(documentos);
+            }
+
+            // --- 4. Retornar as soluções e o ID do atendimento ---
             return res.status(200).json({
                 id_atendimento: atendimento.id_atendimento,
-                resposta: resposta,
+                solucoes: documentos, // Devolve o array de documentos
                 encontrado: respostaEncontrada
             });
 

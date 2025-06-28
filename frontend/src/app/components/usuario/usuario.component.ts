@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UserService } from '../../services/user.service';
+import { UsuarioService } from '../../services/usuario.service';
 import { PerfilService } from '../../services/perfil.service';
 import { Usuario, UsuarioPayload } from '../../models/usuario.model';
 import { Perfil } from '../../models/perfil.model';
@@ -36,19 +36,20 @@ export class UsuarioComponent implements OnInit {
     usuarioEmEdicao: Partial<UsuarioPayload> & { id?: number } = {};
 
     constructor(
-        private userService: UserService,
+        private userService: UsuarioService,
         private perfilService: PerfilService
     ) {}
 
     /**
-     * Hook inicial que carrega os dados necessários para a página.
+     *Carrega os dados necessários para a página.
      */
     ngOnInit(): void {
         this.carregarDados();
     }
 
+
     /**
-     * Busca os dados dos utilizadores (ativos e pendentes) e dos perfis na API.
+     * Busca os dados dos usuários, independnete do status, e dos perfis na API.
      */
     carregarDados(): void {
         this.userService.getUsuarios().subscribe(data => this.usuariosAtivos = data);

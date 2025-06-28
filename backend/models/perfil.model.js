@@ -1,3 +1,8 @@
+/**
+ * models/perfil.model.js
+ *
+ * Versão final e correta, alinhada com a lógica de uma única tabela de utilizadores.
+ */
 module.exports = (sequelize, DataTypes) => {
     const Perfil = sequelize.define('Perfil', {
         id_perfil: {
@@ -12,9 +17,12 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Perfil.associate = (models) => {
-        Perfil.hasMany(models.Usuario, { foreignKey: 'id_perfil', as: 'Perfil' }); // Adicionamos um alias aqui por consistência
+        Perfil.hasMany(models.Usuario, {
+            foreignKey: 'id_perfil',
+            as: 'Perfil'
+        });
 
-        // --- CORREÇÃO: Adicionado o alias 'Permissaos' ---
+        // Associação com Permissões
         Perfil.belongsToMany(models.Permissao, {
             through: 'perfil_permissao',
             foreignKey: 'id_perfil',

@@ -20,17 +20,14 @@ interface GrupoDePagina {
   styleUrls: ['./acesso.component.css']
 })
 export class AcessoComponent implements OnInit {
-  // Dados da Tabela
   perfis: Perfil[] = [];
-
-  // Dados do Modal
+  //Modal
   modalAberto = false;
   isEditMode = false;
   perfilEmEdicao: Partial<Perfil> = {};
   gruposDePaginas: GrupoDePagina[] = [];
   permissoesSelecionadas = new Map<number, boolean>();
 
-  // Controlo da UI
   openActionIndex: number | null = null;
 
   constructor(private perfilService: PerfilService) {}
@@ -46,9 +43,9 @@ export class AcessoComponent implements OnInit {
 
   carregarEAgruparPermissoes(): void {
     this.perfilService.getTodasPermissoes().subscribe(todas => {
-      // Define os grupos de páginas que você quer exibir no modal
+      // Define os grupos de páginas para exibir no modal
       this.gruposDePaginas = [
-        { nomeExibicao: 'Acesso à Gestão de Utilizadores', permissoesChave: ['usuario', 'perfi', 'permis'], permissoes: [], selecionado: false },
+        { nomeExibicao: 'Acesso à Gestão de Usuários', permissoesChave: ['usuario', 'perfi', 'permis'], permissoes: [], selecionado: false },
         { nomeExibicao: 'Acesso à Base de Conhecimento', permissoesChave: ['documento', 'categoria'], permissoes: [], selecionado: false },
         { nomeExibicao: 'Acesso ao Dashboard e Relatórios', permissoesChave: ['dashboard', 'relatorio', 'pendencia', 'listar_'], permissoes: [], selecionado: false },
       ];
@@ -60,12 +57,11 @@ export class AcessoComponent implements OnInit {
           grupo.permissoes.push(p);
         }
       });
-      // Remove da vista quaisquer grupos que não tenham permissões associadas
       this.gruposDePaginas = this.gruposDePaginas.filter(g => g.permissoes.length > 0);
     });
   }
 
-  // --- Funções do Modal ---
+  //Modal
 
   abrirModalParaCriar(): void {
     this.isEditMode = false;

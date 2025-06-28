@@ -1,10 +1,10 @@
 module.exports = (sequelize, DataTypes) => {
     const BaseChatbotSolucao = sequelize.define('BaseChatbotSolucao', {
-        atendimento_id: {
+        id_atendimento: {
             type: DataTypes.INTEGER,
             primaryKey: true
         },
-        base_id: {
+        id_documento: {
             type: DataTypes.INTEGER,
             primaryKey: true
         },
@@ -15,8 +15,8 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     BaseChatbotSolucao.associate = (models) => {
-        BaseChatbotSolucao.belongsTo(models.AtendimentoChatbot, { foreignKey: 'atendimento_id' });
-        BaseChatbotSolucao.belongsTo(models.BaseConhecimento, { foreignKey: 'base_id' });
+        BaseChatbotSolucao.belongsTo(models.AtendimentoChatbot, { foreignKey: 'id_atendimento' });
+        BaseChatbotSolucao.belongsTo(models.BaseConhecimento, { foreignKey: 'id_documento' });
     };
 
     return BaseChatbotSolucao;

@@ -3,8 +3,8 @@
         <h2><i class="fas fa-question-circle"></i> Quero Ajuda</h2>
         <p class="subtitle">Selecione o assunto e descreva sua dúvida para que eu possa ajudar.</p>
 
+        <!-- Formulário para enviar a pergunta -->
         <form (ngSubmit)="enviarPergunta()">
-            <!-- Menus de seleção para Tema e Subtema -->
             <label for="tema">Tema:</label>
             <select id="tema" [(ngModel)]="idTemaSelecionado" name="tema" (change)="onTemaChange()" required>
                 <option [ngValue]="null" disabled>-- Selecione um tema --</option>
@@ -17,7 +17,6 @@
                 <option *ngFor="let st of subtemasDisponiveis" [ngValue]="st.id_subtema">{{ st.nome }}</option>
             </select>
 
-            <!-- Campo para a pergunta do utilizador -->
             <label for="pergunta">Qual é a sua dúvida?</label>
             <textarea id="pergunta" [(ngModel)]="pergunta" name="pergunta" rows="4" placeholder="Ex: Como faço para emitir a segunda via de um boleto?" required></textarea>
 
@@ -27,19 +26,24 @@
         </form>
 
         <!-- Container de Resposta que muda de acordo com o estado da conversa -->
-        <div *ngIf="respostaChat" class="resposta-container">
-            <h3>Resposta:</h3>
-            <p class="resposta-texto">{{ respostaChat }}</p>
+        <div *ngIf="solucoesEncontradas.length > 0 || respostaGenerica" class="resposta-container">
 
-            <!-- CENÁRIO 1: RESPOSTA FOI ENCONTRADA -->
+            <!-- CENÁRIO 1: SOLUÇÕES FORAM ENCONTRADAS -->
             <div *ngIf="respostaEncontrada === true">
-                <!-- Etapa 1: Avaliação inicial de útil/não útil -->
+                <h3>Soluções Sugeridas:</h3>
+                <!-- Loop para exibir cada solução como um card -->
+                <div *ngFor="let solucao of solucoesEncontradas" class="solucao-card">
+                    <h4>{{ solucao.titulo }}</h4>
+                    <p>{{ solucao.conteudo.substring(0, 200) }}...</p>
+                </div>
+
+                <!-- O fluxo de feedback agora aparece abaixo da lista de soluções -->
                 <div *ngIf="etapaFeedback === 'inicio'" class="avaliacao">
-                    <span>Esta resposta foi útil?</span>
+                    <span>Estas sugestões foram úteis?</span>
                     <button (click)="avaliar(true)" class="btn-util">Sim</button>
                     <button (click)="avaliar(false)" class="btn-nao-util">Não</button>
                 </div>
-                <!-- Etapa 2: Formulário para o comentário de feedback negativo -->
+                <!-- Formulário para o comentário de feedback negativo -->
                 <div *ngIf="etapaFeedback === 'comentario'" class="feedback-negativo-form">
                     <label for="comentario">Por favor, diga-nos o que estava a procurar para que possamos melhorar:</label>
                     <textarea id="comentario" [(ngModel)]="feedbackComentario" name="comentario" rows="3"></textarea>
@@ -47,14 +51,16 @@
                 </div>
             </div>
 
-            <!-- CENÁRIO 2: RESPOSTA NÃO FOI ENCONTRADA -->
-            <div *ngIf="respostaEncontrada === false && etapaFeedback === 'inicio'">
-                <div class="avaliacao">
+            <!-- CENÁRIO 2: NENHUMA SOLUÇÃO ENCONTRADA -->
+            <div *ngIf="respostaEncontrada === false">
+                <h3>Resposta:</h3>
+                <p class="resposta-texto">{{ respostaGenerica }}</p>
+                <div *ngIf="etapaFeedback === 'inicio'" class="avaliacao">
                     <button (click)="enviarComoSugestao()" class="btn-sugestao">Sim, registar a minha dúvida</button>
                 </div>
             </div>
 
-            <!-- Etapa Final: Mensagem de agradecimento após o feedback -->
+            <!-- Mensagem de agradecimento após o feedback -->
             <p *ngIf="etapaFeedback === 'finalizado'" class="feedback-agradecimento">
                 <strong>Obrigado pelo seu feedback!</strong>
             </p>

@@ -14,7 +14,7 @@
         </div>
     </div>
 
-    <!-- Container da Aplicação -->
+
     <div class="app-container">
         <aside class="sidebar" [class.collapsed]="isCollapsed">
             <button class="toggle-btn" (click)="toggleSidebar()">
@@ -71,7 +71,6 @@
     </div>
 </div>
 
-<!-- Para páginas públicas -->
 <div *ngIf="!showLayout" class="full-screen-content">
     <router-outlet></router-outlet>
 </div>
