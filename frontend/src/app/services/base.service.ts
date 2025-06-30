@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {catchError, Observable, throwError} from 'rxjs';
 import { Documento } from '../models/documento.model'; // Importa nosso novo modelo
 import { environment } from '../environments/environment';
 
@@ -15,7 +15,12 @@ export class BaseService {
 
     // GET /api/base-conhecimento
     getDocumentos(): Observable<Documento[]> {
-        return this.http.get<Documento[]>(this.apiUrl);
+        return this.http.get<Documento[]>(`${this.apiUrl}`).pipe(
+            catchError(err => {
+                console.error('Erro ao carregar documentos:', err);
+                return throwError(() => err);
+            })
+        );
     }
 
     // POST /api/base-conhecimento

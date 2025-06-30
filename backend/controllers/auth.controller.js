@@ -17,11 +17,15 @@ const AuthController = {
         try {
             const usuario = await Usuario.findOne({
                 where: { email },
-                include: {
+                include: [{
                     model: Perfil,
                     as: 'Perfil',
-                    include: { model: Permissao, as: 'Permissoes' }
-                }
+                    include: [{
+                        model: Permissao,
+                        as: 'Permissoes',
+                        through: { attributes: [] }
+                    }]
+                }]
             });
 
             if (!usuario || usuario.status !== 'ativo') {

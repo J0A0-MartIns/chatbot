@@ -1,33 +1,38 @@
 /**
  * routes/tema.routes.js
  *
- * Define os endpoints da API para o recurso de Temas.
+ * Define os endpoints da API para o recurso de Temas, agora com
+ * a segurança de permissões (RBAC) devidamente aplicada e de forma granular.
  */
 
 const express = require('express');
 const router = express.Router();
 
-// Importa o controller com a lógica de negócio.
 const temaController = require('../controllers/tema.controller');
+// Importa os middlewares necessários
+const { authenticateToken } = require('../middlewares/auth.middleware');
+const { pode } = require('../middlewares/permissao.middleware');
 
-// Importa os middlewares de forma correta, usando desestruturação.
-const { authenticateToken, authorizePerfil } = require('../middlewares/auth.middleware');
-
-// --- Definição das Rotas ---
-
-// Rota para criar um novo tema (Apenas Admins)
-router.post('/', authenticateToken, authorizePerfil(['Admin']), temaController.criarTema);
-
-// Rota para listar todos os temas (Qualquer usuário autenticado)
+// --- ROTA PÚBLICA (ou apenas autenticada) ---
+// Qualquer utilizador logado pode ver a lista de temas para os menus de seleção.
 router.get('/', authenticateToken, temaController.listarTemas);
 
-// Rota para buscar um tema por ID (Qualquer usuário autenticado)
-router.get('/:id', authenticateToken, temaController.buscarTemaPorId);
 
-// Rota para atualizar um tema (Apenas Admins)
-router.put('/:id', authenticateToken, authorizePerfil(['Admin']), temaController.atualizarTema);
+// --- ROTAS DE ADMINISTRAÇÃO (Exigem Permissões Específicas) ---
 
-// Rota para remover um tema (Apenas Admins)
-router.delete('/:id', authenticateToken, authorizePerfil(['Admin']), temaController.removerTema);
+// CORREÇÃO: A permissão agora é mais específica para cada ação.
+
+// Rota para buscar um tema por ID
+router.get('/:id', authenticateToken, pode('ver_categorias'), temaController.buscarTemaPorId);
+
+// Rota para criar um novo tema
+router.post('/', authenticateToken, pode('criar_categorias'), temaController.criarTema);
+
+// Rota para atualizar um tema
+router.put('/:id', authenticateToken, pode('editar_categorias'), temaController.atualizarTema);
+
+// Rota para remover um tema
+router.delete('/:id', authenticateToken, pode('deletar_categorias'), temaController.removerTema);
+
 
 module.exports = router;

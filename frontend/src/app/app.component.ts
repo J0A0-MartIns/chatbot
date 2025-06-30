@@ -1,77 +1,43 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router, NavigationEnd, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component } from '@angular/core';
+import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
 import { AuthService } from './auth/auth.service';
 import { Usuario } from './models/usuario.model';
-import { AlertModalComponent } from './components/alerta/alerta.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, AlertModalComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent {
   isCollapsed = false;
-  showLayout = false;
-  user: Usuario | null = null;
 
-  sessionExpired = false;
-  private sessionSub: Subscription | undefined;
+  // As propriedades agora são Observables que se atualizam automaticamente.
+  user$: Observable<Usuario | null>;
+  isLoggedIn$: Observable<boolean>;
 
-  constructor(private router: Router, private authService: AuthService) {}
-
-  ngOnInit() {
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        this.showLayout = this.authService.isLoggedIn();
-        if (this.showLayout) {
-          this.user = this.authService.getUser();
-        } else {
-          this.user = null;
-        }
-      }
-    });
-  }
-
-  ngOnDestroy() {
-    if (this.sessionSub) {
-      this.sessionSub.unsubscribe();
-    }
-  }
-
-  onModalClose() {
-    this.sessionExpired = false;
+  constructor(private authService: AuthService, private router: Router) {
+    // Inicializa os Observables a partir do serviço
+    this.user$ = this.authService.user$;
+    // O utilizador está logado se o objeto user não for nulo
+    this.isLoggedIn$ = this.user$.pipe(map(user => !!user));
   }
 
   /**
-   * CORREÇÃO: Adicionada depuração detalhada para ver o que a função está a fazer.
+   * A função agora recebe o objeto do utilizador como parâmetro,
+   * o que a torna mais pura e fácil de testar.
    */
-  temAcessoAPagina(chaves: string[]): boolean {
-
-    if (!this.user || !this.user.Perfil || !this.user.Perfil.Permissoes || this.user.Perfil.Permissoes.length === 0) {
+  temAcessoAPagina(user: Usuario | null, chaves: string[]): boolean {
+    if (!user || !user.Perfil || !user.Perfil.Permissoes || user.Perfil.Permissoes.length === 0) {
       return false;
     }
-
-
-    // Mostra todas as permissões
-    const nomesPermissoes = this.user.Perfil.Permissoes.map(p => p.nome);
-
-    const temAcesso = this.user.Perfil.Permissoes.some(permissao => {
-      // Garante que a propriedade 'nome' existe e a converte para minúsculas
-      const nomePermissao = (permissao.nome || '').toLowerCase();
-
-      // Itera sobre as chaves de busca (ex: 'usuario', 'perfi')
-      return chaves.some(chave => {
-        const resultado = nomePermissao.includes(chave.toLowerCase());
-
-        return resultado;
-      });
-    });
-
-    return temAcesso;
+    return user.Perfil.Permissoes.some(p =>
+        chaves.some(chave => (p.nome || '').toLowerCase().includes(chave.toLowerCase()))
+    );
   }
 
   toggleSidebar(): void {

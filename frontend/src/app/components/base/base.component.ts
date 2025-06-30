@@ -7,20 +7,15 @@ import { SubtemaService } from '../../services/subtema.service';
 import { Tema } from '../../models/tema.model';
 import { Subtema } from '../../models/subtema.model';
 import { AuthService } from '../../auth/auth.service';
-import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {NgForOf, NgIf} from "@angular/common";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { CommonModule } from "@angular/common";
 
 @Component({
   selector: 'app-base',
+  standalone: true,
+  imports: [ReactiveFormsModule, CommonModule, FormsModule],
   templateUrl: './base.component.html',
-  imports: [
-    ReactiveFormsModule,
-    NgForOf,
-    FormsModule,
-    NgIf
-  ],
   styleUrls: ['./base.component.css']
-  // Lembre-se: Garanta que CommonModule e FormsModule estão no array 'imports' do seu app.module.ts
 })
 export class BaseComponent implements OnInit {
   // Propriedades para a lista e busca
@@ -48,7 +43,6 @@ export class BaseComponent implements OnInit {
       private subtemaService: SubtemaService,
       private authService: AuthService
   ) {
-    // Inicializa a propriedade aqui para garantir que authService está disponível
     this.docEmEdicao = this.criarDocVazio();
   }
 
@@ -66,7 +60,7 @@ export class BaseComponent implements OnInit {
     this.temaService.getTemas().subscribe(data => this.temas = data);
   }
 
-  // --- Funções de Controle da UI ---
+  // --- Funções de Controlo da UI ---
   docsFiltrados(): Documento[] {
     if (!this.termoBusca.trim()) return this.documentos;
     return this.documentos.filter(doc =>
@@ -90,7 +84,9 @@ export class BaseComponent implements OnInit {
     this.novoTemaNome = '';
     this.novoSubtemaNome = '';
     if (doc.Subtema) {
-      this.idTemaSelecionadoNoModal = doc.Subtema.id_subtema;
+      // --- AQUI ESTÁ A CORREÇÃO CRÍTICA ---
+      // Atribui o ID do TEMA pai, e não do subtema.
+      this.idTemaSelecionadoNoModal = doc.Subtema.id_tema;
       this.onTemaChangeNoModal();
     }
     this.showModal = true;
@@ -120,9 +116,13 @@ export class BaseComponent implements OnInit {
 
       let subtemaIdFinal: number;
       if (this.novoSubtemaNome.trim()) {
+        if (!temaIdFinal) {
+          alert('Um erro ocorreu ao determinar o tema. Tente novamente.');
+          return;
+        }
         const novoSubtema = await lastValueFrom(this.subtemaService.criarSubtema(this.novoSubtemaNome.trim(), temaIdFinal));
         subtemaIdFinal = novoSubtema.id_subtema;
-      } else if (this.docEmEdicao.id_subtema) {
+      } else if (this.docEmEdicao.id_subtema && this.docEmEdicao.id_subtema > 0) {
         subtemaIdFinal = this.docEmEdicao.id_subtema;
       } else {
         alert('Por favor, selecione ou crie um subtema.');
@@ -149,7 +149,9 @@ export class BaseComponent implements OnInit {
 
   onTemaChangeNoModal(): void {
     this.subtemasDoTemaSelecionado = [];
-    this.docEmEdicao.id_subtema = 0;
+    if (this.docEmEdicao) {
+      this.docEmEdicao.id_subtema = 0;
+    }
     if (this.idTemaSelecionadoNoModal) {
       this.subtemaService.getSubtemasPorTema(this.idTemaSelecionadoNoModal)
           .subscribe(data => this.subtemasDoTemaSelecionado = data);

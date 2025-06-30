@@ -26,6 +26,5 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false
     });
 
-    // Esta tabela de junção não precisa de uma função 'associate'.
     return PerfilPermissao;
 };

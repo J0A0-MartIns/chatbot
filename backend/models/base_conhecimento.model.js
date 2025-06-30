@@ -1,17 +1,10 @@
 module.exports = (sequelize, DataTypes) => {
     const BaseConhecimento = sequelize.define('BaseConhecimento', {
-        id_documento: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            autoIncrement: true
-        },
+        id_documento: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
         titulo: DataTypes.STRING,
         conteudo: DataTypes.TEXT,
         palavras_chave: DataTypes.STRING,
-        data_criacao: {
-            type: DataTypes.DATE,
-            defaultValue: DataTypes.NOW
-        },
+        data_criacao: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
         ativo: DataTypes.BOOLEAN,
         usuario_id: DataTypes.INTEGER,
         id_subtema: DataTypes.INTEGER
@@ -21,10 +14,21 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     BaseConhecimento.associate = (models) => {
-        BaseConhecimento.belongsTo(models.Usuario, { foreignKey: 'usuario_id' });
-        BaseConhecimento.belongsTo(models.Subtema, { foreignKey: 'id_subtema' });
-        BaseConhecimento.hasMany(models.DocumentoArquivo, { foreignKey: 'id_documento' });
-        BaseConhecimento.hasMany(models.BaseChatbotSolucao, { foreignKey: 'base_id' });
+        BaseConhecimento.belongsTo(models.Usuario, {
+            foreignKey: 'usuario_id',
+            as: 'Usuario'
+        });
+        BaseConhecimento.belongsTo(models.Subtema, {
+            foreignKey: 'id_subtema',
+            as: 'Subtema'
+        });
+        // BaseConhecimento.hasMany(models.DocumentoArquivo, {
+        //     foreignKey: 'id_documento',
+        //     as: 'DocumentoArquivos'
+        // });
+        BaseConhecimento.hasMany(models.BaseChatbotSolucao, {
+            foreignKey: 'id_documento'
+        });
     };
 
     return BaseConhecimento;

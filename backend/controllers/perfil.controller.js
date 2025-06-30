@@ -39,51 +39,63 @@ const PerfilController = {
     },
 
     /**
-     * @description Cria um novo perfil e associa as permissões enviadas.
+     * @description Cria um novo perfil e associa as permissões de forma atómica.
      */
     async criarPerfil(req, res) {
         const { nome, permissoes } = req.body;
-
         if (!nome) {
             return res.status(400).json({ message: 'O nome do perfil é obrigatório.' });
         }
 
+        // Inicia uma transação
+        const t = await sequelize.transaction();
         try {
-            const novoPerfil = await Perfil.create({ nome });
-            if (permissoes && permissoes.length > 0) {
-                await novoPerfil.setPermissoes(permissoes);
+            const novoPerfil = await Perfil.create({ nome }, { transaction: t });
+
+            if (permissoes && Array.isArray(permissoes) && permissoes.length > 0) {
+                await novoPerfil.setPermissoes(permissoes, { transaction: t });
             }
+
+            // Se tudo correu bem, confirma a transação
+            await t.commit();
             return res.status(201).json(novoPerfil);
+
         } catch (err) {
+            // Se algo deu errado, desfaz todas as operações
+            await t.rollback();
+            console.error("Erro ao criar perfil:", err);
             return res.status(500).json({ message: 'Erro ao criar perfil.', error: err.message });
         }
     },
 
     /**
-     * @description Atualiza um perfil existente e suas permissões.
+     * @description Atualiza um perfil existente e suas permissões de forma atómica.
      */
     async updatePerfil(req, res) {
         const { id } = req.params;
         const { nome, permissoes } = req.body;
 
+        const t = await sequelize.transaction();
         try {
-            const perfil = await Perfil.findByPk(id);
+            const perfil = await Perfil.findByPk(id, { transaction: t });
             if (!perfil) {
+                await t.rollback();
                 return res.status(404).json({ message: 'Perfil não encontrado.' });
             }
 
             perfil.nome = nome;
-            await perfil.save();
+            await perfil.save({ transaction: t });
 
-            //Sincroniza as permissões do perfil com a lista enviada.
-            //Sequelize vai remover as antigas e adicionar as novas automaticamente.
             if (permissoes) {
-                await perfil.setPermissaos(permissoes);
+                await perfil.setPermissoes(permissoes, { transaction: t });
             }
 
+            await t.commit();
             return res.status(200).json(perfil);
 
         } catch (err) {
+            await t.rollback();
+            console.error("Erro ao atualizar perfil:", err);
             return res.status(500).json({ message: 'Erro ao atualizar perfil.', error: err.message });
         }
     },

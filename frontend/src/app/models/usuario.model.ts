@@ -1,17 +1,17 @@
 import { Perfil } from './perfil.model';
 
-// Interface para um objeto de utilizador, como vem da API.
-// Serve tanto para utilizadores ativos (ativo: true) quanto pendentes (ativo: false).
+/**
+ * Define a estrutura de um objeto de Utilizador completo, como vem da API.
+ */
 export interface Usuario {
-  id_usuario: number; // A chave primária é sempre id_usuario
+  id_usuario: number;
   nome: string;
   email: string;
-  ativo: boolean;
+  status: 'ativo' | 'pendente' | 'inativo';
   id_perfil: number;
   Perfil?: Perfil;
 }
 
-// Interface para o PAYLOAD de criação/atualização
 export interface UsuarioPayload {
   nome: string;
   email: string;
@@ -19,13 +19,11 @@ export interface UsuarioPayload {
   id_perfil: number;
 }
 
-// Interface para a resposta da API ao criar um utilizador ativo
 export interface CriarUsuarioResponse {
   usuario: Usuario;
   mensagem: string;
 }
 
-// Interface para o payload de troca de senha
 export interface TrocarSenhaPayload {
   senhaAtual: string;
   novaSenha: string;

@@ -14,12 +14,21 @@ const SubtemaController = {
             return res.status(400).json({ message: 'Os campos nome e id_tema são obrigatórios.' });
         }
         try {
+            const temaPai = await Tema.findByPk(id_tema);
+            if (!temaPai) {
+                return res.status(404).json({ message: `O Tema com ID ${id_tema} não foi encontrado. Não é possível criar o subtema.` });
+            }
+
             const subtema = await Subtema.create({ nome, id_tema });
             return res.status(201).json(subtema);
+
         } catch (err) {
+            console.log("ERRO DETALHADO AO CRIAR SUBTEMA:", err);
             return res.status(500).json({ message: 'Erro ao criar subtema.', error: err.message });
         }
+
     },
+
 
     /**
      * @description Lista todos os subtemas.

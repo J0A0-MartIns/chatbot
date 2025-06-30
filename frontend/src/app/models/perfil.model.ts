@@ -1,10 +1,9 @@
-// Interface para um objeto de Permissão
-export interface Permissao {
-    id_permissao: number;
-    nome: string;
-}
+// CORREÇÃO: Importa a interface Permissao do seu próprio ficheiro de modelo.
+import { Permissao } from './permissao.model';
 
-// Interface para um objeto de Perfil
+/**
+ * Define a estrutura de um objeto de Perfil, como vem da API.
+ */
 export interface Perfil {
     id_perfil: number;
     nome: string;

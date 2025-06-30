@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Perfil } from '../models/perfil.model';
-import { Permissao } from '../models/perfil.model';
+import { Permissao } from '../models/permissao.model';
 import { environment } from '../environments/environment';
 
 

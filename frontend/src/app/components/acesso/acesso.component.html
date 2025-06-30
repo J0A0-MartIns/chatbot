@@ -17,16 +17,13 @@
                 <tr *ngFor="let perfil of perfis; let i = index">
                     <td>{{ perfil.nome }}</td>
                     <td>
-                        <!-- Lista as permissões individuais que o perfil possui -->
                         <ul class="permissoes-lista">
                             <li *ngFor="let p of perfil.Permissoes">{{ p.nome }}</li>
                         </ul>
                     </td>
                     <td>
                         <div class="dropdown" [class.open]="openActionIndex === i">
-                            <button (click)="toggleActionSelect(i)" class="dropdown-toggle">
-                                Opções <span class="material-icons">arrow_drop_down</span>
-                            </button>
+                            <button (click)="toggleActionSelect(i)" class="dropdown-toggle">Opções</button>
                             <div class="dropdown-menu" *ngIf="openActionIndex === i">
                                 <button (click)="abrirModalParaEditar(perfil)">Editar</button>
                                 <button (click)="excluirPerfil(perfil.id_perfil)" class="delete-button">Excluir</button>
@@ -35,9 +32,7 @@
                     </td>
                 </tr>
                 <tr *ngIf="perfis.length === 0">
-                    <td colspan="3" class="empty-table-message">
-                        Nenhum perfil encontrado.
-                    </td>
+                    <td colspan="3" class="empty-table-message">Nenhum perfil encontrado.</td>
                 </tr>
                 </tbody>
             </table>

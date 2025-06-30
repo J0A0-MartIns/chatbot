@@ -1,5 +1,7 @@
 /**
- * Este arquivo gerencia a lógica de negócio para as operações de CRUD
+ * controllers/tema.controller.js
+ *
+ * Este ficheiro gere a lógica de negócio para as operações de CRUD
  * relacionadas aos Temas da base de conhecimento.
  */
 
@@ -8,7 +10,7 @@ const { Tema } = require('../models');
 const TemaController = {
     /**
      * @description Cria um novo tema.
-     * @route POST /temas
+     * @route POST /api/temas
      */
     async criarTema(req, res) {
         const { nome } = req.body;
@@ -16,33 +18,34 @@ const TemaController = {
             return res.status(400).json({ message: 'O nome do tema é obrigatório.' });
         }
         try {
-            const temaExistente = await Tema.findOne({ where: { nome } });
-            if (temaExistente) {
-                return res.status(409).json({ message: 'Um tema com este nome já existe.' });
-            }
             const tema = await Tema.create({ nome });
             return res.status(201).json(tema);
         } catch (err) {
-            return res.status(500).json({ message: 'Erro ao criar tema.', error: err.message });
+            if (err.name === 'SequelizeUniqueConstraintError') {
+                return res.status(409).json({ message: 'Um tema com este nome já existe.' });
+            }
+            console.log("--- ERRO INESPERADO AO CRIAR TEMA ---");
+            console.log("Nome do Erro:", err.name);
+            console.log("Mensagem do Erro:", err.message);
+            console.log("Stack do Erro:", err.stack);
+
+            return res.status(500).json({ message: 'Erro interno ao criar tema.', error: err.message });
         }
     },
 
-    /**
-     * @description Lista todos os temas.
-     * @route GET /temas
-     */
     async listarTemas(req, res) {
         try {
-            const temas = await Tema.findAll();
+            const temas = await Tema.findAll({ order: [['nome', 'ASC']] });
             return res.status(200).json(temas);
         } catch (err) {
+            console.error("ERRO AO LISTAR TEMAS:", err);
             return res.status(500).json({ message: 'Erro ao buscar temas.', error: err.message });
         }
     },
 
     /**
      * @description Busca um tema pelo seu ID.
-     * @route GET /temas/:id
+     * @route GET /api/temas/:id
      */
     async buscarTemaPorId(req, res) {
         try {
@@ -58,7 +61,7 @@ const TemaController = {
 
     /**
      * @description Atualiza um tema existente.
-     * @route PUT /temas/:id
+     * @route PUT /api/temas/:id
      */
     async atualizarTema(req, res) {
         const { id } = req.params;
@@ -80,14 +83,16 @@ const TemaController = {
 
     /**
      * @description Remove um tema.
-     * @route DELETE /temas/:id
+     * @route DELETE /api/temas/:id
      */
     async removerTema(req, res) {
+        const { id } = req.params;
         try {
-            const tema = await Tema.findByPk(req.params.id);
+            const tema = await Tema.findByPk(id);
             if (!tema) {
                 return res.status(404).json({ message: 'Tema não encontrado.' });
             }
+            // Adicionar verificação se o tema está em uso antes de apagar
             await tema.destroy();
             return res.status(204).send();
         } catch (err) {

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, BehaviorSubject, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../environments/environment';
 import { Usuario } from '../models/usuario.model';
@@ -15,28 +15,41 @@ export interface AuthResponse {
     providedIn: 'root'
 })
 export class AuthService {
-    // URLs base da API, centralizadas e puxadas do arquivo de environment
     private authApiUrl = `${environment.apiUrl}/auth`;
     private passwordApiUrl = `${environment.apiUrl}/password`;
 
-    // Armazena os dados do usuário em memória para acesso rápido
-    private currentUser: Usuario | null = null;
+    // BehaviorSubject guarda o estado atual do utilizador e notifica os subscritores.
+    private userSubject = new BehaviorSubject<Usuario | null>(null);
+    // Os componentes irão "escutar" este Observable público
+    public user$ = this.userSubject.asObservable();
 
     constructor(
         private http: HttpClient,
         private router: Router
-    ) {}
+    ) {
+        // Ao iniciar o serviço, tenta carregar o utilizador do localStorage
+        this.loadInitialUser();
+    }
+
+    private loadInitialUser(): void {
+        const userJson = localStorage.getItem('currentUser');
+        if (userJson) {
+            this.userSubject.next(JSON.parse(userJson));
+        }
+    }
 
     /**
-     * Autentica um utilizador, salva a sessão e retorna os dados.
+     * Autentica um utilizador, salva a sessão e notifica a aplicação.
      */
     login(email: string, senha: string): Observable<AuthResponse> {
-        // --- CORREÇÃO ---
-        // Garante que o objeto enviado para a API tenha a propriedade 'senha',
-        // que é o que o back-end espera.
         const payload = { email, senha };
         return this.http.post<AuthResponse>(`${this.authApiUrl}/login`, payload).pipe(
-            tap(response => this.setSession(response))
+            tap(response => {
+                localStorage.setItem('authToken', response.token);
+                localStorage.setItem('currentUser', JSON.stringify(response.usuario));
+                // Notifica todos os subscritores sobre o novo utilizador logado
+                this.userSubject.next(response.usuario);
+            })
         );
     }
 
@@ -45,9 +58,8 @@ export class AuthService {
      */
     logout(): void {
         this.http.post(`${this.authApiUrl}/logout`, {}).subscribe({
-            // Limpa a sessão localmente, independentemente do resultado da API,
-            // para garantir que o utilizador seja sempre deslogado da interface.
-            next: () => this.clearSessionAndRedirect(),
+            // Limpa a sessão localmente, independentemente do resultado da API
+            complete: () => this.clearSessionAndRedirect(),
             error: () => this.clearSessionAndRedirect()
         });
     }
@@ -69,18 +81,10 @@ export class AuthService {
     // --- Funções Helper de Gestão de Sessão ---
 
     /**
-     * Retorna os dados do utilizador logado.
+     * Retorna o valor atual do utilizador de forma síncrona.
      */
     getUser(): Usuario | null {
-        if (this.currentUser) {
-            return this.currentUser;
-        }
-        const userJson = localStorage.getItem('currentUser');
-        if (userJson) {
-            this.currentUser = JSON.parse(userJson);
-            return this.currentUser;
-        }
-        return null;
+        return this.userSubject.value;
     }
 
     /**
@@ -97,23 +101,18 @@ export class AuthService {
         return !!this.getToken();
     }
 
-    /**
-     * Função privada para limpar a sessão local e redirecionar para o login.
-     */
     private clearSessionAndRedirect(): void {
         localStorage.removeItem('authToken');
         localStorage.removeItem('currentUser');
-        this.currentUser = null;
+        // Notifica todos os subscritores que o utilizador fez logout (o valor é agora nulo)
+        this.userSubject.next(null);
         this.router.navigate(['/login']);
     }
 
-    /**
-     * Função privada para salvar os dados da sessão após o login.
-     */
     private setSession(authResponse: AuthResponse): void {
         localStorage.setItem('authToken', authResponse.token);
         const userData = JSON.stringify(authResponse.usuario);
         localStorage.setItem('currentUser', userData);
-        this.currentUser = authResponse.usuario;
+        this.userSubject.next(authResponse.usuario);
     }
 }
