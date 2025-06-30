@@ -2,7 +2,7 @@
  * Gerencia o CRUD de Perfis e suas associações com Permissões.
  */
 
-const { Perfil, Permissao } = require('../models');
+const { Perfil, Permissao, sequelize } = require('../models');
 
 const PerfilController = {
 
@@ -46,23 +46,17 @@ const PerfilController = {
         if (!nome) {
             return res.status(400).json({ message: 'O nome do perfil é obrigatório.' });
         }
-
-        // Inicia uma transação
-        const t = await sequelize.transaction();
+        const transacao = await sequelize.transaction();
         try {
-            const novoPerfil = await Perfil.create({ nome }, { transaction: t });
+            const novoPerfil = await Perfil.create({ nome }, { transaction: transacao });
 
             if (permissoes && Array.isArray(permissoes) && permissoes.length > 0) {
-                await novoPerfil.setPermissoes(permissoes, { transaction: t });
+                await novoPerfil.setPermissoes(permissoes, { transaction: transacao });
             }
-
-            // Se tudo correu bem, confirma a transação
-            await t.commit();
+            await transacao.commit();
             return res.status(201).json(novoPerfil);
-
         } catch (err) {
-            // Se algo deu errado, desfaz todas as operações
-            await t.rollback();
+            await transacao.rollback();
             console.error("Erro ao criar perfil:", err);
             return res.status(500).json({ message: 'Erro ao criar perfil.', error: err.message });
         }
@@ -74,27 +68,23 @@ const PerfilController = {
     async updatePerfil(req, res) {
         const { id } = req.params;
         const { nome, permissoes } = req.body;
-
-        const t = await sequelize.transaction();
+        const transacao = await sequelize.transaction();
         try {
-            const perfil = await Perfil.findByPk(id, { transaction: t });
+            const perfil = await Perfil.findByPk(id, { transaction: transacao });
             if (!perfil) {
-                await t.rollback();
+                await transacao.rollback();
                 return res.status(404).json({ message: 'Perfil não encontrado.' });
             }
-
             perfil.nome = nome;
-            await perfil.save({ transaction: t });
+            await perfil.save({ transaction: transacao });
 
             if (permissoes) {
-                await perfil.setPermissoes(permissoes, { transaction: t });
+                await perfil.setPermissoes(permissoes, { transaction: transacao });
             }
-
-            await t.commit();
+            await transacao.commit();
             return res.status(200).json(perfil);
-
         } catch (err) {
-            await t.rollback();
+            await transacao.rollback();
             console.error("Erro ao atualizar perfil:", err);
             return res.status(500).json({ message: 'Erro ao atualizar perfil.', error: err.message });
         }

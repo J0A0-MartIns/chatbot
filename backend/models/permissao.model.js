@@ -13,7 +13,10 @@ module.exports = (sequelize, DataTypes) => {
 
     Permissao.associate = (models) => {
         Permissao.belongsToMany(models.Perfil, {
-            through: 'perfil_permissao',
+            through: {
+                model: models.PerfilPermissao,
+                timestamps: false
+            },
             foreignKey: 'id_permissao',
             otherKey: 'id_perfil',
             as: 'Perfis'
