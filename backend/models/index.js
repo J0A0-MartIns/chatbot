@@ -3,22 +3,17 @@
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
-const process = require('process');
 const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
-// Garante que está a carregar a configuração correta do banco de dados
-const config = require(__dirname + '/../config/config.json')[env];
 const db = {};
 
-let sequelize;
-if (config.use_env_variable) {
-    sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-    sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
+// --- CORREÇÃO: Importa a instância do Sequelize JÁ CONFIGURADA ---
+// Em vez de reconfigurar a conexão, usamos a que você já criou.
+// Certifique-se de que o caminho '../config/database.config.js' está correto.
+const sequelize = require('../config/database.js');
 
-// --- LÓGICA DE CARREGAMENTO DOS MODELOS ---
-// Lê todos os ficheiros na pasta atual, exceto este ficheiro (index.js)
+
+// --- LÓGICA DE CARREGAMENTO DOS MODELOS (permanece a mesma) ---
+// Lê todos os ficheiros na pasta atual
 fs
     .readdirSync(__dirname)
     .filter(file => {
@@ -30,14 +25,13 @@ fs
         );
     })
     .forEach(file => {
-        // Carrega cada ficheiro de modelo e o inicializa com o sequelize
+        // Carrega cada ficheiro de modelo e o inicializa com a instância do sequelize
         const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
         db[model.name] = model;
     });
 
-// --- LÓGICA CRUCIAL DE ASSOCIAÇÃO ---
-// Itera sobre todos os modelos carregados e, se eles tiverem uma função 'associate', executa-a.
-// Isto garante que todas as relações (belongsTo, hasMany, etc.) são criadas.
+// --- LÓGICA DE ASSOCIAÇÃO (permanece a mesma) ---
+// Itera sobre todos os modelos carregados e executa as associações.
 Object.keys(db).forEach(modelName => {
     if (db[modelName].associate) {
         db[modelName].associate(db);
