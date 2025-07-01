@@ -22,7 +22,9 @@
                     </td>
                     <td>
                         <div class="dropdown" [class.open]="openActionIndex === i">
-                            <button (click)="toggleActionSelect(i)" class="dropdown-toggle">Opções</button>
+                            <button (click)="toggleActionSelect(i)" class="dropdown-toggle">Opções
+                                <span class="material-icons">arrow_drop_down</span>
+                            </button>
                             <div class="dropdown-menu" *ngIf="openActionIndex === i">
                                 <button (click)="abrirModalParaEditar(perfil)">Editar</button>
                                 <button (click)="excluirPerfil(perfil.id_perfil)" class="delete-button">Excluir</button>

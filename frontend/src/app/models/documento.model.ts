@@ -21,6 +21,7 @@ export interface Documento {
     id_usuario?: number;
     id_subtema?: number;
 
+    Tema?: Tema;
     Subtema?: Subtema;
     Usuario?: UsuarioSimple;
 }

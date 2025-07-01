@@ -29,6 +29,8 @@ export class BaseComponent implements OnInit {
   idTemaSelecionadoNoModal: number | null = null;
   novoTemaNome: string = '';
   novoSubtemaNome: string = '';
+  openActionIndex: number | null = null;
+  dropdownPosition = { top: '0px', left: '0px' };
 
   constructor(
       private baseService: BaseService,
@@ -85,8 +87,21 @@ export class BaseComponent implements OnInit {
     this.showModal = false;
   }
 
-  toggleActionMenu(index: number): void {
-    this.activeMenuIndex = this.activeMenuIndex === index ? null : index;
+  toggleActionSelect(index: number, event: MouseEvent): void {
+    if (this.openActionIndex === index) {
+      this.openActionIndex = null;
+      return;
+    }
+
+    const button = event.target as HTMLElement;
+    const rect = button.getBoundingClientRect();
+
+    this.dropdownPosition = {
+      top: `${rect.bottom + window.scrollY}px`,
+      left: `${rect.left + window.scrollX - 100}px`
+    };
+
+    this.openActionIndex = index;
   }
 
   async salvarDocumento(): Promise<void> {

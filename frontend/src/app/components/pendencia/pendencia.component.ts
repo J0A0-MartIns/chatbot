@@ -21,6 +21,7 @@ export class PendenciaComponent implements OnInit {
   temas: Tema[] = [];
   subtemasDoTemaSelecionado: Subtema[] = [];
   showModal = false;
+
   docParaAprovar: AprovacaoPayload;
   pendenciaIdAtual: number | null = null;
   perguntaOriginal = '';
@@ -28,6 +29,8 @@ export class PendenciaComponent implements OnInit {
   idTemaSelecionadoNoModal: number | null = null;
   novoTemaNome = '';
   novoSubtemaNome = '';
+  openActionIndex: number | null = null;
+  dropdownPosition = { top: '0px', left: '0px' };
 
   constructor(
       private pendenciaService: PendenciaService,
@@ -45,7 +48,6 @@ export class PendenciaComponent implements OnInit {
   carregarPendencias(): void {
     this.pendenciaService.listarPendencias().subscribe({
       next: (data) => {
-        console.log('Dados de pendências recebidos da API:', data);
         this.pendencias = data;
       },
       error: (err) => {
@@ -113,7 +115,7 @@ export class PendenciaComponent implements OnInit {
       if (this.novoSubtemaNome.trim()) {
         const novoSubtema = await lastValueFrom(this.subtemaService.criarSubtema(this.novoSubtemaNome.trim(), temaIdFinal));
         subtemaIdFinal = novoSubtema.id_subtema;
-      } else if (this.docParaAprovar.id_subtema) {
+      } else if (this.docParaAprovar.id_subtema && this.docParaAprovar.id_subtema > 0) {
         subtemaIdFinal = this.docParaAprovar.id_subtema;
       } else {
         alert('Por favor, selecione ou crie um subtema.');
@@ -152,5 +154,22 @@ export class PendenciaComponent implements OnInit {
       palavras_chave: '',
       id_subtema: 0,
     };
+  }
+
+  toggleActionSelect(index: number, event: MouseEvent): void {
+    if (this.openActionIndex === index) {
+      this.openActionIndex = null;
+      return;
+    }
+
+    const button = event.target as HTMLElement;
+    const rect = button.getBoundingClientRect();
+
+    this.dropdownPosition = {
+      top: `${rect.bottom + window.scrollY}px`,
+      left: `${rect.left + window.scrollX - 100}px`
+    };
+
+    this.openActionIndex = index;
   }
 }

@@ -1,6 +1,6 @@
 <div class="page-container">
+    <h2>Base de Conhecimento</h2>
     <div class="page-content">
-        <h2>Base de Conhecimento</h2>
         <button (click)="abrirModalParaCriar()" class="add-button">Adicionar Conteúdo</button>
 
         <div class="filtros-container">
@@ -24,32 +24,36 @@
                     <td>{{ doc.Tema?.nome || 'N/A' }}</td>
                     <td>{{ doc.Subtema?.nome || 'N/A' }}</td>
                     <td>{{ doc.conteudo.substring(0, 70) }}...</td>
-                    <td class="action-menu-container">
+                    <td class="action-cell">
                         <div class="dropdown-container">
-                            <button class="icon-button" (click)="toggleActionMenu(i)">⋮</button>
-                            <div class="dropdown-menu" *ngIf="activeMenuIndex === i">
-                                <button (click)="abrirModalParaEditar(doc)">Editar</button>
-                                <button (click)="excluirDocumento(doc.id_documento)" class="delete-button">Excluir</button>
-                            </div>
+                            <button class="icon-button" (click)="toggleActionSelect(i, $event)">⋮</button>
                         </div>
                     </td>
                 </tr>
                 <tr *ngIf="docsFiltrados().length === 0">
-                    <td colspan="4" class="empty-table-message">
-                        Nenhum documento encontrado. Clique em "Adicionar Conteúdo" para criar o primeiro.
-                    </td>
+                    <td colspan="5" style="text-align: center;">Nenhum documento encontrado.</td>
                 </tr>
                 </tbody>
             </table>
         </div>
 
+        <div
+                class="dropdown-menu global-dropdown"
+                *ngIf="openActionIndex !== null"
+                [ngStyle]="{ top: dropdownPosition.top, left: dropdownPosition.left }">
+
+            <button (click)="abrirModalParaEditar(documentos[openActionIndex])">Editar</button>
+            <button (click)="excluirDocumento(documentos[openActionIndex].id_documento)" class="btn-excluir">Excluir</button>
+        </div>
+
+        <!-- Modal -->
         <div class="modal" *ngIf="showModal">
             <div class="modal-content">
                 <span class="close" (click)="fecharModal()">&times;</span>
                 <h3>{{ isEditMode ? 'Editar Documento' : 'Adicionar Documento' }}</h3>
 
                 <form (ngSubmit)="salvarDocumento()">
-                    <input type="text" [(ngModel)]="docEmEdicao.titulo" name="titulo" placeholder="Título do Documento" required/>
+                    <input type="text" [(ngModel)]="docEmEdicao.titulo" name="titulo" placeholder="Título do Documento" required />
 
                     <label for="tema-modal">Tema:</label>
                     <select id="tema-modal" name="tema" [(ngModel)]="idTemaSelecionadoNoModal" (change)="onTemaChangeNoModal()" [disabled]="novoTemaNome.trim() !== ''">
@@ -57,7 +61,7 @@
                         <option *ngFor="let tema of temas" [ngValue]="tema.id_tema">{{ tema.nome }}</option>
                     </select>
                     <span class="ou-text">ou</span>
-                    <input type="text" [(ngModel)]="novoTemaNome" name="novoTemaNome" placeholder="Crie um Novo Tema" [disabled]="!!idTemaSelecionadoNoModal">
+                    <input type="text" [(ngModel)]="novoTemaNome" name="novoTemaNome" placeholder="Crie um Novo Tema" [disabled]="!!idTemaSelecionadoNoModal" />
 
                     <label for="subtema-modal">Subtema:</label>
                     <select id="subtema-modal" name="id_subtema" [(ngModel)]="docEmEdicao.id_subtema" [disabled]="novoSubtemaNome.trim() !== '' || !idTemaSelecionadoNoModal">
@@ -65,10 +69,10 @@
                         <option *ngFor="let subtema of subtemasDoTemaSelecionado" [ngValue]="subtema.id_subtema">{{ subtema.nome }}</option>
                     </select>
                     <span class="ou-text">ou</span>
-                    <input type="text" [(ngModel)]="novoSubtemaNome" name="novoSubtemaNome" placeholder="Crie um Novo Subtema" [disabled]="!!docEmEdicao.id_subtema && docEmEdicao.id_subtema > 0">
+                    <input type="text" [(ngModel)]="novoSubtemaNome" name="novoSubtemaNome" placeholder="Crie um Novo Subtema" [disabled]="!!docEmEdicao.id_subtema && docEmEdicao.id_subtema > 0" />
 
                     <textarea [(ngModel)]="docEmEdicao.conteudo" name="conteudo" placeholder="Conteúdo do documento..." required></textarea>
-                    <input type="text" [(ngModel)]="docEmEdicao.palavras_chave" name="palavras_chave" placeholder="Palavras-chave (separadas por vírgula)"/>
+                    <input type="text" [(ngModel)]="docEmEdicao.palavras_chave" name="palavras_chave" placeholder="Palavras-chave (separadas por vírgula)" />
 
                     <div class="modal-buttons">
                         <button type="submit">{{ isEditMode ? 'Atualizar' : 'Adicionar' }}</button>

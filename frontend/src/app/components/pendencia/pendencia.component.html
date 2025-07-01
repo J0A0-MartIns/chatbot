@@ -1,70 +1,81 @@
 <div class="page-container">
-    <h2>Solicitações de Inclusão de Conteúdo</h2>
-    <div class="table-container">
-        <table class="pendencias-tabela">
-            <thead>
-            <tr>
-                <th>Data da Pergunta</th>
-                <th>Pergunta do Usuário</th>
-                <th>Resposta do Bot</th>
-                <th>Usuário</th>
-                <th>Ações</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngFor="let pendencia of pendencias">
-                <td>{{ formatarData(pendencia.data_criacao) }}</td>
-                <td>{{ pendencia.pergunta }}</td>
-                <td>{{ pendencia.resposta }}</td>
-                <td>{{ pendencia.usuario }}</td>
-                <td>
-                    <button (click)="abrirModalParaAprovar(pendencia)" class="btn-aceitar">Aprovar e Criar Documento</button>
-                    <button (click)="rejeitarPendencia(pendencia.id_pendencia)" class="btn-excluir">Rejeitar</button>
-                </td>
-            </tr>
-            <tr *ngIf="pendencias.length === 0">
-                <td colspan="5" style="text-align: center;">Nenhuma pendência encontrada.</td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+    <h2>Inclusão de pendências</h2>
+    <div class="page-content">
+        <div class="table-container">
+            <table class="pendencias-tabela">
+                <thead>
+                <tr>
+                    <th>Data da Pergunta</th>
+                    <th>Pergunta do Utilizador</th>
+                    <th>Resposta do Bot</th>
+                    <th>Utilizador</th>
+                    <th>Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let pendencia of pendencias; let i = index">
+                    <td>{{ formatarData(pendencia.data_criacao) }}</td>
+                    <td>{{ pendencia.pergunta }}</td>
+                    <td>{{ pendencia.resposta }}</td>
+                    <td>{{ pendencia.usuario }}</td>
+                    <td class="action-cell">
+                        <div class="dropdown-container">
+                            <button class="icon-button" (click)="toggleActionSelect(i, $event)">⋮</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr *ngIf="pendencias.length === 0">
+                    <td colspan="5" style="text-align: center;">Nenhuma pendência encontrada.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
 
-    <div class="modal" *ngIf="showModal">
-        <div class="modal-content">
-            <span class="close" (click)="fecharModal()">&times;</span>
-            <h3>Aprovar Pendência e Adicionar à Base</h3>
-            <div class="campo">
-                <label><strong>Pergunta original (resumo):</strong></label>
-                <p class="pergunta-resumo">{{ perguntaResumo }}</p>
+        <div
+                class="dropdown-menu global-dropdown"
+                *ngIf="openActionIndex !== null"
+                [ngStyle]="{ top: dropdownPosition.top, left: dropdownPosition.left }">
+
+            <button (click)="abrirModalParaAprovar(pendencias[openActionIndex])" class="btn-aceitar">Validar</button>
+            <button (click)="rejeitarPendencia(pendencias[openActionIndex].id_pendencia)" class="btn-excluir">Rejeitar</button>
+        </div>
+        <div class="modal" *ngIf="showModal">
+            <div class="modal-content">
+                <span class="close" (click)="fecharModal()">&times;</span>
+                <h3>Aprovar Pendência e Adicionar à Base</h3>
+
+                <form (ngSubmit)="confirmarAprovacao()">
+                    <div class="campo">
+                        <label><strong>Pergunta original (resumo):</strong></label>
+                        <p class="pergunta-resumo">{{ perguntaResumo }}</p>
+                    </div>
+
+                    <input type="text" [(ngModel)]="docParaAprovar.titulo" name="titulo" placeholder="Título do Novo Documento" required />
+
+                    <label for="tema-modal">Tema:</label>
+                    <select id="tema-modal" name="tema" [(ngModel)]="idTemaSelecionadoNoModal" (change)="onTemaChangeNoModal()" [disabled]="novoTemaNome.trim() !== ''">
+                        <option [ngValue]="null">-- Escolha um Tema Existente --</option>
+                        <option *ngFor="let tema of temas" [ngValue]="tema.id_tema">{{ tema.nome }}</option>
+                    </select>
+                    <span class="ou-text">ou</span>
+                    <input type="text" [(ngModel)]="novoTemaNome" name="novoTemaNome" placeholder="Crie um Novo Tema" [disabled]="!!idTemaSelecionadoNoModal" />
+
+                    <label for="subtema-modal">Subtema:</label>
+                    <select id="subtema-modal" name="id_subtema" [(ngModel)]="docParaAprovar.id_subtema" [disabled]="novoSubtemaNome.trim() !== '' || !idTemaSelecionadoNoModal">
+                        <option [ngValue]="0" disabled>-- Escolha um Subtema --</option>
+                        <option *ngFor="let subtema of subtemasDoTemaSelecionado" [ngValue]="subtema.id_subtema">{{ subtema.nome }}</option>
+                    </select>
+                    <span class="ou-text">ou</span>
+                    <input type="text" [(ngModel)]="novoSubtemaNome" name="novoSubtemaNome" placeholder="Crie um Novo Subtema" [disabled]="!!docParaAprovar.id_subtema && docParaAprovar.id_subtema > 0" />
+
+                    <textarea [(ngModel)]="docParaAprovar.conteudo" name="conteudo" placeholder="Conteúdo do novo documento..." required></textarea>
+                    <input type="text" [(ngModel)]="docParaAprovar.palavras_chave" name="palavras_chave" placeholder="Palavras-chave (separadas por vírgula)" />
+
+                    <div class="modal-buttons">
+                        <button type="submit">Adicionar</button>
+                    </div>
+                </form>
             </div>
-
-            <form (ngSubmit)="confirmarAprovacao()">
-                <input type="text" [(ngModel)]="docParaAprovar.titulo" name="titulo" placeholder="Título do Novo Documento" required/>
-
-                <label for="tema-modal">Tema:</label>
-                <select id="tema-modal" name="tema" [(ngModel)]="idTemaSelecionadoNoModal" (change)="onTemaChangeNoModal()" [disabled]="novoTemaNome.trim() !== ''">
-                    <option [ngValue]="null">-- Escolha um Tema Existente --</option>
-                    <option *ngFor="let tema of temas" [ngValue]="tema.id_tema">{{ tema.nome }}</option>
-                </select>
-                <span class="ou-text">ou</span>
-                <input type="text" [(ngModel)]="novoTemaNome" name="novoTemaNome" placeholder="Crie um Novo Tema" [disabled]="!!idTemaSelecionadoNoModal">
-
-                <label for="subtema-modal">Subtema:</label>
-                <select id="subtema-modal" name="id_subtema" [(ngModel)]="docParaAprovar.id_subtema" [disabled]="novoSubtemaNome.trim() !== '' || !idTemaSelecionadoNoModal">
-                    <option [ngValue]="0" disabled>-- Escolha um Subtema --</option>
-                    <option *ngFor="let subtema of subtemasDoTemaSelecionado" [ngValue]="subtema.id_subtema">{{ subtema.nome }}</option>
-                </select>
-                <span class="ou-text">ou</span>
-                <input type="text" [(ngModel)]="novoSubtemaNome" name="novoSubtemaNome" placeholder="Crie um Novo Subtema" [disabled]="!!docParaAprovar.id_subtema && docParaAprovar.id_subtema > 0">
-
-                <textarea [(ngModel)]="docParaAprovar.conteudo" name="conteudo" placeholder="Conteúdo do novo documento..." required></textarea>
-                <input type="text" [(ngModel)]="docParaAprovar.palavras_chave" name="palavras_chave" placeholder="Palavras-chave (separadas por vírgula)"/>
-
-                <div class="modal-buttons">
-                    <button type="submit">Confirmar Aprovação</button>
-                    <button type="button" (click)="fecharModal()">Cancelar</button>
-                </div>
-            </form>
         </div>
     </div>
 </div>

@@ -129,38 +129,9 @@ table tbody tr:hover {
     margin-right: 5px;
 }
 
-.edit-button {
-    background-color: #00412a;
-    color: white;
-}
-
-.edit-button:hover {
-    background-color: #22c55e;
-}
-
-.delete-button {
-    background-color: #ef4444;
-    color: white;
-}
-
-.delete-button:hover {
-    background-color: #b91c1c;
-}
-
-.status-button {
-    background-color: #22c55e;
-    color: white;
-    margin-right: 0;
-}
-
-.status-button:hover {
-    background-color: #16a34a;
-}
-
-
 .modal {
     position: fixed;
-    top: 0;
+    top: 35px;
     left: 0;
     width: 100vw;
     height: 100vh;
@@ -279,19 +250,19 @@ ul li {
     align-items: center;
 }
 
-ul li button {
-    background-color: transparent;
-    border: none;
-    color: #ef4444;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 16px;
-    padding: 0 5px;
-}
+/*ul li button {*/
+/*    background-color: transparent;*/
+/*    border: none;*/
+/*    color: #ef4444;*/
+/*    font-weight: bold;*/
+/*    cursor: pointer;*/
+/*    font-size: 16px;*/
+/*    padding: 0 5px;*/
+/*}*/
 
-ul li button:hover {
-    color: #b91c1c;
-}
+/*ul li button:hover {*/
+/*    color: #b91c1c;*/
+/*}*/
 
 .action-menu-container {
     position: relative;
@@ -334,6 +305,7 @@ ul li button:hover {
     z-index: 9999;
     padding: 6px 0;
     min-width: 120px;
+    color: black;
 }
 
 .dropdown-menu button {
@@ -346,10 +318,49 @@ ul li button:hover {
     font-size: 14px;
     cursor: pointer;
     transition: background 0.2s ease;
+    color: black;
+}
+
+.global-dropdown {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 6px 0;
+    min-width: 120px;
+    z-index: 9999;
+}
+
+/*.global-dropdown button {*/
+/*    display: block;*/
+/*    width: 100%;*/
+/*    background: none;*/
+/*    border: none;*/
+/*    padding: 8px 15px;*/
+/*    text-align: left;*/
+/*    font-size: 14px;*/
+/*    cursor: pointer;*/
+/*    transition: background 0.2s ease;*/
+/*    color: black;*/
+/*}*/
+
+/*.global-dropdown button:hover {*/
+/*    background-color: #f5f5f5;*/
+/*}*/
+
+.btn-excluir {
+    background-color: white;
+    color: black;
+}
+
+.btn-excluir:hover {
+    background-color: #b91c1c;
 }
 
 .dropdown-menu button:hover {
     background-color: #f5f5f5;
+    color: black;
 }
 
 .switch {
@@ -389,10 +400,10 @@ ul li button:hover {
     transition: 0.4s;
 }
 
-input:checked + .slider {
-    background-color: #22c55e;
-}
+/*input:checked + .slider {*/
+/*    background-color: #22c55e;*/
+/*}*/
 
-input:checked + .slider::before {
-    transform: translateX(20px);
-}
+/*input:checked + .slider::before {*/
+/*    transform: translateX(20px);*/
+/*}*/
