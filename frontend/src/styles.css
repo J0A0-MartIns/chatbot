@@ -14,12 +14,12 @@ html, body {
   font-family: Inter, sans-serif;
 }
 
-.page-right {
-  width: 50%;
-  max-width: 300px;
-  max-height: 90vh;
-  object-fit: cover
-}
+/*.page-right {*/
+/*  width: 50%;*/
+/*  max-width: 300px;*/
+/*  max-height: 90vh;*/
+/*  object-fit: cover*/
+/*}*/
 
 html, body {
   height: 100%;
@@ -131,12 +131,6 @@ form a {
 /*  max-height: 65vh;*/
 /*  object-fit: contain;*/
 /*}*/
-
-@media (min-width: 1200px) {
-  .login-right img {
-    max-width: 600px;
-  }
-}
 
 @media (max-width: 768px) {
   .login-container {
