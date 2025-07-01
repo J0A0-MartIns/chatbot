@@ -18,6 +18,10 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: 'usuario_id',
             as: 'Usuario'
         });
+        BaseConhecimento.belongsTo(models.Subtema, {
+            foreignKey: 'id_subtema',
+            as: 'Subtema'
+        });
         BaseConhecimento.belongsToMany(models.AtendimentoChatbot, {
             through: models.BaseChatbotSolucao,
             foreignKey: 'documento_id',
