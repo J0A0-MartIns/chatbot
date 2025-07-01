@@ -11,9 +11,9 @@ const ChatController = {
      */
     async perguntar(req, res) {
         const {pergunta, id_subtema} = req.body;
-        const usuario_id = req.user.id;
+        const id_usuario = req.user.id;
 
-        if (!pergunta || !id_subtema || !usuario_id) {
+        if (!pergunta || !id_subtema || !id_usuario) {
             return res.status(400).json({message: 'Pergunta, subtema e ID do utilizador são obrigatórios.'});
         }
 
@@ -31,7 +31,7 @@ const ChatController = {
                         id_subtema: id_subtema,
                         [Op.or]: condicoesDeBusca
                     },
-                    limit: 5,
+                    limit: 100,
                     order: [['data_criacao', 'DESC']]
                 });
             }
@@ -41,8 +41,8 @@ const ChatController = {
 
             //Faz o registro do atendimento
             const [sessao] = await SessaoUsuario.findOrCreate({
-                where: {usuario_id, data_logout: null},
-                defaults: {usuario_id}
+                where: {id_usuario: id_usuario, data_logout: null},
+                defaults: {id_usuario: id_usuario}
             });
 
             const atendimento = await AtendimentoChatbot.create({

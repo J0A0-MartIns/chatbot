@@ -1,3 +1,6 @@
+/**
+ * models/documento_arquivo.model.js
+ */
 module.exports = (sequelize, DataTypes) => {
     const DocumentoArquivo = sequelize.define('DocumentoArquivo', {
         id_arquivo: {

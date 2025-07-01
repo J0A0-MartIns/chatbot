@@ -124,7 +124,7 @@ button:hover {
     border-radius: 4px;
     margin-top: 4px;
     min-width: 120px;
-    z-index: 1000;
+    z-index: 10000;
     display: flex;
     flex-direction: column;
 }
@@ -189,7 +189,7 @@ form select:focus {
 
 .table-container {
     padding: 20px;
-    overflow-x: auto;
+    overflow-x: visible;
     width: 100%;
 }
 
@@ -199,7 +199,7 @@ table {
     font-family: Arial, sans-serif;
     min-width: 650px;
     border-radius: 8px;
-    overflow: hidden;
+    /*overflow: hidden;*/
     box-shadow: 0 0 10px rgb(0 0 0 / 0.05);
 }
 
@@ -247,15 +247,15 @@ button.delete-button:hover {
 
 .modal-backdrop {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0,0,0,0.4);
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 10000;
+    overflow: hidden;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .modal {
@@ -266,25 +266,55 @@ button.delete-button:hover {
     max-width: 400px;
     box-shadow: 0 0 25px rgba(0,0,0,0.3);
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+
+.modal.large {
+    max-width: 90%;
+    width: 800px;
+    max-height: 90vh;
+    overflow: hidden;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .modal h3 {
-    margin-top: 0;
+    margin: 0 0 15px 0;
     color: #007d3d;
     font-weight: 700;
-    margin-bottom: 20px;
     font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.modal form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 30px;
+    align-items: stretch;
+    max-height: 90vh;
 }
 
 .modal form input,
 .modal form select {
-    width: 100%;
-    padding: 10px 14px;
-    margin-bottom: 15px;
-    font-size: 1rem;
+    height: 28px;
+    padding: 4px 10px;
+    font-size: 0.9rem;
     border-radius: 6px;
     border: 1.5px solid #ccc;
     transition: border-color 0.3s ease;
+    box-sizing: border-box;
+    resize: none;
+    overflow: hidden;
+    max-height: 8vh;
 }
 
 .modal form input:focus,
@@ -307,10 +337,11 @@ button.delete-button:hover {
     border: none;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    flex-shrink: 0;
 }
 
 .modal-buttons button[type="submit"] {
-    background-color: #00A651;
+    background-color: #00a651;
     color: white;
 }
 
@@ -327,78 +358,69 @@ button.delete-button:hover {
     background-color: #00412a;
 }
 
-.modal.large {
-    max-width: 90%;
-    width: 800px;
-    max-height: 90vh;
-    overflow: hidden;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.25);
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
 .pending-table-wrapper {
     overflow-y: auto;
     max-height: 300px;
     border: 1px solid #ddd;
     border-radius: 8px;
+    box-sizing: border-box;
 }
 
 .pending-table-wrapper table {
     width: 100%;
     border-collapse: collapse;
+    font-family: Arial, sans-serif;
 }
 
-.pending-table-wrapper table th {
+.pending-table-wrapper thead tr {
     background-color: #007d3d;
+    color: white;
 }
+
 .pending-table-wrapper th,
 .pending-table-wrapper td {
     padding: 10px 12px;
-    text-align: left;
     border-bottom: 1px solid #eee;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 1rem;
 }
 
 .pending-table-wrapper th {
-    background-color: #f5f5f5;
+    background-color: #007d3d;
+    color: black;
     font-weight: bold;
 }
 
-.action-buttons {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.btn {
-    background-color: #007d3d;
+.btn-approve {
+    background-color: #4caf50;
     color: white;
     border: none;
-    padding: 8px 14px;
+    padding: 6px 14px;
     border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+    margin-right: 8px;
 }
 
-.btn.small {
-    padding: 6px 10px;
-    font-size: 0.85rem;
+.btn-approve:hover {
+    background-color: #388e3c;
 }
 
-.btn.approve {
-    background-color: #4caf50;
-}
-
-.btn.reject {
+.btn-reject {
     background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
 }
 
-.btn:hover {
-    filter: brightness(1.1);
+.btn-reject:hover {
+    background-color: #d32f2f;
 }
 
 .badge {
@@ -408,116 +430,48 @@ button.delete-button:hover {
     padding: 2px 8px;
     font-size: 0.8rem;
     margin-left: 8px;
+    user-select: none;
 }
 
-
 @media (max-width: 780px) {
-    h2 {
-        padding-bottom: 20px;
-        font-size: 1.6rem;
+    .modal {
+        max-width: 95%;
+        padding: 15px 20px;
     }
-    .page-container {
-        flex-direction: column;
-        height: auto;
-        padding: 20px;
-    }
-    .page-left {
-        padding: 20px;
-        width: 100%;
-    }
-
-    .modal-backdrop {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.4);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 10000;
-        padding: 20px;
-        box-sizing: border-box;
-    }
-
-    form {
-        flex-direction: column;
-        gap: 12px;
-    }
-    form input[type="text"],
-    form input[type="email"],
-    form select,
-    form button {
-        flex: 1 1 100%;
-        min-width: unset;
-    }
-    table {
-        min-width: 100%;
-        font-size: 0.95rem;
-    }
-
     .modal.large {
         width: 95%;
-        padding: 15px;
+        max-width: 95%;
+        padding: 15px 20px;
+        max-height: 80vh;
     }
-
-    .action-buttons {
+    .modal form {
         flex-direction: column;
-        gap: 6px;
+        max-height: unset;
+    }
+    .modal-buttons {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .modal-buttons button {
+        flex: 1 1 45%;
+        max-width: 150px;
+        margin: 6px 4px;
     }
 
     .pending-table-wrapper {
         max-height: 50vh;
     }
-
-    .pending-table-wrapper th {
-        background-color: #007d3d;
-    }
-    .pending-table-wrapper table,
-    .pending-table-wrapper thead,
-    .pending-table-wrapper tbody,
-    .pending-table-wrapper td,
-    .pending-table-wrapper tr {
-        display: block;
-        width: 100%;
-    }
-
-    .pending-table-wrapper tr {
-        margin-bottom: 12px;
-        border-bottom: 1px solid #ccc;
-        padding-bottom: 8px;
-    }
-
-    .pending-table-wrapper td {
-        text-align: right;
-        padding-left: 50%;
-        position: relative;
-    }
-
-    .pending-table-wrapper td::before,
-    .pending-table-wrapper th::before {
-        position: absolute;
-        left: 10px;
-        width: 45%;
-        white-space: nowrap;
-        font-weight: bold;
-        text-align: left;
-    }
-
-    .pending-table-wrapper td:nth-of-type(1)::before { content: "Nome"; }
-    .pending-table-wrapper td:nth-of-type(2)::before { content: "Email"; }
-    .pending-table-wrapper td:nth-of-type(3)::before { content: "Cargo"; }
-    .pending-table-wrapper td:nth-of-type(4)::before { content: "Ações"; }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 480px) {
+    .modal-buttons button {
+        flex: 1 1 100%;
+        max-width: unset;
+        margin: 6px 0;
+    }
 
-    form button {
-        padding: 10px;
-        font-size: 1rem;
-    }
-    table {
-        min-width: 500px;
-    }
-    th, td {
-        padding: 10px 12px;
+    .pending-table-wrapper th,
+    .pending-table-wrapper td {
+        font-size: 0.9rem;
     }
 }

@@ -10,14 +10,14 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: DataTypes.NOW
         },
         data_logout: DataTypes.DATE,
-        usuario_id: DataTypes.INTEGER
+        id_usuario: DataTypes.INTEGER
     }, {
         tableName: 'sessao_usuario',
         timestamps: false
     });
 
     SessaoUsuario.associate = (models) => {
-        SessaoUsuario.belongsTo(models.Usuario, { foreignKey: 'usuario_id' });
+        SessaoUsuario.belongsTo(models.Usuario, { foreignKey: 'id_usuario' });
         SessaoUsuario.hasMany(models.AtendimentoChatbot, { foreignKey: 'id_sessao' });
     };
 

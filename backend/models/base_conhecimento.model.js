@@ -1,13 +1,26 @@
+/**
+ * models/base_conhecimento.model.js
+ */
 module.exports = (sequelize, DataTypes) => {
     const BaseConhecimento = sequelize.define('BaseConhecimento', {
-        id_documento: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+        id_documento: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
         titulo: DataTypes.STRING,
         conteudo: DataTypes.TEXT,
         palavras_chave: DataTypes.STRING,
-        data_criacao: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-        ativo: { type: DataTypes.BOOLEAN, defaultValue: true },
-        usuario_id: DataTypes.INTEGER,
-        id_subtema: DataTypes.INTEGER
+        data_criacao: {
+            type: DataTypes.DATE,
+            defaultValue: DataTypes.NOW
+        },
+        ativo: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true
+        },
+        id_subtema: DataTypes.INTEGER,
+        id_usuario: DataTypes.INTEGER
     }, {
         tableName: 'base_conhecimento',
         timestamps: false
@@ -15,24 +28,22 @@ module.exports = (sequelize, DataTypes) => {
 
     BaseConhecimento.associate = (models) => {
         BaseConhecimento.belongsTo(models.Usuario, {
-            foreignKey: 'usuario_id',
+            foreignKey: 'id_usuario',
             as: 'Usuario'
         });
         BaseConhecimento.belongsTo(models.Subtema, {
             foreignKey: 'id_subtema',
             as: 'Subtema'
         });
+        BaseConhecimento.hasMany(models.DocumentoArquivo, {
+            foreignKey: 'id_documento',
+            as: 'DocumentoArquivos'
+        });
+
         BaseConhecimento.belongsToMany(models.AtendimentoChatbot, {
             through: models.BaseChatbotSolucao,
-            foreignKey: 'documento_id',
-            otherKey: 'atendimento_id'
-        });
-        // BaseConhecimento.hasMany(models.DocumentoArquivo, {
-        //     foreignKey: 'id_documento',
-        //     as: 'DocumentoArquivos'
-        // });
-        BaseConhecimento.hasMany(models.BaseChatbotSolucao, {
-            foreignKey: 'id_documento'
+            foreignKey: 'id_documento',
+            otherKey: 'id_atendimento'
         });
     };
 

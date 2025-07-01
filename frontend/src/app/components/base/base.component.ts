@@ -160,7 +160,7 @@ export class BaseComponent implements OnInit {
       conteudo: '',
       palavras_chave: '',
       ativo: true,
-      usuario_id: user?.id_usuario,
+      id_usuario: user?.id_usuario,
       id_subtema: 0,
     };
   }

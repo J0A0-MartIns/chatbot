@@ -18,11 +18,9 @@ export interface Documento {
     palavras_chave: string;
     ativo: boolean;
     data_criacao?: string;
-
-    usuario_id?: number;
+    id_usuario?: number;
     id_subtema?: number;
 
-    Tema?: Tema;
     Subtema?: Subtema;
     Usuario?: UsuarioSimple;
 }

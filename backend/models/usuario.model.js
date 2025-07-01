@@ -28,8 +28,8 @@ module.exports = (sequelize, DataTypes) => {
             as: 'Perfil'
         });
 
-        Usuario.hasMany(models.BaseConhecimento, { foreignKey: 'usuario_id' });
-        Usuario.hasMany(models.SessaoUsuario, { foreignKey: 'usuario_id' });
+        Usuario.hasMany(models.BaseConhecimento, { foreignKey: 'id_usuario' });
+        Usuario.hasMany(models.SessaoUsuario, { foreignKey: 'id_usuario' });
     };
 
     return Usuario;
