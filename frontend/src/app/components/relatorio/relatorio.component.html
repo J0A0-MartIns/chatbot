@@ -1,64 +1,85 @@
 <div class="relatorios-container">
-    <h2>Relatórios de Interação</h2>
+    <h2>Relatórios</h2>
 
-    <div class="relatorio-bloco filtros-container">
-        <h3>Filtros</h3>
-        <label for="filtroTema">Tema:</label>
-        <select id="filtroTema" [(ngModel)]="filtroTema">
-            <option value="">Todos</option>
-            <option *ngFor="let tema of temasUnicos" [value]="tema">{{ tema }}</option>
-        </select>
-
-        <label for="filtroMicrotema">Subtema:</label>
-        <select id="filtroMicrotema" [(ngModel)]="filtroSubtema">
-            <option value="">Todos</option>
-            <option *ngFor="let microtema of microtemasUnicos" [value]="microtema">{{ microtema }}</option>
-        </select>
-
-        <label for="dataInicio">De:</label>
-        <input type="date" id="dataInicio" [(ngModel)]="dataInicio" name="dataInicio">
-
-        <label for="dataFim">Até:</label>
-        <input type="date" id="dataFim" [(ngModel)]="dataFim" name="dataFim">
-
-        <div class="botoes-filtro">
-            <button (click)="aplicarFiltros()" class="botao-filtrar">
-                <i class="material-icons">filter_list</i>Aplicar Filtros
-            </button>
-            <button (click)="limparFiltros()" class="botao-limpar">
-                <i class="material-icons">clear</i>Limpar Filtros
-            </button>
-        </div>
-    </div>
-
+    <!-- Bloco 1: Tabela de Interações -->
     <div class="relatorio-bloco">
-        <h3>Resultados</h3>
+        <h3>Log de Interações do Chat</h3>
+        <div class="filtros-container">
+            <label for="filtroTema">Filtrar por Tema:</label>
+            <select id="filtroTema" [(ngModel)]="filtroTemaId" (change)="onTemaChange()">
+                <option [ngValue]="null">Todos os Temas</option>
+                <option *ngFor="let tema of temasDisponiveis" [value]="tema.id_tema">{{ tema.nome }}</option>
+            </select>
+
+            <label for="filtroSubtema">Filtrar por Subtema:</label>
+            <select id="filtroSubtema" [(ngModel)]="filtroSubtemaId" [disabled]="!filtroTemaId" (change)="aplicarFiltroInteracoes()">
+                <option [ngValue]="null">Todos os Subtemas</option>
+                <option *ngFor="let subtema of subtemasDisponiveis" [value]="subtema.id_subtema">{{ subtema.nome }}</option>
+            </select>
+        </div>
+
         <div class="tabela-container">
             <table>
                 <thead>
                 <tr>
                     <th>Data/Hora</th>
+                    <th>Utilizador</th>
                     <th>Pergunta</th>
-                    <th>Resposta do Bot</th>
                     <th>Tema</th>
                     <th>Subtema</th>
                     <th>Avaliação</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr *ngFor="let item of registrosFiltrados">
+                <tr *ngFor="let item of interacoes">
                     <td>{{ formatarData(item.data_atendimento) }}</td>
-                    <td>{{ item.texto_entrada_usuario }}</td>
-                    <td>{{ item.resposta_gerada }}</td>
-                    <td>{{ item.tema || 'N/A' }}</td>
-                    <td>{{ item.sub_tema || 'N/A' }}</td>
+                    <td>{{ item.usuario }}</td>
+                    <td>{{ item.pergunta_usuario }}</td>
+                    <td>{{ item.tema }}</td>
+                    <td>{{ item.sub_tema }}</td>
                     <td>{{ formatarAvaliacao(item.avaliacao) }}</td>
                 </tr>
-                <tr *ngIf="registrosFiltrados.length === 0">
-                    <td colspan="6" class="mensagem-sem-dados">Nenhum registro encontrado para os filtros selecionados.</td>
+                <tr *ngIf="interacoes.length === 0">
+                    <td colspan="6" class="mensagem-sem-dados">Nenhuma interação encontrada para os filtros selecionados.</td>
                 </tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Bloco 2: Tabela de Uso de Subtemas -->
+    <div class="relatorio-bloco">
+        <h3>Uso de Subtemas por Período</h3>
+        <div class="filtros-container">
+            <label for="dataInicio">Data Início:</label>
+            <input type="date" id="dataInicio" [(ngModel)]="dataInicio" name="dataInicio">
+
+            <label for="dataFim">Data Fim:</label>
+            <input type="date" id="dataFim" [(ngModel)]="dataFim" name="dataFim">
+
+            <button (click)="aplicarFiltroPeriodo()" class="botao-filtrar">
+                <i class="material-icons">filter_list</i>Filtrar por Período
+            </button>
+        </div>
+
+        <div class="tabela-container" *ngIf="usoSubtemas.length > 0">
+            <table>
+                <thead>
+                <tr>
+                    <th>Subtema</th>
+                    <th>Nº de Utilizações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let item of usoSubtemas">
+                    <td>{{ item.nome }}</td>
+                    <td>{{ item.count }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div *ngIf="usoSubtemas.length === 0" class="mensagem-sem-dados">
+            Não existem dados de utilização para o período selecionado.
         </div>
     </div>
 </div>

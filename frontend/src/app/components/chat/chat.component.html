@@ -39,7 +39,7 @@
                     <button (click)="avaliar(false)" class="btn-nao-util">Não</button>
                 </div>
                 <div *ngIf="etapaFeedback === 'comentario'" class="feedback-negativo-form">
-                    <label for="comentario">Por favor, diga-nos o que estava a procurar para que possamos melhorar:</label>
+                    <label for="comentario">Por favor, diga-nos o que estava procurando para que possamos avaliar:</label>
                     <textarea id="comentario" [(ngModel)]="feedbackComentario" name="comentario" rows="3"></textarea>
                     <button (click)="enviarFeedbackNegativo()">Enviar Feedback</button>
                 </div>
@@ -54,7 +54,7 @@
             </div>
 
             <p *ngIf="etapaFeedback === 'finalizado'" class="feedback-agradecimento">
-                <strong>Obrigado pelo seu feedback!</strong>
+                <strong>Obrigado!</strong>
             </p>
         </div>
     </div>

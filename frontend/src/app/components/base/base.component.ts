@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, HostListener, OnInit} from '@angular/core';
 import { lastValueFrom } from 'rxjs';
 import { BaseService } from '../../services/base.service';
 import { Documento } from '../../models/documento.model';
@@ -46,6 +46,15 @@ export class BaseComponent implements OnInit {
     this.carregarTemas();
   }
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (target.closest('.icon-button') || target.closest('.global-dropdown')) {
+      return;
+    }
+    this.openActionIndex = null;
+  }
+
   carregarDocumentos(): void {
     this.baseService.getDocumentos().subscribe(data => this.documentos = data);
   }
@@ -72,6 +81,7 @@ export class BaseComponent implements OnInit {
   }
 
   abrirModalParaEditar(doc: Documento): void {
+    this.openActionIndex = null;
     this.isEditMode = true;
     this.docEmEdicao = JSON.parse(JSON.stringify(doc));
     this.novoTemaNome = '';
@@ -162,6 +172,7 @@ export class BaseComponent implements OnInit {
   }
 
   excluirDocumento(id: number | undefined): void {
+    this.openActionIndex = null;
     if (!id) return;
     if (confirm('Tem certeza de que deseja excluir este documento?')) {
       this.baseService.excluirDocumento(id).subscribe(() => this.carregarDocumentos());

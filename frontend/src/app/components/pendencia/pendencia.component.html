@@ -46,7 +46,7 @@
 
                 <form (ngSubmit)="confirmarAprovacao()">
                     <div class="campo">
-                        <label><strong>Pergunta original (resumo):</strong></label>
+                        <label><strong>Pergunta original:</strong></label>
                         <p class="pergunta-resumo">{{ perguntaResumo }}</p>
                     </div>
 
@@ -66,7 +66,7 @@
                         <option *ngFor="let subtema of subtemasDoTemaSelecionado" [ngValue]="subtema.id_subtema">{{ subtema.nome }}</option>
                     </select>
                     <span class="ou-text">ou</span>
-                    <input type="text" [(ngModel)]="novoSubtemaNome" name="novoSubtemaNome" placeholder="Crie um Novo Subtema" [disabled]="!!docParaAprovar.id_subtema && docParaAprovar.id_subtema > 0" />
+                    <input type="text" [(ngModel)]="novoSubtemaNome" name="novoSubtemaNome" placeholder="Crie um Novo Subtema" [disabled]="docParaAprovar.id_subtema > 0" />
 
                     <textarea [(ngModel)]="docParaAprovar.conteudo" name="conteudo" placeholder="Conteúdo do novo documento..." required></textarea>
                     <input type="text" [(ngModel)]="docParaAprovar.palavras_chave" name="palavras_chave" placeholder="Palavras-chave (separadas por vírgula)" />

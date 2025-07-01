@@ -43,7 +43,8 @@ module.exports = (sequelize, DataTypes) => {
         BaseConhecimento.belongsToMany(models.AtendimentoChatbot, {
             through: models.BaseChatbotSolucao,
             foreignKey: 'id_documento',
-            otherKey: 'id_atendimento'
+            otherKey: 'id_atendimento',
+            as: 'AtendimentoChatbots'
         });
     };
 

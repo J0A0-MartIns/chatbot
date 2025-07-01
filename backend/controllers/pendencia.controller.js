@@ -4,9 +4,12 @@
 
 const {
     Pendencia,
+    Feedback,
     AtendimentoChatbot,
     SessaoUsuario,
     Usuario,
+    BaseConhecimento,
+    sequelize
 } = require('../models');
 
 const PendenciaController = {
@@ -32,7 +35,6 @@ const PendenciaController = {
                 order: [['createdAt', 'DESC']]
             });
 
-            //Formata a resposta
             const resultado = pendencias.map(p => {
                 if (!p.AtendimentoChatbot) return null;
                 return {
@@ -52,12 +54,74 @@ const PendenciaController = {
         }
     },
 
+    /**
+     * @description Aprova uma pendência, criando um novo documento na Base de Conhecimento
+     * e apagando a pendência e o feedback associado de forma atómica.
+     */
     async aprovarPendencia(req, res) {
-        //adicionar
+        const { id } = req.params; // ID da pendência
+        const { titulo, conteudo, palavras_chave, id_subtema } = req.body;
+        const usuario_id = req.user.id; // ID do admin que está a aprovar
+
+        const t = await sequelize.transaction();
+        try {
+            const pendencia = await Pendencia.findByPk(id, { transaction: t });
+            if (!pendencia) {
+                await t.rollback();
+                return res.status(404).json({ message: 'Pendência não encontrada.' });
+            }
+
+            //Cria o novo documento
+            await BaseConhecimento.create({
+                titulo,
+                conteudo,
+                palavras_chave,
+                id_subtema,
+                usuario_id,
+                ativo: true
+            }, { transaction: t });
+
+            const idFeedback = pendencia.id_feedback;
+            await pendencia.destroy({ transaction: t });
+            if (idFeedback) {
+                await Feedback.destroy({ where: { id_feedback: idFeedback }, transaction: t });
+            }
+
+            await t.commit();
+            return res.status(200).json({ message: 'Pendência aprovada e adicionada à base de conhecimento.' });
+        } catch (err) {
+            await t.rollback();
+            console.error("Erro ao aprovar pendência:", err);
+            return res.status(500).json({ message: 'Erro ao aprovar pendência.', error: err.message });
+        }
     },
 
+    /**
+     * @description Exclui uma pendência.
+     */
     async excluirPendencia(req, res) {
-        //adicionar
+        const { id } = req.params;
+        const t = await sequelize.transaction();
+        try {
+            const pendencia = await Pendencia.findByPk(id, { transaction: t });
+            if (!pendencia) {
+                await t.rollback();
+                return res.status(404).json({ message: 'Pendência não encontrada.' });
+            }
+
+            const idFeedback = pendencia.id_feedback;
+            await pendencia.destroy({ transaction: t });
+            if (idFeedback) {
+                await Feedback.destroy({ where: { id_feedback: idFeedback }, transaction: t });
+            }
+
+            await t.commit();
+            return res.status(204).send();
+        } catch (err) {
+            await t.rollback();
+            console.error("Erro ao excluir pendência:", err);
+            return res.status(500).json({ message: 'Erro ao excluir pendência.', error: err.message });
+        }
     }
 };
 

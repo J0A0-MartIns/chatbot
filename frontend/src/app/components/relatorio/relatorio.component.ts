@@ -1,71 +1,69 @@
 import { Component, OnInit } from '@angular/core';
-import { RelatorioService, RelatorioItem } from '../../services/relatorio.service';
-import {FormsModule} from "@angular/forms";
-import {NgForOf, NgIf} from "@angular/common";
+import { RelatorioService, RelatorioInteracao, RelatorioUsoSubtema } from '../../services/relatorio.service';
+import { TemaService } from '../../services/tema.service';
+import { SubtemaService } from '../../services/subtema.service';
+import { Tema } from '../../models/tema.model';
+import { Subtema } from '../../models/subtema.model';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-relatorio',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './relatorio.component.html',
-  imports: [
-    FormsModule,
-    NgForOf,
-    NgIf
-  ],
   styleUrls: ['./relatorio.component.css']
 })
 export class RelatorioComponent implements OnInit {
-  // Estado dos filtros
-  filtroTema = '';
-  filtroSubtema = '';
+  interacoes: RelatorioInteracao[] = [];
+  filtroTemaId: number | null = null;
+  filtroSubtemaId: number | null = null;
+  temasDisponiveis: Tema[] = [];
+  subtemasDisponiveis: Subtema[] = [];
+
+  usoSubtemas: RelatorioUsoSubtema[] = [];
   dataInicio = '';
   dataFim = '';
 
-  // Dados
-  todosRegistros: RelatorioItem[] = [];
-  registrosFiltrados: RelatorioItem[] = [];
-  temasUnicos: string[] = [];
-  microtemasUnicos: string[] = [];
-
-  constructor(private reportService: RelatorioService) {}
+  constructor(
+      private relatorioService: RelatorioService,
+      private temaService: TemaService,
+      private subtemaService: SubtemaService
+  ) {}
 
   ngOnInit(): void {
-    this.carregarDadosIniciais();
+    this.aplicarFiltroInteracoes();
+    this.aplicarFiltroPeriodo();
+    this.carregarFiltros();
   }
 
-  carregarDadosIniciais(): void {
-    this.reportService.buscarRelatorio({}).subscribe(data => {
-      this.todosRegistros = data;
-      this.registrosFiltrados = data;
-      this.extrairOpcoesDeFiltro();
-    });
+  carregarFiltros(): void {
+    this.temaService.getTemas().subscribe(data => this.temasDisponiveis = data);
   }
 
-  extrairOpcoesDeFiltro(): void {
-    const temas = new Set(this.todosRegistros.map(r => r.tema).filter(Boolean) as string[]);
-    const subtemas = new Set(this.todosRegistros.map(r => r.sub_tema).filter(Boolean) as string[]);
-    this.temasUnicos = Array.from(temas);
-    this.microtemasUnicos = Array.from(subtemas);
+  onTemaChange(): void {
+    this.filtroSubtemaId = null;
+    this.subtemasDisponiveis = [];
+    if (this.filtroTemaId) {
+      this.subtemaService.getSubtemasPorTema(this.filtroTemaId).subscribe(data => this.subtemasDisponiveis = data);
+    }
+    this.aplicarFiltroInteracoes(); // Filtra automaticamente ao mudar o tema
   }
 
-  aplicarFiltros(): void {
+  aplicarFiltroInteracoes(): void {
     const filtros = {
-      tema: this.filtroTema || undefined,
-      subtema: this.filtroSubtema || undefined,
+      id_tema: this.filtroTemaId || undefined,
+      id_subtema: this.filtroSubtemaId || undefined
+    };
+    this.relatorioService.getRelatorioInteracoes(filtros).subscribe(data => this.interacoes = data);
+  }
+
+  aplicarFiltroPeriodo(): void {
+    const filtros = {
       dataInicio: this.dataInicio || undefined,
       dataFim: this.dataFim || undefined
     };
-
-    this.reportService.buscarRelatorio(filtros).subscribe(data => {
-      this.registrosFiltrados = data;
-    });
-  }
-
-  limparFiltros(): void {
-    this.filtroTema = '';
-    this.filtroSubtema = '';
-    this.dataInicio = '';
-    this.dataFim = '';
-    this.aplicarFiltros();
+    this.relatorioService.getRelatorioUsoSubtema(filtros).subscribe(data => this.usoSubtemas = data);
   }
 
   formatarData(data: string): string {
@@ -74,8 +72,8 @@ export class RelatorioComponent implements OnInit {
   }
 
   formatarAvaliacao(avaliacao: boolean | null): string {
-    if (avaliacao === true) return 'Positiva';
-    if (avaliacao === false) return 'Negativa';
+    if (avaliacao === true) return 'Útil';
+    if (avaliacao === false) return 'Não Útil';
     return 'Sem avaliação';
   }
 }

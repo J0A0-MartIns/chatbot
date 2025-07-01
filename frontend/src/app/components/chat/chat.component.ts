@@ -112,7 +112,7 @@ export class ChatComponent implements OnInit {
     if (!this.idAtendimentoAtual) return;
     this.chatService.criarPendenciaDireta(this.idAtendimentoAtual).subscribe(() => {
       this.etapaFeedback = 'finalizado';
-      this.respostaGenerica = 'Obrigado! A sua dúvida foi enviada como uma sugestão para a nossa equipa.';
+      this.respostaGenerica = 'Obrigado! A sua dúvida foi enviada para avaliação.';
     });
   }
 

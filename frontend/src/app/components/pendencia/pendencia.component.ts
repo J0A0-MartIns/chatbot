@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, HostListener, OnInit} from '@angular/core';
 import { lastValueFrom } from 'rxjs';
 import { PendenciaService } from '../../services/pendencia.service';
 import { Pendencia, AprovacaoPayload } from '../../models/pendencia.model';
@@ -16,6 +16,8 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './pendencia.component.html',
   styleUrls: ['./pendencia.component.css']
 })
+
+
 export class PendenciaComponent implements OnInit {
   pendencias: Pendencia[] = [];
   temas: Tema[] = [];
@@ -45,15 +47,19 @@ export class PendenciaComponent implements OnInit {
     this.carregarTemas();
   }
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (target.closest('.icon-button') || target.closest('.global-dropdown')) {
+      return;
+    }
+    this.openActionIndex = null;
+  }
+
   carregarPendencias(): void {
     this.pendenciaService.listarPendencias().subscribe({
-      next: (data) => {
-        this.pendencias = data;
-      },
-      error: (err) => {
-        console.error("ERRO ao carregar pendências:", err);
-        alert("Não foi possível carregar as solicitações. Verifique a consola para mais detalhes.");
-      }
+      next: (data) => this.pendencias = data,
+      error: (err) => console.error("ERRO ao carregar pendências:", err)
     });
   }
 
@@ -63,9 +69,7 @@ export class PendenciaComponent implements OnInit {
 
   onTemaChangeNoModal(): void {
     this.subtemasDoTemaSelecionado = [];
-    if (this.docParaAprovar) {
-      this.docParaAprovar.id_subtema = 0;
-    }
+    if (this.docParaAprovar) this.docParaAprovar.id_subtema = 0;
     if (this.idTemaSelecionadoNoModal) {
       this.subtemaService.getSubtemasPorTema(this.idTemaSelecionadoNoModal)
           .subscribe(data => this.subtemasDoTemaSelecionado = data);
@@ -73,12 +77,10 @@ export class PendenciaComponent implements OnInit {
   }
 
   abrirModalParaAprovar(pendencia: Pendencia): void {
+    this.openActionIndex = null;
     this.pendenciaIdAtual = pendencia.id_pendencia;
     this.perguntaOriginal = pendencia.pergunta;
-    this.perguntaResumo = pendencia.pergunta.length > 150
-        ? pendencia.pergunta.substring(0, 150) + '...'
-        : pendencia.pergunta;
-
+    this.perguntaResumo = pendencia.pergunta.length > 150 ? `${pendencia.pergunta.substring(0, 150)}...` : pendencia.pergunta;
     this.docParaAprovar = {
       titulo: pendencia.pergunta,
       conteudo: pendencia.resposta,
@@ -93,6 +95,7 @@ export class PendenciaComponent implements OnInit {
   }
 
   fecharModal(): void {
+    this.openActionIndex = null;
     this.showModal = false;
   }
 
@@ -148,28 +151,21 @@ export class PendenciaComponent implements OnInit {
   }
 
   private criarPayloadVazio(): AprovacaoPayload {
-    return {
-      titulo: '',
-      conteudo: '',
-      palavras_chave: '',
-      id_subtema: 0,
-    };
+    return { titulo: '', conteudo: '', palavras_chave: '', id_subtema: 0 };
   }
 
   toggleActionSelect(index: number, event: MouseEvent): void {
+    event.stopPropagation();
     if (this.openActionIndex === index) {
       this.openActionIndex = null;
-      return;
+    } else {
+      const button = event.target as HTMLElement;
+      const rect = button.getBoundingClientRect();
+      this.dropdownPosition = {
+        top: `${rect.bottom + window.scrollY}px`,
+        left: `${rect.left + window.scrollX - 100}px`
+      };
+      this.openActionIndex = index;
     }
-
-    const button = event.target as HTMLElement;
-    const rect = button.getBoundingClientRect();
-
-    this.dropdownPosition = {
-      top: `${rect.bottom + window.scrollY}px`,
-      left: `${rect.left + window.scrollX - 100}px`
-    };
-
-    this.openActionIndex = index;
   }
 }
