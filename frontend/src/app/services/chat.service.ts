@@ -4,24 +4,21 @@ import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 import {Documento} from "../models/documento.model";
 
-// Interface para o que enviamos ao fazer uma pergunta
 export interface PerguntaPayload {
     pergunta: string;
     id_subtema: number;
 }
 
-// CORREÇÃO: A resposta agora contém um array de soluções
 export interface RespostaChat {
     id_atendimento: number;
     solucoes: Documento[];
     encontrado: boolean;
 }
 
-// Interface para o que enviamos ao dar um feedback
 export interface FeedbackPayload {
     id_atendimento: number;
-    avaliacao: boolean; // true = útil, false = não útil
-    comentario?: string; // O comentário é opcional
+    avaliacao: boolean;
+    comentario?: string;
 }
 
 @Injectable({
@@ -32,23 +29,14 @@ export class ChatService {
 
     constructor(private http: HttpClient) {}
 
-    /**
-     * Envia a pergunta do utilizador para a API.
-     */
     perguntar(payload: PerguntaPayload): Observable<RespostaChat> {
         return this.http.post<RespostaChat>(`${this.apiUrl}/perguntar`, payload);
     }
 
-    /**
-     * Envia o feedback do utilizador. O back-end criará a pendência se a avaliação for negativa.
-     */
     enviarFeedback(payload: FeedbackPayload): Observable<any> {
         return this.http.post(`${this.apiUrl}/feedback`, payload);
     }
 
-    /**
-     * Cria uma pendência diretamente quando o bot não encontra uma resposta.
-     */
     criarPendenciaDireta(id_atendimento: number): Observable<any> {
         return this.http.post(`${this.apiUrl}/pendencia`, { id_atendimento });
     }

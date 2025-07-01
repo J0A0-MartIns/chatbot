@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { environment } from '../environments/environment';
 import { Usuario } from '../models/usuario.model';
 
-// Interface para a resposta do login
+
 export interface AuthResponse {
     token: string;
     usuario: Usuario;
@@ -18,16 +18,16 @@ export class AuthService {
     private authApiUrl = `${environment.apiUrl}/auth`;
     private passwordApiUrl = `${environment.apiUrl}/password`;
 
-    // BehaviorSubject guarda o estado atual do utilizador e notifica os subscritores.
+    //BehaviorSubject guarda o estado atual do usuário e notifica os subscritores.
     private userSubject = new BehaviorSubject<Usuario | null>(null);
-    // Os componentes irão "escutar" este Observable público
+    //Os componentes irão escutar este Observable público
     public user$ = this.userSubject.asObservable();
 
     constructor(
         private http: HttpClient,
         private router: Router
     ) {
-        // Ao iniciar o serviço, tenta carregar o utilizador do localStorage
+        // Ao iniciar o serviço, tenta carregar o usuário
         this.loadInitialUser();
     }
 
@@ -39,7 +39,7 @@ export class AuthService {
     }
 
     /**
-     * Autentica um utilizador, salva a sessão e notifica a aplicação.
+     * Autentica um usuário, salva a sessão e notifica a aplicação.
      */
     login(email: string, senha: string): Observable<AuthResponse> {
         const payload = { email, senha };
@@ -47,18 +47,17 @@ export class AuthService {
             tap(response => {
                 localStorage.setItem('authToken', response.token);
                 localStorage.setItem('currentUser', JSON.stringify(response.usuario));
-                // Notifica todos os subscritores sobre o novo utilizador logado
                 this.userSubject.next(response.usuario);
             })
         );
     }
 
     /**
-     * Faz o logout: notifica o back-end primeiro e depois limpa a sessão local.
+     * Faz o logout - notifica o back-end primeiro e depois limpa a sessão local.
      */
     logout(): void {
         this.http.post(`${this.authApiUrl}/logout`, {}).subscribe({
-            // Limpa a sessão localmente, independentemente do resultado da API
+            // Limpa a sessão localmente..
             complete: () => this.clearSessionAndRedirect(),
             error: () => this.clearSessionAndRedirect()
         });
@@ -78,7 +77,6 @@ export class AuthService {
         return this.http.post(`${this.passwordApiUrl}/reset/${token}`, { senha });
     }
 
-    // --- Funções Helper de Gestão de Sessão ---
 
     /**
      * Retorna o valor atual do utilizador de forma síncrona.
@@ -104,7 +102,6 @@ export class AuthService {
     private clearSessionAndRedirect(): void {
         localStorage.removeItem('authToken');
         localStorage.removeItem('currentUser');
-        // Notifica todos os subscritores que o utilizador fez logout (o valor é agora nulo)
         this.userSubject.next(null);
         this.router.navigate(['/login']);
     }

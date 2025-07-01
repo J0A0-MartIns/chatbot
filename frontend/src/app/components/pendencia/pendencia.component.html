@@ -29,23 +29,18 @@
         </table>
     </div>
 
-    <!-- Modal para Aprovar Pendência -->
     <div class="modal" *ngIf="showModal">
         <div class="modal-content">
             <span class="close" (click)="fecharModal()">&times;</span>
             <h3>Aprovar Pendência e Adicionar à Base</h3>
-
-            <!-- CORREÇÃO: Adicionada a exibição do resumo da pergunta -->
             <div class="campo">
                 <label><strong>Pergunta original (resumo):</strong></label>
                 <p class="pergunta-resumo">{{ perguntaResumo }}</p>
             </div>
 
-            <!-- Formulário para criar o novo documento -->
             <form (ngSubmit)="confirmarAprovacao()">
                 <input type="text" [(ngModel)]="docParaAprovar.titulo" name="titulo" placeholder="Título do Novo Documento" required/>
 
-                <!-- Seção de Tema -->
                 <label for="tema-modal">Tema:</label>
                 <select id="tema-modal" name="tema" [(ngModel)]="idTemaSelecionadoNoModal" (change)="onTemaChangeNoModal()" [disabled]="novoTemaNome.trim() !== ''">
                     <option [ngValue]="null">-- Escolha um Tema Existente --</option>
@@ -54,7 +49,6 @@
                 <span class="ou-text">ou</span>
                 <input type="text" [(ngModel)]="novoTemaNome" name="novoTemaNome" placeholder="Crie um Novo Tema" [disabled]="!!idTemaSelecionadoNoModal">
 
-                <!-- Seção de Subtema -->
                 <label for="subtema-modal">Subtema:</label>
                 <select id="subtema-modal" name="id_subtema" [(ngModel)]="docParaAprovar.id_subtema" [disabled]="novoSubtemaNome.trim() !== '' || !idTemaSelecionadoNoModal">
                     <option [ngValue]="0" disabled>-- Escolha um Subtema --</option>

@@ -1,4 +1,3 @@
-// Define as estruturas aninhadas que vêm do back-end
 import {Tema} from "./tema.model";
 
 export interface Subtema {
@@ -12,7 +11,6 @@ export interface UsuarioSimple {
     nome: string;
 }
 
-// A interface principal que corresponde exatamente à API
 export interface Documento {
     id_documento?: number;
     titulo: string;

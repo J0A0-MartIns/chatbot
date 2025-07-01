@@ -3,7 +3,6 @@
         <h2>Gerir Perfis e Permissões</h2>
         <button class="open-modal-btn" (click)="abrirModalParaCriar()">Criar Novo Perfil</button>
 
-        <!-- Tabela de Perfis -->
         <div class="table-container">
             <table>
                 <thead>
@@ -40,7 +39,6 @@
     </div>
 </div>
 
-<!-- Modal com a nova lógica de agrupamento por página -->
 <div class="modal-backdrop" *ngIf="modalAberto">
     <div class="modal">
         <h3>{{ isEditMode ? 'Editar Perfil' : 'Novo Perfil' }}</h3>
@@ -49,7 +47,6 @@
 
             <fieldset>
                 <legend>Acesso às Páginas/Módulos</legend>
-                <!-- Loop dinâmico que cria um único checkbox para cada página/módulo -->
                 <label *ngFor="let grupo of gruposDePaginas" class="grupo-label">
                     <input
                             type="checkbox"
@@ -59,7 +56,6 @@
                     <strong>{{ grupo.nomeExibicao }}</strong>
                 </label>
             </fieldset>
-
             <div class="modal-buttons">
                 <button type="submit">{{ isEditMode ? 'Salvar Alterações' : 'Adicionar' }}</button>
                 <button type="button" (click)="fecharModal()">Cancelar</button>

@@ -5,12 +5,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {Permissao} from "../../models/permissao.model";
 
-// Interface para definir a estrutura dos nossos grupos de páginas
 interface GrupoDePagina {
-  nomeExibicao: string; // Ex: "Gestão de Conteúdo"
+  nomeExibicao: string;
   permissoesChave: string[];
   permissoes: Permissao[];
-  selecionado: boolean; // Controla o checkbox principal do grupo
+  selecionado: boolean;
 }
 
 @Component({
@@ -43,14 +42,12 @@ export class AcessoComponent implements OnInit {
 
   carregarEAgruparPermissoes(): void {
     this.perfilService.getTodasPermissoes().subscribe(todas => {
-      // Define os grupos de páginas que você quer exibir no modal
       this.gruposDePaginas = [
-        { nomeExibicao: 'Gestão de Utilizadores', permissoesChave: ['usuario', 'perfi', 'permis'], permissoes: [], selecionado: false },
+        { nomeExibicao: 'Gestão de Utilizadores', permissoesChave: ['usuario', 'perfil', 'permissoes'], permissoes: [], selecionado: false },
         { nomeExibicao: 'Gestão de Conteúdo (Base e Categorias)', permissoesChave: ['documento', 'categoria'], permissoes: [], selecionado: false },
         { nomeExibicao: 'Acesso a Dashboards e Relatórios', permissoesChave: ['dashboard', 'relatorio', 'pendencia'], permissoes: [], selecionado: false },
       ];
 
-      // Distribui as permissões reais da API para os grupos corretos
       todas.forEach(p => {
         const grupo = this.gruposDePaginas.find(g => g.permissoesChave.some(chave => p.nome.includes(chave)));
         if (grupo) {
@@ -61,7 +58,6 @@ export class AcessoComponent implements OnInit {
     });
   }
 
-  // --- Funções do Modal ---
   abrirModalParaCriar(): void {
     this.isEditMode = false;
     this.perfilEmEdicao = { nome: '' };
@@ -79,7 +75,6 @@ export class AcessoComponent implements OnInit {
     this.modalAberto = true;
   }
 
-  // Seleciona ou deseleciona todas as permissões de um grupo
   toggleGrupoCompleto(grupo: GrupoDePagina, event: any): void {
     const isChecked = event.target.checked;
     grupo.selecionado = isChecked;
@@ -88,7 +83,6 @@ export class AcessoComponent implements OnInit {
     });
   }
 
-  // Atualiza o estado do checkbox principal de um grupo
   atualizarCheckboxDosGrupos(): void {
     this.gruposDePaginas.forEach(grupo => {
       grupo.selecionado = grupo.permissoes.length > 0 && grupo.permissoes.every(p => this.permissoesSelecionadas.get(p.id_permissao));
@@ -111,6 +105,6 @@ export class AcessoComponent implements OnInit {
   }
 
   fecharModal = () => this.modalAberto = false;
-  excluirPerfil = (id: number | undefined) => { if (id && confirm('Tem a certeza?')) this.perfilService.excluirPerfil(id).subscribe(() => this.carregarPerfis()); };
+  excluirPerfil = (id: number | undefined) => { if (id && confirm('Tem certeza que deseja prosseguir?')) this.perfilService.excluirPerfil(id).subscribe(() => this.carregarPerfis()); };
   toggleActionSelect = (index: number) => this.openActionIndex = this.openActionIndex === index ? null : index;
 }

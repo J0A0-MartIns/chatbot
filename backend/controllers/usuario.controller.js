@@ -79,7 +79,7 @@ const UserController = {
     },
 
     /**
-     * CORREÇÃO: Função adicionada para buscar um utilizador por ID.
+     * Busca um usuário por ID.
      */
     async buscarUsuarioPorId(req, res) {
         const { id } = req.params;
@@ -99,7 +99,7 @@ const UserController = {
     },
 
     /**
-     * Lista todos os utilizadores com status 'pendente'.
+     * Lista todos os usuário com status 'pendente'.
      */
     async listarPendentes(req, res) {
         try {
@@ -115,7 +115,7 @@ const UserController = {
     },
 
     /**
-     * Aprova um utilizador, mudando o status de 'pendente' para 'ativo'.
+     * Aprova um usuário, mudando o status de 'pendente' para 'ativo'.
      */
     async aprovarPendente(req, res) {
         const { id } = req.params;
@@ -133,7 +133,7 @@ const UserController = {
     },
 
     /**
-     * Rejeita um utilizador pendente, apagando o registo do banco de dados.
+     * Rejeita um usuário pendente, apagando o registo do banco de dados.
      */
     async rejeitarPendente(req, res) {
         const { id } = req.params;
@@ -149,7 +149,7 @@ const UserController = {
     },
 
     /**
-     * Desativa um utilizador ativo, mudando o status para 'inativo'. (Soft Delete)
+     * Desativa um usuário ativo, mudando o status para 'inativo'. (Soft Delete)
      */
     async deletarUsuario(req, res) {
         const { id } = req.params;
@@ -167,7 +167,7 @@ const UserController = {
     },
 
     /**
-     * Atualiza os dados de um utilizador ativo.
+     * Atualiza os dados de um usuário ativo.
      */
     async atualizarUsuario(req, res) {
         const { id } = req.params;
@@ -188,7 +188,7 @@ const UserController = {
     },
 
     /**
-     * Permite que um utilizador ativo troque a própria senha dentro da aplicação.
+     * Permite que um usuário ativo troque a própria senha dentro da aplicação.
      */
     async trocarSenha(req, res) {
         const { id } = req.params;

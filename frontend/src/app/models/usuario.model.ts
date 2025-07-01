@@ -1,8 +1,5 @@
 import { Perfil } from './perfil.model';
 
-/**
- * Define a estrutura de um objeto de Utilizador completo, como vem da API.
- */
 export interface Usuario {
   id_usuario: number;
   nome: string;

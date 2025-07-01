@@ -31,7 +31,7 @@ export class SenhaComponent {
     this.authService.forgotPassword(this.email).subscribe({
       next: (res) => {
         this.isLoading = false;
-        this.mensagem = res.message; // Exibe a mensagem de sucesso da API
+        this.mensagem = res.message;
       },
       error: (err) => {
         this.isLoading = false;

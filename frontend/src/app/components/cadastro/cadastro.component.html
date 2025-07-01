@@ -11,10 +11,6 @@
                 <input type="text" placeholder="Nome Completo" [(ngModel)]="nome" name="nome" required />
                 <input type="email" placeholder="E-mail Corporativo" [(ngModel)]="email" name="email" required />
 
-                <!--
-                  --- AQUI ESTÁ A CORREÇÃO PRINCIPAL ---
-                  O select agora é populado dinamicamente com os perfis da API.
-                -->
                 <select [(ngModel)]="perfilId" name="perfilId" required>
                     <option [ngValue]="null" disabled>-- Selecione seu perfil --</option>
                     <option *ngFor="let perfil of perfisDisponiveis" [ngValue]="perfil.id_perfil">
@@ -32,7 +28,7 @@
             </form>
         </div>
     </div>
-    <div class="login-right">
-        <img src="assets/images/mascote_quero_quero.jpg" alt="Mascote Quero-Quero" />
-    </div>
+<!--    <div class="login-right">-->
+<!--        <img src="assets/images/mascote_quero_quero.jpg" alt="Mascote Quero-Quero" />-->
+<!--    </div>-->
 </div>

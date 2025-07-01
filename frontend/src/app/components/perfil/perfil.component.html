@@ -4,7 +4,6 @@
         <div class="user-info">
             <p><strong>Nome:</strong> {{ user.nome }}</p>
             <p><strong>Email:</strong> {{ user.email }}</p>
-            <!-- CORREÇÃO: Mostra o nome do perfil, que é mais amigável -->
             <p><strong>Perfil:</strong> {{ user.Perfil?.nome || 'Não definido' }}</p>
         </div>
 
@@ -12,7 +11,6 @@
             {{ !mostrarTrocaSenha ? 'Alterar Senha' : 'Cancelar Alteração' }}
         </button>
 
-        <!-- Modal/Formulário para Alterar Senha -->
         <div class="change-password-form" *ngIf="mostrarTrocaSenha">
             <h3>Alterar Senha</h3>
             <form (ngSubmit)="mudarSenha()">

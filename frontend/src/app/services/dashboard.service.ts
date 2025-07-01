@@ -17,10 +17,6 @@ export class DashboardService {
 
     constructor(private http: HttpClient) {}
 
-    /**
-     * Busca todas as estatísticas do dashboard em uma única chamada.
-     * Corresponde a: GET /api/dashboard/stats
-     */
     getStats(): Observable<DashboardStats> {
         return this.http.get<DashboardStats>(`${this.apiUrl}/stats`);
     }

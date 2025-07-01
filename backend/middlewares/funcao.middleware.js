@@ -5,7 +5,6 @@ function permitirPerfil(...perfisPermitidos) {
         if (!perfil || !perfisPermitidos.includes(perfil)) {
             return res.status(403).json({ message: 'Acesso negado' });
         }
-
         next();
     };
 }

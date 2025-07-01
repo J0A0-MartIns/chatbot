@@ -18,20 +18,13 @@ import { CommonModule } from "@angular/common";
   styleUrls: ['./base.component.css']
 })
 export class BaseComponent implements OnInit {
-  // Propriedades para a lista e busca
   documentos: Documento[] = [];
   termoBusca: string = '';
-
-  // Propriedades para os dropdowns de seleção
   temas: Tema[] = [];
   subtemasDoTemaSelecionado: Subtema[] = [];
-
-  // Propriedades para controlar a UI
   showModal: boolean = false;
   isEditMode: boolean = false;
   activeMenuIndex: number | null = null;
-
-  // Propriedades do formulário do modal
   docEmEdicao: Documento;
   idTemaSelecionadoNoModal: number | null = null;
   novoTemaNome: string = '';
@@ -51,7 +44,6 @@ export class BaseComponent implements OnInit {
     this.carregarTemas();
   }
 
-  // --- Funções de Carregamento de Dados ---
   carregarDocumentos(): void {
     this.baseService.getDocumentos().subscribe(data => this.documentos = data);
   }
@@ -60,7 +52,6 @@ export class BaseComponent implements OnInit {
     this.temaService.getTemas().subscribe(data => this.temas = data);
   }
 
-  // --- Funções de Controlo da UI ---
   docsFiltrados(): Documento[] {
     if (!this.termoBusca.trim()) return this.documentos;
     return this.documentos.filter(doc =>
@@ -84,8 +75,6 @@ export class BaseComponent implements OnInit {
     this.novoTemaNome = '';
     this.novoSubtemaNome = '';
     if (doc.Subtema) {
-      // --- AQUI ESTÁ A CORREÇÃO CRÍTICA ---
-      // Atribui o ID do TEMA pai, e não do subtema.
       this.idTemaSelecionadoNoModal = doc.Subtema.id_tema;
       this.onTemaChangeNoModal();
     }
@@ -100,7 +89,6 @@ export class BaseComponent implements OnInit {
     this.activeMenuIndex = this.activeMenuIndex === index ? null : index;
   }
 
-  // --- Lógica Principal ---
   async salvarDocumento(): Promise<void> {
     try {
       let temaIdFinal: number;

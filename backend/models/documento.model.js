@@ -1,7 +1,3 @@
-/**
- * Define o modelo para os metadados dos ficheiros anexados
- * a um documento da base de conhecimento.
- */
 module.exports = (sequelize, DataTypes) => {
     const DocumentoArquivo = sequelize.define('DocumentoArquivo', {
         id_arquivo: {

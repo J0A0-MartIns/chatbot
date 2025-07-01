@@ -1,8 +1,3 @@
-/**
- * models/perfil_permissao.model.js
- *
- * Modelo para a tabela de junção que associa Perfis a Permissões.
- */
 module.exports = (sequelize, DataTypes) => {
     const PerfilPermissao = sequelize.define('PerfilPermissao', {
         id_perfil: {

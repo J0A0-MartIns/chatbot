@@ -3,8 +3,8 @@ const app = express();
 const cors = require('cors');
 
 // --- ARQUIVOS DE ROTAS ---
-const routes = require('./routes'); // Carrega o index.js com as rotas principais
-const authRoutes = require('./routes/auth.routes'); // <-- ADIÇÃO 1: Importa as rotas de autenticação
+const routes = require('./routes');
+const authRoutes = require('./routes/auth.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const relatorioRoutes = require('./routes/relatorio.routes.js');
 const chatRoutes = require('./routes/chat.routes.js');

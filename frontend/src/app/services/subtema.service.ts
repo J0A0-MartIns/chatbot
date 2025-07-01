@@ -16,10 +16,6 @@ export class SubtemaService {
         return this.http.get<Subtema[]>(`${this.apiUrl}/tema/${id_tema}`);
     }
 
-    /**
-     * ADICIONADO: Cria um novo subtema associado a um tema.
-     * Corresponde a: POST /api/subtemas
-     */
     criarSubtema(nome: string, id_tema: number): Observable<Subtema> {
         return this.http.post<Subtema>(this.apiUrl, { nome, id_tema });
     }

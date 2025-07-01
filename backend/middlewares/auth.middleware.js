@@ -1,6 +1,5 @@
 /**
- * Este código contém os middlewares responsáveis pela autenticação e autorização
- * de rotas na aplicação.
+ * Contém os middlewares responsáveis pela autenticação e autorização de rotas na aplicação.
  */
 
 const jwt = require('jsonwebtoken');
@@ -13,15 +12,13 @@ const jwt = require('jsonwebtoken');
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-
     if (!token) {
-        return res.status(401).json({ message: 'Token não fornecido.' });
+        return res.status(401).json({message: 'Token não fornecido.'});
     }
-
     //Verifica a assinatura e a validade do token
     jwt.verify(token, process.env.JWT_SECRET || 'sua_chave_secreta_padrao', (err, user) => {
         if (err) {
-            return res.status(403).json({ message: 'Token inválido ou expirado.' });
+            return res.status(403).json({message: 'Token inválido ou expirado.'});
         }
         req.user = user;
         next();
@@ -30,19 +27,18 @@ const authenticateToken = (req, res, next) => {
 
 /**
  * Uma função de "fábrica" que retorna um middleware de autorização.
- * O middleware gerado verifica se o perfil do utilizador logado está
+ * O middleware gerado verifica se o perfil do usuário logado está
  * incluído na lista de perfis permitidos.
  */
 const authorizePerfil = (allowedProfiles) => {
     return (req, res, next) => {
-        // Verifica se o middleware 'authenticateToken' foi executado antes e anexou o utilizador
+        // Verifica se o middleware 'authenticateToken' foi executado antes e anexou o usuário
         if (!req.user || !req.user.perfil) {
-            return res.status(401).json({ message: 'Não autenticado ou o perfil do utilizador não foi encontrado no token.' });
+            return res.status(401).json({message: 'Não autenticado ou o perfil do utilizador não foi encontrado no token.'});
         }
-
-        // Verifica se o perfil do utilizador está na lista de perfis permitidos
+        // Verifica se o perfil do usuário está na lista de perfis permitidos
         if (!allowedProfiles.includes(req.user.perfil)) {
-            return res.status(403).json({ message: 'Acesso negado. O seu perfil não tem permissão para esta ação.' });
+            return res.status(403).json({message: 'Acesso negado. O seu perfil não tem permissão para esta ação.'});
         }
         next();
     };

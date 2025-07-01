@@ -27,7 +27,6 @@ export class NovaSenhaComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Captura o token da URL (ex: /nova-senha?token=abcdef123)
     this.route.queryParamMap.subscribe(params => {
       this.token = params.get('token');
       if (!this.token) {

@@ -6,13 +6,9 @@
             <p class="login-label">Recuperar Senha</p>
 
             <form (ngSubmit)="solicitarRecuperacao()">
-                <!-- Mensagem de Erro -->
                 <div *ngIf="erro" class="alert alert-error">{{ erro }}</div>
-                <!-- Mensagem de Sucesso -->
                 <div *ngIf="mensagem" class="alert alert-success">{{ mensagem }}</div>
-
                 <input type="email" [(ngModel)]="email" placeholder="Digite seu e-mail de cadastro" name="email" required />
-
                 <button type="submit" [disabled]="isLoading">
                     {{ isLoading ? 'Enviando...' : 'Enviar Link de Recuperação' }}
                 </button>
@@ -20,7 +16,7 @@
             </form>
         </div>
     </div>
-    <div class="login-right">
-        <img src="../images/mascote_quero_quero.jpg" alt="Mascote Quero-Quero" />
-    </div>
+<!--    <div class="login-right">-->
+<!--        <img src="../images/mascote_quero_quero.jpg" alt="Mascote Quero-Quero" />-->
+<!--    </div>-->
 </div>

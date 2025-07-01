@@ -21,12 +21,9 @@ export class PendenciaComponent implements OnInit {
   temas: Tema[] = [];
   subtemasDoTemaSelecionado: Subtema[] = [];
   showModal = false;
-
-  // Propriedades do modal
   docParaAprovar: AprovacaoPayload;
   pendenciaIdAtual: number | null = null;
   perguntaOriginal = '';
-  // --- ADICIONADO: Propriedade para o resumo da pergunta ---
   perguntaResumo = '';
   idTemaSelecionadoNoModal: number | null = null;
   novoTemaNome = '';
@@ -48,9 +45,6 @@ export class PendenciaComponent implements OnInit {
   carregarPendencias(): void {
     this.pendenciaService.listarPendencias().subscribe({
       next: (data) => {
-        // --- PONTO DE DEBUG CRUCIAL ---
-        // Verifique a consola do seu navegador (F12) para ver a estrutura destes dados.
-        // Eles devem corresponder à interface Pendencia e ter as propriedades que o seu HTML usa.
         console.log('Dados de pendências recebidos da API:', data);
         this.pendencias = data;
       },
@@ -79,7 +73,6 @@ export class PendenciaComponent implements OnInit {
   abrirModalParaAprovar(pendencia: Pendencia): void {
     this.pendenciaIdAtual = pendencia.id_pendencia;
     this.perguntaOriginal = pendencia.pergunta;
-    // --- ADICIONADO: Cria um resumo da pergunta para o modal ---
     this.perguntaResumo = pendencia.pergunta.length > 150
         ? pendencia.pergunta.substring(0, 150) + '...'
         : pendencia.pergunta;

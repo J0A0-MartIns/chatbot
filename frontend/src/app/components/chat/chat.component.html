@@ -3,7 +3,6 @@
         <h2><i class="fas fa-question-circle"></i> Quero Ajuda</h2>
         <p class="subtitle">Selecione o assunto e descreva sua dúvida para que eu possa ajudar.</p>
 
-        <!-- Formulário para enviar a pergunta -->
         <form (ngSubmit)="enviarPergunta()">
             <label for="tema">Tema:</label>
             <select id="tema" [(ngModel)]="idTemaSelecionado" name="tema" (change)="onTemaChange()" required>
@@ -25,25 +24,20 @@
             </button>
         </form>
 
-        <!-- Container de Resposta que muda de acordo com o estado da conversa -->
         <div *ngIf="solucoesEncontradas.length > 0 || respostaGenerica" class="resposta-container">
 
-            <!-- CENÁRIO 1: SOLUÇÕES FORAM ENCONTRADAS -->
             <div *ngIf="respostaEncontrada === true">
                 <h3>Soluções Sugeridas:</h3>
-                <!-- Loop para exibir cada solução como um card -->
                 <div *ngFor="let solucao of solucoesEncontradas" class="solucao-card">
                     <h4>{{ solucao.titulo }}</h4>
-                    <p>{{ solucao.conteudo.substring(0, 200) }}...</p>
+                    <p>{{ solucao.conteudo.substring(0, 150) }}...</p>
                 </div>
 
-                <!-- O fluxo de feedback agora aparece abaixo da lista de soluções -->
                 <div *ngIf="etapaFeedback === 'inicio'" class="avaliacao">
                     <span>Estas sugestões foram úteis?</span>
                     <button (click)="avaliar(true)" class="btn-util">Sim</button>
                     <button (click)="avaliar(false)" class="btn-nao-util">Não</button>
                 </div>
-                <!-- Formulário para o comentário de feedback negativo -->
                 <div *ngIf="etapaFeedback === 'comentario'" class="feedback-negativo-form">
                     <label for="comentario">Por favor, diga-nos o que estava a procurar para que possamos melhorar:</label>
                     <textarea id="comentario" [(ngModel)]="feedbackComentario" name="comentario" rows="3"></textarea>
@@ -51,7 +45,6 @@
                 </div>
             </div>
 
-            <!-- CENÁRIO 2: NENHUMA SOLUÇÃO ENCONTRADA -->
             <div *ngIf="respostaEncontrada === false">
                 <h3>Resposta:</h3>
                 <p class="resposta-texto">{{ respostaGenerica }}</p>
@@ -60,7 +53,6 @@
                 </div>
             </div>
 
-            <!-- Mensagem de agradecimento após o feedback -->
             <p *ngIf="etapaFeedback === 'finalizado'" class="feedback-agradecimento">
                 <strong>Obrigado pelo seu feedback!</strong>
             </p>

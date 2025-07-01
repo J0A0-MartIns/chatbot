@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ReportService, RelatorioItem } from '../../services/report.service';
+import { RelatorioService, RelatorioItem } from '../../services/relatorio.service';
 import {FormsModule} from "@angular/forms";
 import {NgForOf, NgIf} from "@angular/common";
 
@@ -21,22 +21,21 @@ export class RelatorioComponent implements OnInit {
   dataFim = '';
 
   // Dados
-  todosRegistros: RelatorioItem[] = []; // Guarda todos os dados para extrair os filtros
-  registrosFiltrados: RelatorioItem[] = []; // Dados exibidos na tabela principal
+  todosRegistros: RelatorioItem[] = [];
+  registrosFiltrados: RelatorioItem[] = [];
   temasUnicos: string[] = [];
   microtemasUnicos: string[] = [];
 
-  constructor(private reportService: ReportService) {}
+  constructor(private reportService: RelatorioService) {}
 
   ngOnInit(): void {
-    // Carrega todos os registros inicialmente para popular os menus de filtro
     this.carregarDadosIniciais();
   }
 
   carregarDadosIniciais(): void {
     this.reportService.buscarRelatorio({}).subscribe(data => {
       this.todosRegistros = data;
-      this.registrosFiltrados = data; // Mostra tudo no início
+      this.registrosFiltrados = data;
       this.extrairOpcoesDeFiltro();
     });
   }
@@ -48,7 +47,6 @@ export class RelatorioComponent implements OnInit {
     this.microtemasUnicos = Array.from(subtemas);
   }
 
-  // Função única para aplicar TODOS os filtros e buscar os dados
   aplicarFiltros(): void {
     const filtros = {
       tema: this.filtroTema || undefined,
@@ -67,7 +65,7 @@ export class RelatorioComponent implements OnInit {
     this.filtroSubtema = '';
     this.dataInicio = '';
     this.dataFim = '';
-    this.aplicarFiltros(); // Recarrega os dados sem filtros
+    this.aplicarFiltros();
   }
 
   formatarData(data: string): string {

@@ -17,11 +17,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                 Authorization: `Bearer ${authToken}`
             }
         });
-        // --- CORREÇÃO ---
         // Envia a requisição CLONADA (authReq) com o token, não a original (req).
         return next(authReq);
     }
-
-    // Se não houver token, passa a requisição original adiante.
     return next(req);
 };

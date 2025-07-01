@@ -16,10 +16,6 @@ export class TemaService {
         return this.http.get<Tema[]>(this.apiUrl);
     }
 
-    /**
-     * ADICIONADO: Cria um novo tema.
-     * Corresponde a: POST /api/temas
-     */
     criarTema(nome: string): Observable<Tema> {
         return this.http.post<Tema>(this.apiUrl, { nome });
     }

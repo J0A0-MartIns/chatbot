@@ -34,12 +34,10 @@ export class LoginComponent {
         this.authService.login(this.email, this.senha).subscribe({
             next: () => {
                 this.isLoading = false;
-                // Redireciona para a página principal após o login bem-sucedido
                 this.router.navigate(['/home']);
             },
             error: (err) => {
                 this.isLoading = false;
-                // Exibe a mensagem de erro específica vinda da API
                 this.erro = err.error?.message || 'Usuário ou senha inválidos. Tente novamente.';
             }
         });

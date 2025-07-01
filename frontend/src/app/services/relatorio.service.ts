@@ -16,14 +16,14 @@ export interface RelatorioItem {
 @Injectable({
     providedIn: 'root'
 })
-export class ReportService {
+export class RelatorioService {
     private apiUrl = `${environment.apiUrl}/relatorios`;
 
     constructor(private http: HttpClient) {}
 
     buscarRelatorio(filtros: {
-        tema?: string;       // Filtro por nome do tema
-        subtema?: string;    // Filtro por nome do subtema
+        tema?: string;
+        subtema?: string;
         dataInicio?: string;
         dataFim?: string;
     }): Observable<RelatorioItem[]> {

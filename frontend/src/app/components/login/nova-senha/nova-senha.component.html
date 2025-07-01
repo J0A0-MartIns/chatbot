@@ -6,11 +6,8 @@
             <p class="login-label">Redefinir Senha</p>
 
             <form (ngSubmit)="redefinirSenha()">
-                <!-- Mensagem de Erro -->
                 <div *ngIf="erro" class="alert alert-error">{{ erro }}</div>
-                <!-- Mensagem de Sucesso -->
                 <div *ngIf="mensagem" class="alert alert-success">{{ mensagem }}</div>
-
                 <input
                         type="password"
                         [(ngModel)]="novaSenha"
@@ -32,7 +29,7 @@
             </form>
         </div>
     </div>
-    <div class="login-right">
-        <img src="../images/mascote_quero_quero.jpg" alt="Mascote Quero-Quero" />
-    </div>
+<!--    <div class="login-right">-->
+<!--        <img src="../images/mascote_quero_quero.jpg" alt="Mascote Quero-Quero" />-->
+<!--    </div>-->
 </div>

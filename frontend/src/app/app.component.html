@@ -1,12 +1,11 @@
 <div *ngIf="isLoggedIn$ | async">
 
-    <!-- Topbar -->
     <div class="topbar">
         <div class="topbar-left">
             <img src="../images/logo_qq.png" alt="Logo Quero-Quero" />
         </div>
+
         <div class="topbar-right">
-            <!-- Usa a pipe async para obter os dados do utilizador -->
             <div class="user-info" *ngIf="user$ | async as user">
                 <span>Olá, {{ user.nome }} ({{ user.Perfil?.nome }})</span>
                 <button (click)="logout()">Sair</button>
@@ -14,7 +13,6 @@
         </div>
     </div>
 
-    <!-- Container da Aplicação -->
     <div class="app-container">
         <aside class="sidebar" [class.collapsed]="isCollapsed">
             <button class="toggle-btn" (click)="toggleSidebar()">
@@ -26,41 +24,58 @@
                 <span *ngIf="isCollapsed" class="material-icons">smart_toy</span>
             </div>
 
-            <!-- A navegação só é renderizada quando temos os dados do utilizador -->
             <nav class="menu" *ngIf="user$ | async as user">
                 <ul>
-                    <li><a routerLink="/home" routerLinkActive="active"><span class="material-icons">home</span><span class="text" *ngIf="!isCollapsed">Início</span></a></li>
-                    <li><a routerLink="/chat" routerLinkActive="active"><span class="material-icons">question_answer</span><span class="text" *ngIf="!isCollapsed">Buscar Solução</span></a></li>
+                    <li>
+                        <a routerLink="/home" routerLinkActive="active">
+                            <span class="material-icons">home</span>
+                            <span class="text" *ngIf="!isCollapsed">Início</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a routerLink="/chat" routerLinkActive="active">
+                            <span class="material-icons">question_answer</span>
+                            <span class="text" *ngIf="!isCollapsed">Buscar Solução</span>
+                        </a>
+                    </li>
 
-                    <!-- A função agora recebe o objeto 'user' diretamente do template -->
-                    <li *ngIf="user.Perfil?.nome === 'Admin 2'">
-                        <a routerLink="/dashboard" routerLinkActive="active"><span class="material-icons">insights</span><span class="text" *ngIf="!isCollapsed">Dashboard & Relatórios</span></a>
+                    <li *ngIf="user.Perfil?.nome === 'Admin'">
+                        <a routerLink="/dashboard" routerLinkActive="active">
+                            <span class="material-icons">insights</span>
+                            <span class="text" *ngIf="!isCollapsed">Dashboard & Relatórios</span>
+                        </a>
                     </li>
-                    <li *ngIf="user.Perfil?.nome === 'Admin 2'">
-                        <a routerLink="/gestao" routerLinkActive="active"><span class="material-icons">manage_accounts</span><span class="text" *ngIf="!isCollapsed">Gestão de Utilizadores</span></a>
+                    <li *ngIf="user.Perfil?.nome === 'Admin'">
+                        <a routerLink="/gestao" routerLinkActive="active">
+                            <span class="material-icons">manage_accounts</span>
+                            <span class="text" *ngIf="!isCollapsed">Gestão de Utilizadores</span>
+                        </a>
                     </li>
-                    <li *ngIf="user.Perfil?.nome === 'Admin 2'">
-                        <a routerLink="/base" routerLinkActive="active"><span class="material-icons">library_books</span><span class="text" *ngIf="!isCollapsed">Base de Conhecimento</span></a>
+                    <li *ngIf="user.Perfil?.nome === 'Admin'">
+                        <a routerLink="/base" routerLinkActive="active">
+                            <span class="material-icons">library_books</span>
+                            <span class="text" *ngIf="!isCollapsed">Base de Conhecimento</span>
+                        </a>
                     </li>
                 </ul>
             </nav>
         </aside>
 
-        <main class="main-content" [class.collapsed]="isCollapsed">
+        <div class="main-content" [class.collapsed]="isCollapsed">
             <router-outlet></router-outlet>
-        </main>
+        </div>
     </div>
 </div>
 
-<!-- Para as páginas públicas -->
 <div *ngIf="!(isLoggedIn$ | async)">
     <router-outlet></router-outlet>
 </div>
 
-<!-- O seu componente de alerta para sessão expirada -->
-<!-- <app-alerta
-    *ngIf="sessionExpired"
-    title="Sessão Expirada"
-    message="A sua sessão expirou. Por favor, faça login novamente."
-    (close)="onModalClose()">
-</app-alerta> -->
+<!--
+<app-alerta
+  *ngIf="sessionExpired"
+  title="Sessão Expirada"
+  message="A sua sessão expirou. Por favor, faça login novamente."
+  (close)="onModalClose()">
+</app-alerta>
+-->

@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
         conteudo: DataTypes.TEXT,
         palavras_chave: DataTypes.STRING,
         data_criacao: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-        ativo: DataTypes.BOOLEAN,
+        ativo: { type: DataTypes.BOOLEAN, defaultValue: true },
         usuario_id: DataTypes.INTEGER,
         id_subtema: DataTypes.INTEGER
     }, {
@@ -18,9 +18,10 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: 'usuario_id',
             as: 'Usuario'
         });
-        BaseConhecimento.belongsTo(models.Subtema, {
-            foreignKey: 'id_subtema',
-            as: 'Subtema'
+        BaseConhecimento.belongsToMany(models.AtendimentoChatbot, {
+            through: models.BaseChatbotSolucao,
+            foreignKey: 'documento_id',
+            otherKey: 'atendimento_id'
         });
         // BaseConhecimento.hasMany(models.DocumentoArquivo, {
         //     foreignKey: 'id_documento',

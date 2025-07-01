@@ -14,10 +14,8 @@
             </div>
 
             <div class="dashboard-right dashboard-box-inner">
-                <!-- Card para Perguntas Hoje -->
                 <div class="stat-card">
                     <h3>Perguntas feitas hoje</h3>
-                    <!-- Usa *ngIf para mostrar o número ou um spinner de carregamento -->
                     <p *ngIf="!isLoading; else loadingIndicator">{{ perguntasHojeCount }}</p>
                 </div>
                 <!-- Card para Pendências -->
@@ -30,7 +28,6 @@
     </div>
 </div>
 
-<!-- Template reutilizável para o indicador de carregamento -->
 <ng-template #loadingIndicator>
     <p class="loading-text">Carregando...</p>
 </ng-template>

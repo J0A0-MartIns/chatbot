@@ -5,31 +5,31 @@ import { SubtemaService } from '../../services/subtema.service';
 import { Tema } from '../../models/tema.model';
 import { Subtema } from '../../models/subtema.model';
 import { Documento } from '../../models/documento.model';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {NgForOf, NgIf} from "@angular/common";
+import {FormsModule} from "@angular/forms";
 
 @Component({
   selector: 'app-chat',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
   templateUrl: './chat.component.html',
+  imports: [
+    NgIf,
+    FormsModule,
+    NgForOf
+  ],
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit {
-  // Estado do formulário de pergunta
   idTemaSelecionado: number | null = null;
   idSubtemaSelecionado: number | null = null;
   pergunta = '';
 
-  // Dados para os menus de seleção
   temasDisponiveis: Tema[] = [];
   subtemasDisponiveis: Subtema[] = [];
 
-  // Estado da conversa e da UI
-  isLoading = false;
   solucoesEncontradas: Documento[] = [];
   respostaGenerica = '';
   idAtendimentoAtual: number | null = null;
+  isLoading = false;
   respostaEncontrada: boolean | null = null;
   etapaFeedback: 'inicio' | 'comentario' | 'finalizado' = 'inicio';
   feedbackComentario = '';
@@ -45,20 +45,14 @@ export class ChatComponent implements OnInit {
   }
 
   carregarTemas(): void {
-    this.temaService.getTemas().subscribe({
-      next: (data) => this.temasDisponiveis = data,
-      error: (err) => console.error('ERRO AO CARREGAR TEMAS:', err)
-    });
+    this.temaService.getTemas().subscribe(data => this.temasDisponiveis = data);
   }
 
   onTemaChange(): void {
     this.idSubtemaSelecionado = null;
     this.subtemasDisponiveis = [];
     if (this.idTemaSelecionado) {
-      this.subtemaService.getSubtemasPorTema(this.idTemaSelecionado).subscribe({
-        next: (data) => this.subtemasDisponiveis = data,
-        error: (err) => console.error('ERRO AO CARREGAR SUBTEMAS:', err)
-      });
+      this.subtemaService.getSubtemasPorTema(this.idTemaSelecionado).subscribe(data => this.subtemasDisponiveis = data);
     }
   }
 
@@ -79,7 +73,7 @@ export class ChatComponent implements OnInit {
       next: (res) => {
         this.idAtendimentoAtual = res.id_atendimento;
         this.respostaEncontrada = res.encontrado;
-        if (res.encontrado && res.solucoes.length > 0) {
+        if (res.encontrado) {
           this.solucoesEncontradas = res.solucoes;
         } else {
           this.respostaGenerica = 'Desculpe, não encontrei uma resposta para sua pergunta neste subtema. Deseja que eu registe a sua dúvida como uma sugestão?';

@@ -1,23 +1,10 @@
-/**
- * models/atendimento_chatbot.model.js
- */
 module.exports = (sequelize, DataTypes) => {
     const AtendimentoChatbot = sequelize.define('AtendimentoChatbot', {
-        id_atendimento: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            autoIncrement: true
-        },
+        id_atendimento: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
         pergunta_usuario: DataTypes.TEXT,
-        resposta_chatbot: DataTypes.TEXT, // Pode ser removido no futuro se a resposta for sempre uma lista
-        data_atendimento: {
-            type: DataTypes.DATE,
-            defaultValue: DataTypes.NOW
-        },
-        id_sessao: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        }
+        resposta_chatbot: DataTypes.TEXT,
+        data_atendimento: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+        id_sessao: { type: DataTypes.INTEGER, allowNull: false }
     }, {
         tableName: 'atendimento_chatbot',
         timestamps: true
@@ -27,11 +14,12 @@ module.exports = (sequelize, DataTypes) => {
         AtendimentoChatbot.hasOne(models.Feedback, { foreignKey: 'atendimento_chatbot_id_atendimento' });
         AtendimentoChatbot.belongsTo(models.SessaoUsuario, { foreignKey: 'id_sessao' });
 
-        // --- CORREÇÃO CRÍTICA: Define a relação Muitos-para-Muitos ---
+        // --- CORREÇÃO: A outra chave agora é 'documento_id' ---
         AtendimentoChatbot.belongsToMany(models.BaseConhecimento, {
-            through: models.BaseChatbotSolucao, // A tabela de junção
+            through: models.BaseChatbotSolucao,
             foreignKey: 'atendimento_id',
-            otherKey: 'base_id' // Corrigido de 'base_id' para 'base_conhecimento_id_documento' se o nome for diferente
+            otherKey: 'documento_id',
+            as: 'Solucoes'
         });
     };
 
