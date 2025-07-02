@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 
-// --- ARQUIVOS DE ROTAS ---
 const routes = require('./routes');
 const authRoutes = require('./routes/auth.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
