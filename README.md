@@ -22,7 +22,7 @@ Certifique-se que os seguintes softwares estejam instalados na sua máquina:
 - Angular CLI (npm install -g @angular/cli)
 - PostgreSQL
 
-#Guia de Instalação e Execução
+# Guia de Instalação e Execução
 Siga os passos a seguir para a correta execução do programa em sua máquina local:
 
 ## 1. Configuração do Back-end
