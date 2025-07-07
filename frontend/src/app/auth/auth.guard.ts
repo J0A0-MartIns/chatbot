@@ -3,7 +3,7 @@ import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from './auth.service';
 
 /**
- * Um guardião que protege as rotas, permitindo o acesso apenas a usuários autenticados.
+ *Protege as rotas, permitindo o acesso apenas aos usuários autenticados.
  */
 export const authGuard: CanActivateFn = (route, state) => {
     const authService = inject(AuthService);

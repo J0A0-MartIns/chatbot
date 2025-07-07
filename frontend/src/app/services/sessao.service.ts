@@ -9,11 +9,11 @@ export class SessaoService {
 
     constructor(private http: HttpClient) {}
 
-    listarPorUsuario(id: number): Observable<any[]> {
-        return this.http.get<any[]>(`${this.apiUrl}/usuario/${id}`);
-    }
-
-    logout(): Observable<any> {
-        return this.http.post(`${this.apiUrl}/logout`, {});
-    }
+    // listarPorUsuario(id: number): Observable<any[]> {
+    //     return this.http.get<any[]>(`${this.apiUrl}/usuario/${id}`);
+    // }
+    //
+    // logout(): Observable<any> {
+    //     return this.http.post(`${this.apiUrl}/logout`, {});
+    // }
 }
