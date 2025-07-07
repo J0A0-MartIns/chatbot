@@ -1,14 +1,17 @@
 <div *ngIf="isLoggedIn$ | async">
-
     <div class="topbar">
         <div class="topbar-left">
             <img src="../images/logo_qq.png" alt="Logo Quero-Quero" />
         </div>
-
         <div class="topbar-right">
             <div class="user-info" *ngIf="user$ | async as user">
                 <span>Olá, {{ user.nome }} ({{ user.Perfil?.nome }})</span>
-                <button (click)="logout()">Sair</button>
+                <button (click)="irParaPerfil()" class="topbar-btn" title="Editar Perfil">
+                    <span class="material-icons">manage_accounts</span>
+                </button>
+                <button (click)="logout()" class="topbar-btn logout-btn" title="Sair">
+                    <span class="material-icons">logout</span>
+                </button>
             </div>
         </div>
     </div>
@@ -26,44 +29,25 @@
 
             <nav class="menu" *ngIf="user$ | async as user">
                 <ul>
-                    <li>
-                        <a routerLink="/home" routerLinkActive="active">
-                            <span class="material-icons">home</span>
-                            <span class="text" *ngIf="!isCollapsed">Início</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a routerLink="/chat" routerLinkActive="active">
-                            <span class="material-icons">question_answer</span>
-                            <span class="text" *ngIf="!isCollapsed">Buscar Solução</span>
-                        </a>
-                    </li>
+                    <li><a routerLink="/home" routerLinkActive="active"><span class="material-icons">home</span><span class="text" *ngIf="!isCollapsed">Início</span></a></li>
+                    <li><a routerLink="/chat" routerLinkActive="active"><span class="material-icons">question_answer</span><span class="text" *ngIf="!isCollapsed">Buscar Solução</span></a></li>
 
-                    <li *ngIf="user.Perfil?.nome === 'Admin'">
-                        <a routerLink="/dashboard" routerLinkActive="active">
-                            <span class="material-icons">insights</span>
-                            <span class="text" *ngIf="!isCollapsed">Dashboard & Relatórios</span>
-                        </a>
+                    <li *ngIf="temAcessoAPagina(user, ['dashboard', 'relatorio', 'pendencia'])">
+                        <a routerLink="/dashboard" routerLinkActive="active"><span class="material-icons">insights</span><span class="text" *ngIf="!isCollapsed">Dashboard & Relatórios</span></a>
                     </li>
-                    <li *ngIf="user.Perfil?.nome === 'Admin'">
-                        <a routerLink="/gestao" routerLinkActive="active">
-                            <span class="material-icons">manage_accounts</span>
-                            <span class="text" *ngIf="!isCollapsed">Gestão de Utilizadores</span>
-                        </a>
+                    <li *ngIf="temAcessoAPagina(user, ['usuario', 'perfil', 'permissao'])">
+                        <a routerLink="/gestao" routerLinkActive="active"><span class="material-icons">manage_accounts</span><span class="text" *ngIf="!isCollapsed">Gestão de Utilizadores</span></a>
                     </li>
-                    <li *ngIf="user.Perfil?.nome === 'Admin'">
-                        <a routerLink="/base" routerLinkActive="active">
-                            <span class="material-icons">library_books</span>
-                            <span class="text" *ngIf="!isCollapsed">Base de Conhecimento</span>
-                        </a>
+                    <li *ngIf="temAcessoAPagina(user, ['documento', 'categoria'])">
+                        <a routerLink="/base" routerLinkActive="active"><span class="material-icons">library_books</span><span class="text" *ngIf="!isCollapsed">Base de Conhecimento</span></a>
                     </li>
                 </ul>
             </nav>
         </aside>
 
-        <div class="main-content" [class.collapsed]="isCollapsed">
+        <main class="main-content" [class.collapsed]="isCollapsed">
             <router-outlet></router-outlet>
-        </div>
+        </main>
     </div>
 </div>
 
@@ -71,11 +55,9 @@
     <router-outlet></router-outlet>
 </div>
 
-
 <app-alerta
-  *ngIf="sessionExpired"
-  title="Sessão Expirada"
-  message="A sua sessão expirou. Por favor, faça login novamente."
-  (close)="onModalClose()">
+        *ngIf="sessionExpired"
+        [title]="expiredMessage"
+        message="Por favor, faça login novamente."
+        (close)="onModalClose()">
 </app-alerta>
-

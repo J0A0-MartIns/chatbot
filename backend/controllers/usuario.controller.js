@@ -81,6 +81,7 @@ const UserController = {
     /**
      * Busca um usuário por ID.
      */
+<<<<<<< HEAD
     //async buscarUsuarioPorId(req, res) {
     //    const { id } = req.params;
     //    try {
@@ -97,6 +98,24 @@ const UserController = {
     //        return res.status(500).json({ message: 'Erro ao buscar usuário.', error: err.message });
     //    }
     //},
+=======
+    async buscarUsuarioPorId(req, res) {
+        const { id } = req.params;
+        try {
+            const user = await Usuario.findOne({
+                where: { id_usuario: id, status: 'ativo' },
+                include: [{ model: Perfil, as: 'Perfil' }]
+            });
+
+            if (!user) {
+                return res.status(404).json({ message: 'Usuário não encontrado.' });
+            }
+            return res.json(formatUserResponse(user));
+        } catch (err) {
+            return res.status(500).json({ message: 'Erro ao buscar usuário.', error: err.message });
+        }
+    },
+>>>>>>> 4c8afc0f0161a692d18754569eb01a9bd0f2ac5f
 
     /**
      * Lista todos os usuário com status 'pendente'.

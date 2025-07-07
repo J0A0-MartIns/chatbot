@@ -1,19 +1,19 @@
 /**
  * Define os endpoints da API para o recurso de Perfis.
- * Associa cada rota HTTP a uma função do controller correspondente e aplica
- * middlewares de autenticação e autorização quando necessário.
  */
 
 const express = require('express');
 const router = express.Router();
 const perfilController = require('../controllers/perfil.controller');
-const { authenticateToken, authorizePerfil } = require('../middlewares/auth.middleware');
+const { authenticateToken } = require('../middlewares/auth.middleware');
+const { pode } = require('../middlewares/permissao.middleware');
 
-router.post('/', authenticateToken, authorizePerfil(['Admin']), perfilController.criarPerfil);
 router.get('/', perfilController.listarPerfis);
-router.get('/:id', authenticateToken, perfilController.getPerfilById);
-router.put('/:id', authenticateToken, authorizePerfil(['Admin']), perfilController.updatePerfil);
-router.delete('/:id', authenticateToken, authorizePerfil(['Admin']), perfilController.deletePerfil);
+router.get('/:id', authenticateToken, pode('gerenciar_perfis'), perfilController.getPerfilById);
+router.post('/', authenticateToken, pode('gerenciar_perfis'), perfilController.criarPerfil);
+router.put('/:id', authenticateToken, pode('gerenciar_perfis'), perfilController.updatePerfil);
+router.delete('/:id', authenticateToken, pode('gerenciar_perfis'), perfilController.deletePerfil);
+
 
 
 module.exports = router;

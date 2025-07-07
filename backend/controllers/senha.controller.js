@@ -6,10 +6,9 @@ const { Usuario } = require('../models');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 
-const PasswordController = {
+const SenhaController = {
     /**
      * @description Inicia o processo de recuperação de senha.
-     * @route POST /password/forgot
      */
     async forgotPassword(req, res) {
         const { email } = req.body;
@@ -76,4 +75,4 @@ const PasswordController = {
     }
 };
 
-module.exports = PasswordController;
+module.exports = SenhaController;

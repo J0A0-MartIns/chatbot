@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
-// Interface para definir a estrutura da resposta da API
+//Defini a estrutura da resposta da API
 export interface DashboardStats {
     perguntasHojeCount: number;
     pendenciasCount: number;

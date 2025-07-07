@@ -5,12 +5,13 @@
 const express = require('express');
 const router = express.Router();
 const feedbackController = require('../controllers/feedback.controller');
-const { authenticateToken, authorizePerfil } = require('../middlewares/auth.middleware');
+const { authenticateToken } = require('../middlewares/auth.middleware');
+const { pode } = require('../middlewares/permissao.middleware');
 
 
 router.post('/', authenticateToken, feedbackController.criarFeedback);
-router.get('/', authenticateToken, authorizePerfil(['Admin']), feedbackController.listarFeedbacks);
-router.get('/:id', authenticateToken, authorizePerfil(['Admin']), feedbackController.buscarFeedbackPorId);
-router.delete('/:id', authenticateToken, authorizePerfil(['Admin']), feedbackController.deletarFeedback);
+router.get('/', authenticateToken, pode('listar_feedbacks'), feedbackController.listarFeedbacks);
+router.get('/:id', authenticateToken, pode('listar_feedbacks'), feedbackController.buscarFeedbackPorId);
+router.delete('/:id', authenticateToken, pode('rejeitar_pendencia'), feedbackController.deletarFeedback);
 
 module.exports = router;

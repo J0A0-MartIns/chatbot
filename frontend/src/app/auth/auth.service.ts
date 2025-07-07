@@ -18,7 +18,7 @@ export class AuthService {
     private passwordApiUrl = `${environment.apiUrl}/password`;
     private userSubject = new BehaviorSubject<Usuario | null>(null);
     public user$ = this.userSubject.asObservable();
-    public sessionExpired$ = new Subject<void>();
+    public sessionExpired$ = new Subject<string>();
     private sessionTimer: any;
 
     constructor(
@@ -33,7 +33,7 @@ export class AuthService {
         const userJson = localStorage.getItem('currentUser');
         if (token && userJson) {
             this.userSubject.next(JSON.parse(userJson));
-            this.startSessionTimer(token); // Inicia o timer na recarga da página
+            this.startSessionTimer(token);
         }
     }
 
@@ -51,11 +51,16 @@ export class AuthService {
      * Faz o logout: notifica o back-end primeiro e depois limpa a sessão local.
      */
     logout(): void {
-        this.http.post(`${this.authApiUrl}/logout`, {}).subscribe({
-            // Limpa a sessão localmente, independentemente do resultado da API
-            complete: () => this.clearSessionAndRedirect(),
-            error: () => this.clearSessionAndRedirect()
-        });
+        //Token enviado para o back para invalidar a sessão atual
+        const token = this.getToken();
+        if (token) {
+            this.http.post(`${this.authApiUrl}/logout`, {}).subscribe({
+                complete: () => this.clearSessionAndRedirect(),
+                error: () => this.clearSessionAndRedirect()
+            });
+        } else {
+            this.clearSessionAndRedirect();
+        }
     }
 
     /**
@@ -89,7 +94,7 @@ export class AuthService {
         localStorage.removeItem('currentUser');
         this.userSubject.next(null);
         if (this.sessionTimer) {
-            clearTimeout(this.sessionTimer); // Limpa o timer sempre que sair
+            clearTimeout(this.sessionTimer);
         }
         this.router.navigate(['/login']);
     }
@@ -99,7 +104,7 @@ export class AuthService {
         const userData = JSON.stringify(authResponse.usuario);
         localStorage.setItem('currentUser', userData);
         this.userSubject.next(authResponse.usuario);
-        this.startSessionTimer(authResponse.token); // Inicia o timer no login
+        this.startSessionTimer(authResponse.token);
     }
 
     private startSessionTimer(token: string) {
@@ -109,17 +114,16 @@ export class AuthService {
 
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            const expiresAt = payload.exp * 1000; // Converte para milissegundos
+            const expiresAt = payload.exp * 1000;
             const timeout = expiresAt - Date.now();
 
             if (timeout <= 0) {
-                this.handleSessionExpiration();
+                this.handleSessionExpiration('Sua sessão expirou.');
                 return;
             }
 
-            //Agenda o logout automático
             this.sessionTimer = setTimeout(() => {
-                this.handleSessionExpiration();
+                this.handleSessionExpiration('Sua sessão expirou por inatividade.');
             }, timeout);
 
         } catch (e) {
@@ -127,7 +131,7 @@ export class AuthService {
         }
     }
 
-    private handleSessionExpiration(): void {
-        this.sessionExpired$.next();
+    private handleSessionExpiration(message: string): void {
+        this.sessionExpired$.next(message);
     }
 }
