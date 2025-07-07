@@ -16,7 +16,7 @@ const formatUserResponse = (user) => {
 
 const UserController = {
     /**
-     * Rota de Registo Público: Cria um novo utilizador com status 'pendente'.
+     * Rota de Registo Público: Cria um novo usuário com status 'pendente'.
      * Esse é para a opção de cadastro, na parte de login.
      */
     async criarUsuario(req, res) {
@@ -38,7 +38,7 @@ const UserController = {
     },
 
     /**
-     * Rota de Admin: Cria um novo utilizador diretamente como 'ativo'.
+     * Rota de Admin: Cria um novo usuário diretamente como 'ativo'.
      */
     async criarUsuarioAtivo(req, res) {
         const { nome, email, id_perfil } = req.body;
@@ -62,7 +62,7 @@ const UserController = {
     },
 
     /**
-     * Lista apenas utilizadores com status 'ativo'.
+     * Lista apenas usuários com status 'ativo'.
      */
     async listarUsuarios(req, res) {
         try {
@@ -81,22 +81,22 @@ const UserController = {
     /**
      * Busca um usuário por ID.
      */
-    async buscarUsuarioPorId(req, res) {
-        const { id } = req.params;
-        try {
-            const user = await Usuario.findOne({
-                where: { id_usuario: id, status: 'ativo' },
-                include: [{ model: Perfil, as: 'Perfil' }]
-            });
-
-            if (!user) {
-                return res.status(404).json({ message: 'Utilizador não encontrado.' });
-            }
-            return res.json(formatUserResponse(user));
-        } catch (err) {
-            return res.status(500).json({ message: 'Erro ao buscar utilizador.', error: err.message });
-        }
-    },
+    //async buscarUsuarioPorId(req, res) {
+    //    const { id } = req.params;
+    //    try {
+    //        const user = await Usuario.findOne({
+    //            where: { id_usuario: id, status: 'ativo' },
+    //            include: [{ model: Perfil, as: 'Perfil' }]
+    //        });
+//
+    //        if (!user) {
+    //            return res.status(404).json({ message: 'Usuário não encontrado.' });
+    //        }
+    //        return res.json(formatUserResponse(user));
+    //    } catch (err) {
+    //        return res.status(500).json({ message: 'Erro ao buscar usuário.', error: err.message });
+    //    }
+    //},
 
     /**
      * Lista todos os usuário com status 'pendente'.
@@ -149,7 +149,7 @@ const UserController = {
     },
 
     /**
-     * Desativa um usuário ativo, mudando o status para 'inativo'. (Soft Delete)
+     * Desativa um usuário ativo, mudando o status para 'inativo'. **Revisar**
      */
     async deletarUsuario(req, res) {
         const { id } = req.params;

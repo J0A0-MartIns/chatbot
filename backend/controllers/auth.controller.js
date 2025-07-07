@@ -41,7 +41,7 @@ const AuthController = {
 
             const payload = { id: usuario.id_usuario, perfil: usuario.Perfil?.nome };
             const secret = process.env.JWT_SECRET || 'chave_secreta';
-            const token = jwt.sign(payload, secret, { expiresIn: '10s' });
+            const token = jwt.sign(payload, secret, { expiresIn: '10000s' });
 
             const usuarioParaRetorno = usuario.toJSON();
             delete usuarioParaRetorno.senha;

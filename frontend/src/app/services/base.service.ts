@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {catchError, Observable, throwError} from 'rxjs';
-import { Documento } from '../models/documento.model'; // Importa nosso novo modelo
+import { Documento } from '../models/documento.model';
 import { environment } from '../environments/environment';
 
 @Injectable({
