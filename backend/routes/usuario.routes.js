@@ -18,7 +18,7 @@ router.get('/pendentes', authenticateToken, pode('listar_pendencias'), usuarioCo
 router.post('/pendentes/:id/aprovar', authenticateToken, pode('aprovar_pendencia'), usuarioController.aprovarPendente);
 router.delete('/pendentes/:id', authenticateToken, pode('rejeitar_pendencia'), usuarioController.rejeitarPendente);
 router.get('/', authenticateToken, pode('listar_usuarios'), usuarioController.listarUsuarios);
-router.get('/:id', authenticateToken, pode('buscar_usuario_por_id'), usuarioController.buscarUsuarioPorId);
+//router.get('/:id', authenticateToken, pode('buscar_usuario_por_id'), usuarioController.buscarUsuarioPorId);
 router.put('/:id', authenticateToken, pode('editar_usuario'), usuarioController.atualizarUsuario);
 router.delete('/:id', authenticateToken, pode('deletar_usuario'), usuarioController.deletarUsuario);
 

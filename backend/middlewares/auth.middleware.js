@@ -17,7 +17,12 @@ const authenticateToken = (req, res, next) => {
     if (!token) {
         return res.status(401).json({ message: 'Token não fornecido.' });
     }
+<<<<<<< HEAD
+    //Verifica a assinatura e a validade do token
+    jwt.verify(token, process.env.JWT_SECRET || 'chave_secreta_padrao', (err, user) => {
+=======
     jwt.verify(token, process.env.JWT_SECRET || 'chave_secreta', async (err, user) => {
+>>>>>>> 4c8afc0f0161a692d18754569eb01a9bd0f2ac5f
         if (err) {
             return res.status(403).json({ message: 'Token inválido ou expirado.' });
         }
