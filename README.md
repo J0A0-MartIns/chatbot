@@ -31,11 +31,12 @@ Navegue até à pasta do back-end a partir da raiz do projeto:
 cd backend
 
 a. Instale as Dependências
+
 Execute o seguinte comando para instalar todos os pacotes necessários:
 npm install
 
 b. Configure as Variáveis de Ambiente
-Crie um ficheiro chamado .env na raiz da pasta backend e adicione as suas credenciais. Substitua os valores de exemplo.
+Crie um arquivo chamado .env na raiz da pasta backend e adicione as suas credenciais. Substitua os valores de exemplo.
 
 ## Configuração da Base de Dados
 
