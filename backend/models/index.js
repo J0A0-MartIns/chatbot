@@ -3,8 +3,6 @@ const path = require('path');
 const Sequelize = require('sequelize');
 const basename = path.basename(__filename);
 const db = {};
-
-// Importa a instância do Sequelize já configurada no database.js
 const sequelize = require('../config/database.js');
 
 fs
