@@ -23,8 +23,4 @@ export class HomeComponent implements OnInit {
   irPara(caminho: string): void {
     this.router.navigate([`/${caminho}`]);
   }
-
-  irParaPerfil(): void {
-    this.router.navigate(['/perfil']);
-  }
 }

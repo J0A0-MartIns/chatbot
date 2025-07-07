@@ -5,7 +5,6 @@ html, body {
   overflow-x: hidden;
 }
 
-/* TOPBAR - agora mais fina */
 .topbar {
   position: fixed;
   top: 0;
@@ -27,6 +26,32 @@ html, body {
   height: 28px;
   max-width: 60px;
   object-fit: contain;
+}
+
+.topbar-btn {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.topbar-btn .material-icons {
+  color: white;
+  font-size: 24px;
+}
+
+.topbar-btn:hover .material-icons {
+  background-color: #f1f3f4;
+  color: black;
+}
+
+.logout-btn:hover .material-icons {
+  color: #d93025;
 }
 
 .topbar .user-info {

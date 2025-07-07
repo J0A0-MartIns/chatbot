@@ -19,6 +19,7 @@ export class AppComponent implements OnInit, OnDestroy {
   user$: Observable<Usuario | null>;
   isLoggedIn$: Observable<boolean>;
   sessionExpired = false;
+  expiredMessage = '';
   private sessionSub: Subscription | undefined;
 
   constructor(private authService: AuthService, private router: Router) {
@@ -27,7 +28,8 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.sessionSub = this.authService.sessionExpired$.subscribe(() => {
+    this.sessionSub = this.authService.sessionExpired$.subscribe((message) => {
+      this.expiredMessage = message;
       this.sessionExpired = true;
     });
   }
@@ -43,17 +45,18 @@ export class AppComponent implements OnInit, OnDestroy {
     this.authService.logout();
   }
 
-  /**
-   * Verifica se o usuário tem acesso a uma página.
-   */
-  // temAcessoAPagina(user: Usuario | null, chaves: string[]): boolean {
-  //   if (!user || !user.Perfil || !user.Perfil.Permissoes || user.Perfil.Permissoes.length === 0) {
-  //     return false;
-  //   }
-  //   return user.Perfil.Permissoes.some(p =>
-  //       chaves.some(chave => (p.nome || '').toLowerCase().includes(chave.toLowerCase()))
-  //   );
-  // }
+  temAcessoAPagina(user: Usuario | null, chaves: string[]): boolean {
+    if (!user || !user.Perfil || !user.Perfil.Permissoes || user.Perfil.Permissoes.length === 0) {
+      return false;
+    }
+    return user.Perfil.Permissoes.some(p =>
+        chaves.some(chave => (p.nome || '').toLowerCase().includes(chave.toLowerCase()))
+    );
+  }
+
+  irParaPerfil(): void {
+    this.router.navigate(['/perfil']);
+  }
 
   toggleSidebar(): void {
     this.isCollapsed = !this.isCollapsed;

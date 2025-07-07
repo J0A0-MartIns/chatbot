@@ -37,11 +37,16 @@ const AuthController = {
                 return res.status(401).json({ message: 'Credenciais inválidas.' });
             }
 
-            await SessaoUsuario.create({ usuario_id: usuario.id_usuario });
+            await SessaoUsuario.update(
+                { data_logout: new Date() },
+                { where: { id_usuario: usuario.id_usuario, data_logout: null } }
+            );
+
+            await SessaoUsuario.create({ id_usuario: usuario.id_usuario });
 
             const payload = { id: usuario.id_usuario, perfil: usuario.Perfil?.nome };
             const secret = process.env.JWT_SECRET || 'chave_secreta';
-            const token = jwt.sign(payload, secret, { expiresIn: '10s' });
+            const token = jwt.sign(payload, secret, { expiresIn: '8h' });
 
             const usuarioParaRetorno = usuario.toJSON();
             delete usuarioParaRetorno.senha;
@@ -58,11 +63,11 @@ const AuthController = {
      * Finaliza a sessão ativa de um usuário, registando a data de logout.
      */
     async logout(req, res) {
-        const usuario_id = req.user.id;
+        const id_usuario = req.user.id;
         try {
             await SessaoUsuario.update(
                 { data_logout: new Date() },
-                { where: { usuario_id, data_logout: null } }
+                { where: { id_usuario, data_logout: null } }
             );
             return res.status(200).json({ message: 'Logout realizado com sucesso.' });
         } catch (error) {

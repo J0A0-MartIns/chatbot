@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
-// Interfaces para os dados dos relatórios
+//Dados dos relatórios
 export interface RelatorioInteracao {
     data_atendimento: string;
     pergunta_usuario: string;
@@ -17,7 +17,7 @@ export interface RelatorioInteracao {
 export interface RelatorioUsoSubtema {
     id_subtema: number;
     nome: string;
-    count: string; //Vem do sequelize c/ string
+    count: string;
 }
 
 @Injectable({

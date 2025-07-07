@@ -62,7 +62,7 @@ const UserController = {
     },
 
     /**
-     * Lista apenas utilizadores com status 'ativo'.
+     * Lista apenas usuários com status 'ativo'.
      */
     async listarUsuarios(req, res) {
         try {
@@ -90,11 +90,11 @@ const UserController = {
             });
 
             if (!user) {
-                return res.status(404).json({ message: 'Utilizador não encontrado.' });
+                return res.status(404).json({ message: 'Usuário não encontrado.' });
             }
             return res.json(formatUserResponse(user));
         } catch (err) {
-            return res.status(500).json({ message: 'Erro ao buscar utilizador.', error: err.message });
+            return res.status(500).json({ message: 'Erro ao buscar usuário.', error: err.message });
         }
     },
 

@@ -5,10 +5,12 @@
 const express = require('express');
 const router = express.Router();
 const pendenciaController = require('../controllers/pendencia.controller');
-const { authenticateToken, authorizePerfil } = require('../middlewares/auth.middleware');
+const { authenticateToken } = require('../middlewares/auth.middleware');
+const { pode } = require('../middlewares/permissao.middleware');
 
-router.get('/', authenticateToken, authorizePerfil(['Admin']), pendenciaController.listarPendencias);
-router.post('/:id/aprovar', authenticateToken, authorizePerfil(['Admin']), pendenciaController.aprovarPendencia);
-router.delete('/:id', authenticateToken, authorizePerfil(['Admin']), pendenciaController.excluirPendencia);
+router.get('/', authenticateToken, pode('listar_pendencias'), pendenciaController.listarPendencias);
+router.post('/:id/aprovar', authenticateToken, pode('aprovar_pendencia'), pendenciaController.aprovarPendencia);
+router.delete('/:id', authenticateToken, pode('rejeitar_pendencia'), pendenciaController.excluirPendencia);
 
 module.exports = router;
+
