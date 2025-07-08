@@ -33,6 +33,13 @@ export class BaseService {
         return this.http.delete(`${this.apiUrl}/${id}`);
     }
 
+    uploadArquivo(id_documento: number, file: File): Observable<any> {
+        const formData = new FormData();
+        //nome deve corresponder ao usado no middleware multer no back-end.
+        formData.append('arquivo', file, file.name);
+        return this.http.post(`${this.apiUrl}/${id_documento}/upload`, formData);
+    }
+
     //Implementar quando usar ia
     atualizarAtivo(id: number, ativo: boolean): Observable<Documento> {
         return this.http.patch<Documento>(`${this.apiUrl}/${id}/ativo`, { ativo });

@@ -7,6 +7,7 @@ const router = express.Router();
 const baseConhecimentoController = require('../controllers/base_conhecimento.controller');
 const { authenticateToken } = require('../middlewares/auth.middleware');
 const { pode } = require('../middlewares/permissao.middleware');
+const upload = require('../config/multer');
 
 router.post('/', authenticateToken, pode('criar_documento'), baseConhecimentoController.criarDocumento);
 router.get('/', authenticateToken, baseConhecimentoController.listarDocumentos);
@@ -15,5 +16,6 @@ router.get('/:id', authenticateToken, baseConhecimentoController.buscarDocumento
 router.put('/:id', authenticateToken, pode('editar_documento'), baseConhecimentoController.atualizarDocumento);
 router.patch('/:id/ativo', authenticateToken, pode('publicar_documento'), baseConhecimentoController.atualizarAtivo);
 router.delete('/:id', authenticateToken, pode('deletar_documento'), baseConhecimentoController.excluirDocumento);
+router.post('/:id_documento/upload', authenticateToken, pode('editar_documento'), upload.single('arquivo'), baseConhecimentoController.uploadArquivo);
 
 module.exports = router;

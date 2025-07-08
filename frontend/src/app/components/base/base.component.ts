@@ -31,6 +31,7 @@ export class BaseComponent implements OnInit {
   novoSubtemaNome: string = '';
   openActionIndex: number | null = null;
   dropdownPosition = { top: '0px', left: '0px' };
+  arquivoParaUpload: File | null = null;
 
   constructor(
       private baseService: BaseService,
@@ -53,6 +54,13 @@ export class BaseComponent implements OnInit {
       return;
     }
     this.openActionIndex = null;
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files?.[0];
+    if (file) {
+      this.arquivoParaUpload = file;
+    }
   }
 
   carregarDocumentos(): void {
@@ -145,9 +153,18 @@ export class BaseComponent implements OnInit {
       this.docEmEdicao.id_subtema = subtemaIdFinal;
 
       if (this.isEditMode && this.docEmEdicao.id_documento) {
-        await lastValueFrom(this.baseService.atualizarDocumento(this.docEmEdicao.id_documento, this.docEmEdicao));
+        //Atualiza os metadados do documento
+        const documentoAtualizado = await lastValueFrom(this.baseService.atualizarDocumento(this.docEmEdicao.id_documento, this.docEmEdicao));
+        //Se um novo arquivo for selecionado, faz o upload associado a este documento
+        if (this.arquivoParaUpload) {
+          await lastValueFrom(this.baseService.uploadArquivo(documentoAtualizado.id_documento!, this.arquivoParaUpload));
+        }
       } else {
-        await lastValueFrom(this.baseService.criarDocumento(this.docEmEdicao));
+        //Cria o documento para obter o um novo ID
+        const novoDocumento = await lastValueFrom(this.baseService.criarDocumento(this.docEmEdicao));
+        if (this.arquivoParaUpload && novoDocumento.id_documento) {
+          await lastValueFrom(this.baseService.uploadArquivo(novoDocumento.id_documento, this.arquivoParaUpload));
+        }
       }
 
       this.carregarDocumentos();
