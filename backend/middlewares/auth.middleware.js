@@ -17,14 +17,12 @@ const authenticateToken = (req, res, next) => {
     if (!token) {
         return res.status(401).json({ message: 'Token não fornecido.' });
     }
-<<<<<<< HEAD
+
     //Verifica a assinatura e a validade do token
-    jwt.verify(token, process.env.JWT_SECRET || 'chave_secreta_padrao', (err, user) => {
-=======
-    jwt.verify(token, process.env.JWT_SECRET || 'chave_secreta', async (err, user) => {
->>>>>>> 4c8afc0f0161a692d18754569eb01a9bd0f2ac5f
+    jwt.verify(token, process.env.JWT_SECRET || 'chave_secreta_padrao', async (err, user) => {
+
         if (err) {
-            return res.status(403).json({ message: 'Token inválido ou expirado.' });
+            return res.status(403).json({message: 'Token inválido ou expirado.'});
         }
 
         try {
@@ -36,14 +34,14 @@ const authenticateToken = (req, res, next) => {
             });
 
             if (!sessaoAtiva) {
-                return res.status(401).json({ message: 'Sessão inválida ou expirada. Por favor, faça login novamente.' });
+                return res.status(401).json({message: 'Sessão inválida ou expirada. Por favor, faça login novamente.'});
             }
             req.user = user;
             next();
 
         } catch (dbError) {
             console.error("Erro ao validar sessão no banco de dados:", dbError);
-            return res.status(500).json({ message: 'Erro de servidor ao validar a sessão.' });
+            return res.status(500).json({message: 'Erro de servidor ao validar a sessão.'});
         }
     });
 };
