@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const path = require('path');
 
 const routes = require('./routes');
 const authRoutes = require('./routes/auth.routes');
@@ -21,6 +22,7 @@ app.use('/api/relatorios', relatorioRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/senha', passwordRoutes);
 app.use('/api', routes);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use(errorHandler);
 

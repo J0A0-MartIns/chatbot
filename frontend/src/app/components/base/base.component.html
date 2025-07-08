@@ -46,7 +46,6 @@
             <button (click)="excluirDocumento(documentos[openActionIndex].id_documento)" class="btn-excluir">Excluir</button>
         </div>
 
-        <!-- Modal -->
         <div class="modal" *ngIf="showModal">
             <div class="modal-content">
                 <span class="close" (click)="fecharModal()">&times;</span>
@@ -73,6 +72,14 @@
 
                     <textarea [(ngModel)]="docEmEdicao.conteudo" name="conteudo" placeholder="Conteúdo do documento..." required></textarea>
                     <input type="text" [(ngModel)]="docEmEdicao.palavras_chave" name="palavras_chave" placeholder="Palavras-chave (separadas por vírgula)" />
+
+                    <div class="upload-section">
+                        <label for="file-upload">Anexar Documento (PDF, DOCX):</label>
+                        <input id="file-upload" type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx">
+                        <div *ngIf="arquivoParaUpload" class="file-info">
+                            Ficheiro selecionado: {{ arquivoParaUpload.name }}
+                        </div>
+                    </div>
 
                     <div class="modal-buttons">
                         <button type="submit">{{ isEditMode ? 'Atualizar' : 'Adicionar' }}</button>

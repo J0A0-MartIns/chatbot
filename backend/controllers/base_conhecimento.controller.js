@@ -175,6 +175,35 @@ const BaseConhecimentoController = {
             await transacao.rollback();
             return res.status(500).json({ message: 'Erro ao excluir documento.', error: err.message });
         }
+    },
+
+    /**
+     * @description Processa um arquivo enviado e o associa a um documento da base de conhecimento.
+     */
+    async uploadArquivo(req, res) {
+        const { id_documento } = req.params;
+        // O multer coloca as informações do arquivo em req.file
+        if (!req.file) {
+            return res.status(400).json({ message: 'Nenhum ficheiro foi enviado.' });
+        }
+
+        try {
+            // Cria um novo registo na tabela 'documento_arquivo' com os metadados
+            const novoArquivo = await DocumentoArquivo.create({
+                nome_original: req.file.originalname,
+                nome_armazenado: req.file.filename,
+                caminho_arquivo: req.file.path,
+                tipo_mime: req.file.mimetype,
+                tamanho_bytes: req.file.size,
+                id_documento: id_documento
+            });
+
+            return res.status(201).json(novoArquivo);
+
+        } catch (err) {
+            console.error("ERRO AO SALVAR ARQUIVO:", err);
+            return res.status(500).json({ message: 'Erro ao salvar o registo do arquivo.', error: err.message });
+        }
     }
 };
 
