@@ -179,16 +179,16 @@ const BaseConhecimentoController = {
 
     /**
      * @description Processa um arquivo enviado e o associa a um documento da base de conhecimento.
+     * Agora integrado com a IA para a anexação
      */
     async uploadArquivo(req, res) {
         const { id_documento } = req.params;
-        // O multer coloca as informações do arquivo em req.file
         if (!req.file) {
-            return res.status(400).json({ message: 'Nenhum ficheiro foi enviado.' });
+            return res.status(400).json({ message: 'Nenhum arquivo foi enviado.' });
         }
 
         try {
-            // Cria um novo registo na tabela 'documento_arquivo' com os metadados
+            // Salva os metadados no banco de dados
             const novoArquivo = await DocumentoArquivo.create({
                 nome_original: req.file.originalname,
                 nome_armazenado: req.file.filename,
@@ -198,8 +198,22 @@ const BaseConhecimentoController = {
                 id_documento: id_documento
             });
 
-            return res.status(201).json(novoArquivo);
+            //Caminho para o script Python
+            const scriptPath = path.join(__dirname, '..', '..', 'ia', 'processador_documentos.py');
+            const filePath = path.join(__dirname, '..', req.file.path);
 
+            console.log(`Chamando o script de IA: python ${scriptPath} ${id_documento} ${filePath}`);
+
+            const pythonProcess = spawn('python', [scriptPath, id_documento, filePath]);
+
+            pythonProcess.stdout.on('data', (data) => {
+                console.log(`[Python Script Output]: ${data}`);
+            });
+            pythonProcess.stderr.on('data', (data) => {
+                console.error(`[Python Script Error]: ${data}`);
+            });
+
+            return res.status(201).json(novoArquivo);
         } catch (err) {
             console.error("ERRO AO SALVAR ARQUIVO:", err);
             return res.status(500).json({ message: 'Erro ao salvar o registo do arquivo.', error: err.message });
