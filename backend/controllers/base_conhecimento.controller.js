@@ -1,4 +1,6 @@
 const { BaseConhecimento, Subtema, Tema, Usuario, DocumentoArquivo, sequelize } = require('../models');
+const { spawn } = require('child_process');
+const path = require('path');
 
 const BaseConhecimentoController = {
     async criarDocumento(req, res) {
@@ -179,7 +181,7 @@ const BaseConhecimentoController = {
 
     /**
      * @description Processa um arquivo enviado e o associa a um documento da base de conhecimento.
-     * Agora integrado com a IA para a anexação
+     * integrado com a IA
      */
     async uploadArquivo(req, res) {
         const { id_documento } = req.params;
@@ -188,7 +190,6 @@ const BaseConhecimentoController = {
         }
 
         try {
-            // Salva os metadados no banco de dados
             const novoArquivo = await DocumentoArquivo.create({
                 nome_original: req.file.originalname,
                 nome_armazenado: req.file.filename,
@@ -199,20 +200,34 @@ const BaseConhecimentoController = {
             });
 
             //Caminho para o script Python
-            const scriptPath = path.join(__dirname, '..', '..', 'ia', 'processador_documentos.py');
-            const filePath = path.join(__dirname, '..', req.file.path);
+            const pythonExecutable = process.platform === 'win32'
+                ? path.join(__dirname, '..', '..', 'ia', 'venv', 'Scripts', 'python.exe')
+                : path.join(__dirname, '..', '..', 'ia', 'venv', 'bin', 'python');
 
-            console.log(`Chamando o script de IA: python ${scriptPath} ${id_documento} ${filePath}`);
+            const scriptPath = path.resolve(__dirname, '..', '..', 'ia', 'processador_documento.py');
+            const filePath = path.resolve(__dirname, '..', req.file.path);
 
-            const pythonProcess = spawn('python', [scriptPath, id_documento, filePath]);
+            console.log(`Chamando o script de IA...`);
+            console.log(`Executável: ${pythonExecutable}`);
+            console.log(`Script: ${scriptPath}`);
+
+            const pythonProcess = spawn(pythonExecutable, [scriptPath, id_documento, filePath]);
 
             pythonProcess.stdout.on('data', (data) => {
-                console.log(`[Python Script Output]: ${data}`);
-            });
-            pythonProcess.stderr.on('data', (data) => {
-                console.error(`[Python Script Error]: ${data}`);
+                console.log(`[Python]: ${data.toString().trim()}`);
             });
 
+            pythonProcess.stderr.on('data', (data) => {
+                console.error(`[Python SCRIPT ERROR]: ${data.toString().trim()}`);
+            });
+
+            pythonProcess.on('close', (code) => {
+                console.log(`[Node.js] Script Python finalizado com código ${code}.`);
+            });
+
+            pythonProcess.on('error', (err) => {
+                console.error('[Node.js] Falha ao iniciar o processo do script Python:', err);
+            });
             return res.status(201).json(novoArquivo);
         } catch (err) {
             console.error("ERRO AO SALVAR ARQUIVO:", err);
@@ -220,5 +235,4 @@ const BaseConhecimentoController = {
         }
     }
 };
-
 module.exports = BaseConhecimentoController;
