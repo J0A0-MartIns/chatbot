@@ -153,14 +153,11 @@ export class BaseComponent implements OnInit {
       this.docEmEdicao.id_subtema = subtemaIdFinal;
 
       if (this.isEditMode && this.docEmEdicao.id_documento) {
-        //Atualiza os metadados do documento
         const documentoAtualizado = await lastValueFrom(this.baseService.atualizarDocumento(this.docEmEdicao.id_documento, this.docEmEdicao));
-        //Se um novo arquivo for selecionado, faz o upload associado a este documento
         if (this.arquivoParaUpload) {
           await lastValueFrom(this.baseService.uploadArquivo(documentoAtualizado.id_documento!, this.arquivoParaUpload));
         }
       } else {
-        //Cria o documento para obter o um novo ID
         const novoDocumento = await lastValueFrom(this.baseService.criarDocumento(this.docEmEdicao));
         if (this.arquivoParaUpload && novoDocumento.id_documento) {
           await lastValueFrom(this.baseService.uploadArquivo(novoDocumento.id_documento, this.arquivoParaUpload));

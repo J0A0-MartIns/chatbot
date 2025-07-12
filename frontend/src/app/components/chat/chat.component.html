@@ -1,7 +1,7 @@
 <div class="page-container">
     <div class="page-content">
         <h2><i class="fas fa-question-circle"></i> Quero Ajuda</h2>
-        <p class="subtitle">Selecione o assunto e descreva sua dúvida para que eu possa ajudar.</p>
+        <p class="subtitle">Selecione o tema e subtema e descreva sua dúvida para que eu possa ajudar.</p>
 
         <form (ngSubmit)="enviarPergunta()">
             <label for="tema">Tema:</label>
@@ -24,37 +24,36 @@
             </button>
         </form>
 
-        <div *ngIf="solucoesEncontradas.length > 0 || respostaGenerica" class="resposta-container">
+        <div *ngIf="respostaDaIA" class="resposta-container">
+            <h3>Resposta:</h3>
+            <p class="resposta-texto">{{ respostaDaIA }}</p>
 
-            <div *ngIf="respostaEncontrada === true">
-                <h3>Soluções Sugeridas:</h3>
+            <div *ngIf="respostaEncontrada === true && solucoesEncontradas.length > 0" class="fontes-container">
+                <h4>Fontes Utilizadas:</h4>
                 <div *ngFor="let solucao of solucoesEncontradas" class="solucao-card">
-                    <h4>{{ solucao.titulo }}</h4>
-                    <p>{{ solucao.conteudo.substring(0, 150) }}...</p>
-                </div>
-
-                <div *ngIf="etapaFeedback === 'inicio'" class="avaliacao">
-                    <span>Estas sugestões foram úteis?</span>
-                    <button (click)="avaliar(true)" class="btn-util">Sim</button>
-                    <button (click)="avaliar(false)" class="btn-nao-util">Não</button>
-                </div>
-                <div *ngIf="etapaFeedback === 'comentario'" class="feedback-negativo-form">
-                    <label for="comentario">Por favor, diga-nos o que estava procurando para que possamos avaliar:</label>
-                    <textarea id="comentario" [(ngModel)]="feedbackComentario" name="comentario" rows="3"></textarea>
-                    <button (click)="enviarFeedbackNegativo()">Enviar Feedback</button>
+                    <p>{{ solucao.titulo }}</p>
                 </div>
             </div>
 
-            <div *ngIf="respostaEncontrada === false">
-                <h3>Resposta:</h3>
-                <p class="resposta-texto">{{ respostaGenerica }}</p>
-                <div *ngIf="etapaFeedback === 'inicio'" class="avaliacao">
+            <div *ngIf="etapaFeedback === 'inicio'">
+                <div *ngIf="respostaEncontrada === true" class="avaliacao">
+                    <span>Esta resposta foi útil?</span>
+                    <button (click)="avaliar(true)" class="btn-util">Sim</button>
+                    <button (click)="avaliar(false)" class="btn-nao-util">Não</button>
+                </div>
+                <div *ngIf="respostaEncontrada === false" class="avaliacao">
                     <button (click)="enviarComoSugestao()" class="btn-sugestao">Sim, registar a minha dúvida</button>
                 </div>
             </div>
 
+            <div *ngIf="etapaFeedback === 'comentario'" class="feedback-negativo-form">
+                <label for="comentario">Por favor, diga-nos o que estava a procurar para que possamos melhorar:</label>
+                <textarea id="comentario" [(ngModel)]="feedbackComentario" name="comentario" rows="3"></textarea>
+                <button (click)="enviarFeedbackNegativo()">Enviar Feedback</button>
+            </div>
+
             <p *ngIf="etapaFeedback === 'finalizado'" class="feedback-agradecimento">
-                <strong>Obrigado!</strong>
+                <strong>Obrigado pelo seu feedback!</strong>
             </p>
         </div>
     </div>

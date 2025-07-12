@@ -1,71 +1,81 @@
 /**
- * Lógica de chat com busca por palavra-chave e criação de pendências.
+ * Lógica de chat com IA (Llama 3) e criação de pendências.
  */
 
 const {AtendimentoChatbot, Feedback, SessaoUsuario, BaseConhecimento, Pendencia, sequelize} = require('../models');
 const {Op} = require('sequelize');
+const { spawn } = require('child_process');
+const path = require('path');
 
 const ChatController = {
     /**
-     * @description Recebe uma pergunta, busca por palavras-chave e retorna uma resposta.
+     * @description Recebe uma pergunta, e executa o script python com a ia para buscar a resposta.
      */
     async perguntar(req, res) {
-        const {pergunta, id_subtema} = req.body;
+        const { pergunta, id_subtema } = req.body;
         const id_usuario = req.user.id;
 
         if (!pergunta || !id_subtema || !id_usuario) {
-            return res.status(400).json({message: 'Pergunta, subtema e ID do utilizador são obrigatórios.'});
+            return res.status(400).json({ message: 'Pergunta, subtema e ID do utilizador são obrigatórios.' });
         }
 
         try {
-            //Busca por múltiplos docs...
-            const palavras = pergunta.toLowerCase().split(' ').filter(p => p.length > 2);
-            let documentos = [];
+            const pythonExecutable = process.platform === 'win32'
+                ? path.resolve(__dirname, '..', '..', 'ia', 'venv', 'Scripts', 'python.exe')
+                : path.resolve(__dirname, '..', '..', 'ia', 'venv', 'bin', 'python');
 
-            if (palavras.length > 0) {
-                const condicoesDeBusca = palavras.map(p => ({
-                    palavras_chave: {[Op.iLike]: `%${p}%`}
-                }));
-                documentos = await BaseConhecimento.findAll({
-                    where: {
-                        id_subtema: id_subtema,
-                        [Op.or]: condicoesDeBusca
-                    },
-                    limit: 100,
-                    order: [['data_criacao', 'DESC']]
-                });
-            }
+            const scriptPath = path.resolve(__dirname, '..', '..', 'ia', 'atendimento_resposta.py');
 
-            const respostaEncontrada = documentos.length > 0;
-            const respostaGenerica = 'Desculpe, não encontrei uma resposta para sua pergunta neste subtema. Deseja que eu registe a sua dúvida como uma sugestão?';
+            const pythonProcess = spawn(pythonExecutable, [scriptPath, pergunta, String(id_subtema)]);
 
-            //Faz o registro do atendimento
-            const [sessao] = await SessaoUsuario.findOrCreate({
-                where: {id_usuario: id_usuario, data_logout: null},
-                defaults: {id_usuario: id_usuario}
+            let respostaJsonString = '';
+            let erroDaIA = '';
+
+            pythonProcess.stdout.on('data', (data) => {
+                respostaJsonString += data.toString();
+            });
+            pythonProcess.stderr.on('data', (data) => {
+                erroDaIA += data.toString();
             });
 
-            const atendimento = await AtendimentoChatbot.create({
-                id_sessao: sessao.id_sessao,
-                pergunta_usuario: pergunta,
-                resposta_chatbot: respostaEncontrada ? `Encontrei ${documentos.length} soluções.` : respostaGenerica,
-            });
+            pythonProcess.on('close', async (code) => {
+                if (code !== 0) {
+                    console.error(`[Python Error]: ${erroDaIA}`);
+                    return res.status(500).json({ message: 'O serviço de IA encontrou um erro.' });
+                }
 
-            //Liga as soluções
-            if (respostaEncontrada) {
-                await atendimento.addSolucoes(documentos);
-            }
+                try {
+                    const respostaDaIA = JSON.parse(respostaJsonString);
+                    if (respostaDaIA.error) {
+                        throw new Error(respostaDaIA.error);
+                    }
 
-            //Retorn a solução e o id do atendimento
-            return res.status(200).json({
-                id_atendimento: atendimento.id_atendimento,
-                solucoes: documentos,
-                encontrado: respostaEncontrada
+                    const [sessao] = await SessaoUsuario.findOrCreate({
+                        where: { id_usuario, data_logout: null },
+                        defaults: { id_usuario }
+                    });
+
+                    const atendimento = await AtendimentoChatbot.create({
+                        id_sessao: sessao.id_sessao,
+                        pergunta_usuario: pergunta,
+                        resposta_chatbot: respostaDaIA.resposta.trim(),
+                    });
+
+                    return res.status(200).json({
+                        id_atendimento: atendimento.id_atendimento,
+                        resposta: respostaDaIA.resposta.trim(),
+                        encontrado: !respostaDaIA.resposta.includes("não encontrei nenhuma informação")
+                    });
+
+                } catch (parseError) {
+                    console.error("Erro ao interpretar a resposta Python:", parseError, "String recebida:", respostaJsonString);
+                    return res.status(500).json({ message: 'Erro ao interpretar a resposta do serviço de IA.' });
+                }
             });
 
         } catch (error) {
-            console.error("Erro no controller do chat:", error);
-            return res.status(500).json({message: 'Erro ao processar pergunta.', error: error.message});
+            console.error("Erro ao chamar o script de IA:", error);
+            return res.status(500).json({ message: 'Erro ao processar pergunta.', error: error.message });
         }
     },
 
