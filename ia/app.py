@@ -79,13 +79,13 @@ def gerar_resposta_com_gemini(contexto, pergunta):
         temperature=0.2
     )
 
-    prompt = f"""Com base apenas no contexto fornecido abaixo, responda à pergunta do utilizador de forma clara e direta em português. Se a resposta não estiver no contexto, diga "Com base nos documentos que tenho acesso, não encontrei uma resposta para a sua pergunta."
+    prompt = f"""Com base apenas no contexto fornecido abaixo, responda à pergunta do usuário de forma clara e direta em português. Se a resposta não estiver no contexto, diga "Com base nos documentos que tenho acesso, não encontrei uma resposta para a sua pergunta."
 
 Contexto:
 ---
 {contexto}
 ---
-Pergunta do Utilizador: {pergunta}
+Pergunta do usuário: {pergunta}
 Resposta:"""
 
     try:
