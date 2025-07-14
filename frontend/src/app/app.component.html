@@ -36,7 +36,7 @@
                         <a routerLink="/dashboard" routerLinkActive="active"><span class="material-icons">insights</span><span class="text" *ngIf="!isCollapsed">Dashboard & Relatórios</span></a>
                     </li>
                     <li *ngIf="temAcessoAPagina(user, ['usuario', 'perfil', 'permissao'])">
-                        <a routerLink="/gestao" routerLinkActive="active"><span class="material-icons">manage_accounts</span><span class="text" *ngIf="!isCollapsed">Gestão de Utilizadores</span></a>
+                        <a routerLink="/gestao" routerLinkActive="active"><span class="material-icons">manage_accounts</span><span class="text" *ngIf="!isCollapsed">Gestão de Usuários</span></a>
                     </li>
                     <li *ngIf="temAcessoAPagina(user, ['documento', 'categoria'])">
                         <a routerLink="/base" routerLinkActive="active"><span class="material-icons">library_books</span><span class="text" *ngIf="!isCollapsed">Base de Conhecimento</span></a>

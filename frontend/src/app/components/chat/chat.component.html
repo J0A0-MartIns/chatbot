@@ -1,33 +1,43 @@
 <div class="page-container">
     <div class="page-content">
         <h2><i class="fas fa-question-circle"></i> Quero Ajuda</h2>
-        <p class="subtitle">Selecione o tema e subtema e descreva sua dúvida para que eu possa ajudar.</p>
+        <p class="subtitle">Selecione o tema e subtema e descreva sua dúvida.</p>
 
-        <form (ngSubmit)="enviarPergunta()">
-            <label for="tema">Tema:</label>
-            <select id="tema" [(ngModel)]="idTemaSelecionado" name="tema" (change)="onTemaChange()" required>
-                <option [ngValue]="null" disabled>-- Selecione um tema --</option>
-                <option *ngFor="let t of temasDisponiveis" [ngValue]="t.id_tema">{{ t.nome }}</option>
-            </select>
+        <form (ngSubmit)="enviarPergunta()" class="chat-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tema">Tema:</label>
+                    <select id="tema" [(ngModel)]="idTemaSelecionado" name="tema" (change)="onTemaChange()" required>
+                        <option [ngValue]="null" disabled>-- Selecione um tema --</option>
+                        <option *ngFor="let t of temasDisponiveis" [ngValue]="t.id_tema">{{ t.nome }}</option>
+                    </select>
+                </div>
 
-            <label for="subtema">Subtema:</label>
-            <select id="subtema" [(ngModel)]="idSubtemaSelecionado" name="subtema" required [disabled]="!idTemaSelecionado">
-                <option [ngValue]="null" disabled>-- Selecione um subtema --</option>
-                <option *ngFor="let st of subtemasDisponiveis" [ngValue]="st.id_subtema">{{ st.nome }}</option>
-            </select>
+                <div class="form-group">
+                    <label for="subtema">Subtema:</label>
+                    <select id="subtema" [(ngModel)]="idSubtemaSelecionado" name="subtema" required [disabled]="!idTemaSelecionado">
+                        <option [ngValue]="null" disabled>-- Selecione um subtema --</option>
+                        <option *ngFor="let st of subtemasDisponiveis" [ngValue]="st.id_subtema">{{ st.nome }}</option>
+                    </select>
+                </div>
 
-            <label for="pergunta">Qual é a sua dúvida?</label>
-            <textarea id="pergunta" [(ngModel)]="pergunta" name="pergunta" rows="4" placeholder="Ex: Como faço para emitir a segunda via de um boleto?" required></textarea>
+                <div class="button-wrapper">
+                    <button type="submit" [disabled]="isLoading || !idSubtemaSelecionado">
+                        <i class="fas fa-paper-plane"></i> {{ isLoading ? 'Procurando... Aguarde' : 'Enviar Pergunta' }}
+                    </button>
+                </div>
+            </div>
 
-            <button type="submit" [disabled]="isLoading || !idSubtemaSelecionado">
-                <i class="fas fa-paper-plane"></i> {{ isLoading ? 'A procurar...' : 'Enviar Pergunta' }}
-            </button>
+            <div class="form-group">
+                <label for="pergunta">Qual é a sua dúvida?</label>
+                <textarea id="pergunta" [(ngModel)]="pergunta" name="pergunta" rows="4" placeholder="Ex: Como faço para emitir a segunda via de um boleto?" required></textarea>
+            </div>
+
         </form>
 
         <div *ngIf="respostaDaIA" class="resposta-container">
             <h3>Resposta:</h3>
             <p class="resposta-texto">{{ respostaDaIA }}</p>
-
             <div *ngIf="respostaEncontrada === true && solucoesEncontradas.length > 0" class="fontes-container">
                 <h4>Fontes Utilizadas:</h4>
                 <div *ngFor="let solucao of solucoesEncontradas" class="solucao-card">
@@ -38,20 +48,18 @@
             <div *ngIf="etapaFeedback === 'inicio'">
                 <div *ngIf="respostaEncontrada === true" class="avaliacao">
                     <span>Esta resposta foi útil?</span>
-                    <button (click)="avaliar(true)" class="btn-util">Sim</button>
-                    <button (click)="avaliar(false)" class="btn-nao-util">Não</button>
+                    <button (click)="avaliar(true)">Sim</button>
+                    <button (click)="avaliar(false)">Não</button>
                 </div>
                 <div *ngIf="respostaEncontrada === false" class="avaliacao">
-                    <button (click)="enviarComoSugestao()" class="btn-sugestao">Sim, registar a minha dúvida</button>
+                    <button (click)="enviarComoSugestao()">Sim, registar a minha dúvida</button>
                 </div>
             </div>
-
             <div *ngIf="etapaFeedback === 'comentario'" class="feedback-negativo-form">
                 <label for="comentario">Por favor, diga-nos o que estava a procurar para que possamos melhorar:</label>
                 <textarea id="comentario" [(ngModel)]="feedbackComentario" name="comentario" rows="3"></textarea>
                 <button (click)="enviarFeedbackNegativo()">Enviar Feedback</button>
             </div>
-
             <p *ngIf="etapaFeedback === 'finalizado'" class="feedback-agradecimento">
                 <strong>Obrigado pelo seu feedback!</strong>
             </p>

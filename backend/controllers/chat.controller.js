@@ -6,6 +6,7 @@ const {AtendimentoChatbot, Feedback, SessaoUsuario, BaseConhecimento, Pendencia,
 const {Op} = require('sequelize');
 const { spawn } = require('child_process');
 const path = require('path');
+const axios = require('axios');
 
 const ChatController = {
     /**
@@ -20,61 +21,31 @@ const ChatController = {
         }
 
         try {
-            const pythonExecutable = process.platform === 'win32'
-                ? path.resolve(__dirname, '..', '..', 'ia', 'venv', 'Scripts', 'python.exe')
-                : path.resolve(__dirname, '..', '..', 'ia', 'venv', 'bin', 'python');
-
-            const scriptPath = path.resolve(__dirname, '..', '..', 'ia', 'atendimento_resposta.py');
-
-            const pythonProcess = spawn(pythonExecutable, [scriptPath, pergunta, String(id_subtema)]);
-
-            let respostaJsonString = '';
-            let erroDaIA = '';
-
-            pythonProcess.stdout.on('data', (data) => {
-                respostaJsonString += data.toString();
+            const respostaDaIA = await axios.post('http://localhost:5001/responder', {
+                pergunta: pergunta,
+                id_subtema: id_subtema
             });
-            pythonProcess.stderr.on('data', (data) => {
-                erroDaIA += data.toString();
+            if (respostaDaIA.data.error) {
+                throw new Error(respostaDaIA.data.error);
+            }
+            const respostaFinal = respostaDaIA.data.resposta;
+            const [sessao] = await SessaoUsuario.findOrCreate({
+                where: { id_usuario, data_logout: null },
+                defaults: { id_usuario }
             });
-
-            pythonProcess.on('close', async (code) => {
-                if (code !== 0) {
-                    console.error(`[Python Error]: ${erroDaIA}`);
-                    return res.status(500).json({ message: 'O serviço de IA encontrou um erro.' });
-                }
-
-                try {
-                    const respostaDaIA = JSON.parse(respostaJsonString);
-                    if (respostaDaIA.error) {
-                        throw new Error(respostaDaIA.error);
-                    }
-
-                    const [sessao] = await SessaoUsuario.findOrCreate({
-                        where: { id_usuario, data_logout: null },
-                        defaults: { id_usuario }
-                    });
-
-                    const atendimento = await AtendimentoChatbot.create({
-                        id_sessao: sessao.id_sessao,
-                        pergunta_usuario: pergunta,
-                        resposta_chatbot: respostaDaIA.resposta.trim(),
-                    });
-
-                    return res.status(200).json({
-                        id_atendimento: atendimento.id_atendimento,
-                        solucoes: [],
-                        resposta: respostaDaIA.resposta.trim(),
-                        encontrado: !respostaDaIA.resposta.includes("não encontrei nenhuma informação")
-                    });
-                } catch (parseError) {
-                    console.error("Erro ao interpretar a resposta Python:", parseError, "String recebida:", respostaJsonString);
-                    return res.status(500).json({ message: 'Erro ao interpretar a resposta do serviço de IA.' });
-                }
+            const atendimento = await AtendimentoChatbot.create({
+                id_sessao: sessao.id_sessao,
+                pergunta_usuario: pergunta,
+                resposta_chatbot: respostaFinal,
+            });
+            return res.status(200).json({
+                id_atendimento: atendimento.id_atendimento,
+                resposta: respostaFinal,
+                encontrado: !respostaFinal.includes("não encontrei nenhuma informação")
             });
 
         } catch (error) {
-            console.error("Erro ao chamar o script de IA:", error);
+            console.error("Erro ao comunicar com a API de IA:", error.response ? error.response.data : error.message);
             return res.status(500).json({ message: 'Erro ao processar pergunta.', error: error.message });
         }
     },
