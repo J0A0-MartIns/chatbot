@@ -8,11 +8,17 @@ from sentence_transformers import SentenceTransformer
 import psycopg2
 from sklearn.metrics.pairwise import cosine_similarity
 from flask import Flask, request, jsonify
+import google.generativeai as genai
 
 def log_stderr(message):
     print(message, file=sys.stderr, flush=True)
 
 load_dotenv()
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    log_stderr("ERRO FATAL: A variável de ambiente GEMINI_API_KEY não foi encontrada.")
+    sys.exit(1)
 
 print("Carregando o modelo de embedding")
 try:
@@ -65,7 +71,14 @@ def buscar_paragrafos_relevantes(embedding_pergunta, id_subtema, conn):
     except Exception as e:
         return None, f"Erro ao buscar parágrafos: {e}"
 
-def gerar_resposta_com_llama3(contexto, pergunta):
+def gerar_resposta_com_gemini(contexto, pergunta):
+    model = genai.GenerativeModel('gemini-1.5-flash')
+
+    generation_config = genai.types.GenerationConfig(
+        max_output_tokens=250,
+        temperature=0.2
+    )
+
     prompt = f"""Com base apenas no contexto fornecido abaixo, responda à pergunta do utilizador de forma clara e direta em português. Se a resposta não estiver no contexto, diga "Com base nos documentos que tenho acesso, não encontrei uma resposta para a sua pergunta."
 
 Contexto:
@@ -74,15 +87,12 @@ Contexto:
 ---
 Pergunta do Utilizador: {pergunta}
 Resposta:"""
-    try:
-        url_ollama = "http://localhost:11434/api/generate"
-        payload = { "model": "llama3", "prompt": prompt, "stream": False }
-        response = requests.post(url_ollama, json=payload)
-        response.raise_for_status()
-        return response.json()['response'], None
-    except Exception as e:
-        return None, f"Erro ao comunicar com o Llama 3 via Ollama: {e}"
 
+    try:
+        response = model.generate_content(prompt, generation_config=generation_config)
+        return response.text, None
+    except Exception as e:
+        return None, f"Erro ao comunicar com a API do Gemini: {e}"
 
 @app.route('/responder', methods=['POST'])
 def responder():
@@ -90,25 +100,25 @@ def responder():
     pergunta = dados.get('pergunta')
     id_subtema = dados.get('id_subtema')
 
-    if not pergunta or not id_subtema:
-        return jsonify({"erro": "Os campos 'pergunta' e 'id_subtema' são obrigatórios."}), 400
+    if not pergunta or id_subtema is None:
+        return jsonify({"error": "Os campos 'pergunta' e 'id_subtema' são obrigatórios."}), 400
 
     conn, err = conectar_db()
     if err:
-        return jsonify({"erro": err}), 500
+        return jsonify({"error": err}), 500
 
     try:
         embedding_pergunta = model_embedding.encode(pergunta)
-        paragrafos_relevantes, err = buscar_paragrafos_relevantes(embedding_pergunta, id_subtema, conn)
+        chunks_relevantes, err = buscar_paragrafos_relevantes(embedding_pergunta, id_subtema, conn)
 
         if err:
             return jsonify({"error": err}), 500
 
-        if not paragrafos_relevantes:
+        if not chunks_relevantes:
             resposta_final = "Desculpe, não encontrei nenhuma informação relevante sobre este assunto nos meus documentos."
         else:
-            contexto_formatado = "\n\n".join(paragrafos_relevantes)
-            resposta_final, err = gerar_resposta_com_llama3(contexto_formatado, pergunta)
+            contexto_formatado = "\n\n".join(chunks_relevantes)
+            resposta_final, err = gerar_resposta_com_gemini(contexto_formatado, pergunta)
             if err:
                 return jsonify({"error": err}), 500
 
@@ -117,6 +127,24 @@ def responder():
     finally:
         if conn:
             conn.close()
+# def gerar_resposta_com_llama3(contexto, pergunta):
+#     prompt = f"""Com base apenas no contexto fornecido abaixo, responda à pergunta do utilizador de forma clara e direta em português. Se a resposta não estiver no contexto, diga "Com base nos documentos que tenho acesso, não encontrei uma resposta para a sua pergunta."
+#
+# Contexto:
+# ---
+# {contexto}
+# ---
+# Pergunta do Utilizador: {pergunta}
+# Resposta:"""
+#     try:
+#         url_ollama = "http://localhost:11434/api/generate"
+#         payload = { "model": "llama3", "prompt": prompt, "stream": False }
+#         response = requests.post(url_ollama, json=payload)
+#         response.raise_for_status()
+#         return response.json()['response'], None
+#     except Exception as e:
+#         return None, f"Erro ao comunicar com o Llama 3 via Ollama: {e}"
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)

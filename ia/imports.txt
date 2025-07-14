@@ -1,0 +1,11 @@
+Flask
+sentence-transformers
+torch
+scikit-learn
+requests
+python-dotenv
+psycopg2-binary
+numpy
+python-docx
+PyMuPDF
+google-generativeai
