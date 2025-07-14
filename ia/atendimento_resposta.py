@@ -8,6 +8,7 @@ from sentence_transformers import SentenceTransformer
 import psycopg2
 from sklearn.metrics.pairwise import cosine_similarity
 
+#logs
 def log_stderr(message):
     print(message, file=sys.stderr, flush=True)
 
@@ -18,7 +19,7 @@ def carregar_modelo_ia():
         log_stderr("Modelo de embedding carregado com sucesso.")
         return model, None
     except Exception as e:
-        return None, f"ERRO FATAL ao carregar modelo de embedding: {e}"
+        return None, f"ERRO ao carregar modelo de embedding: {e}"
 
 def conectar_db():
     try:
@@ -32,7 +33,7 @@ def conectar_db():
         return None, f"Erro ao conectar à base de dados: {e}"
 
 
-def buscar_paragrafos_relevantes(model_embedding, pergunta, id_subtema, conn):
+def buscar_chunks_relevantes(model_embedding, pergunta, id_subtema, conn):
     try:
         embedding_pergunta = model_embedding.encode(pergunta)
         log_stderr(f"Executando a busca no bd para o subtema ID: {id_subtema}...")
@@ -44,14 +45,14 @@ def buscar_paragrafos_relevantes(model_embedding, pergunta, id_subtema, conn):
                 WHERE d.id_subtema = %s;
             """
             cur.execute(sql_query, (id_subtema,))
-            paragrafos_db = cur.fetchall()
+            chunks_db = cur.fetchall()
 
-        log_stderr(f"Encontrados {len(paragrafos_db)} parágrafos no bd para este subtema.")
-        if not paragrafos_db:
+        log_stderr(f"Encontrados {len(chunks_db)} parágrafos no bd para este subtema.")
+        if not chunks_db:
             return [], None
 
         similaridades = []
-        for conteudo, embedding_db_json in paragrafos_db:
+        for conteudo, embedding_db_json in chunks_db:
             embedding_db = np.array(embedding_db_json, dtype=np.float32)
             score = cosine_similarity([embedding_pergunta], [embedding_db])[0][0]
             if score > 0.5:
@@ -97,20 +98,20 @@ def main(pergunta, id_subtema):
     if err: return {"erro": err}
 
     try:
-        paragrafos_relevantes, err = buscar_paragrafos_relevantes(model_embedding, pergunta, id_subtema, conn)
+        chunks_relevantes, err = buscar_chunks_relevantes(model_embedding, pergunta, id_subtema, conn)
 
         if err: return {"erro": err}
 
-        if not paragrafos_relevantes:
+        if not chunks_relevantes:
             log_stderr("Nenhum parágrafo relevante encontrado.")
-            return {"resposta": "Desculpe, não foram encontradas informações sobre este assunto nos documentos."}
+            return {"resposta": "Desculpe, não foram encontradas informações sobre este assunto."}
 
-        contexto_formatado = "\n\n".join(paragrafos_relevantes)
+        contexto_formatado = "\n\n".join(chunks_relevantes)
         resposta_final, err = gerar_resposta_com_llama3(contexto_formatado, pergunta)
 
-        if err: return {"error": err}
+        if err: return {"erro": err}
 
-        return {"resposta": resposta_final}
+        return {"resposta": resposta_final, "solucoes": [], "encontrado": True}
 
     finally:
         if conn:
@@ -130,7 +131,7 @@ if __name__ == "__main__":
         resposta_json = main(pergunta_usuario, subtema_id)
 
         sys.stdout.write(json.dumps(resposta_json))
-        log_stderr("[Buscador] Script finalizado com sucesso.")
+        log_stderr("Script finalizado com sucesso.")
 
     except Exception as e:
         print(json.dumps({f"Erro inesperado no script principal: {e}"}))

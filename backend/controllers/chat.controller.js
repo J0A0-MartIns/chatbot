@@ -16,7 +16,7 @@ const ChatController = {
         const id_usuario = req.user.id;
 
         if (!pergunta || !id_subtema || !id_usuario) {
-            return res.status(400).json({ message: 'Pergunta, subtema e ID do utilizador são obrigatórios.' });
+            return res.status(400).json({ message: 'Pergunta, subtema e ID do usuário são obrigatórios.' });
         }
 
         try {
@@ -63,10 +63,10 @@ const ChatController = {
 
                     return res.status(200).json({
                         id_atendimento: atendimento.id_atendimento,
+                        solucoes: [],
                         resposta: respostaDaIA.resposta.trim(),
                         encontrado: !respostaDaIA.resposta.includes("não encontrei nenhuma informação")
                     });
-
                 } catch (parseError) {
                     console.error("Erro ao interpretar a resposta Python:", parseError, "String recebida:", respostaJsonString);
                     return res.status(500).json({ message: 'Erro ao interpretar a resposta do serviço de IA.' });
