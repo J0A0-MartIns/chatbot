@@ -10,7 +10,7 @@ from sentence_transformers import SentenceTransformer
 load_dotenv()
 
 try:
-    model_ia = SentenceTransformer('all-MiniLM-L6-v2')
+    model_ia = SentenceTransformer('all-mpnet-base-v2')
     print("Modelo de IA carregado.")
 except Exception as e:
     print(f"Não foi possível carregar o modelo. {e}")
@@ -40,7 +40,7 @@ def extrair_texto_pdf(caminho_arquivo):
 # def dividir_em_paragrafos(texto_completo):
 #     return [p.strip() for p in texto_completo.split('\n') if len(p.strip()) > 20]
 
-def dividir_em_chunks(texto_completo, tamanho_chunk=1000, sobreposicao=200):
+def dividir_em_chunks(texto_completo, tamanho_chunk=200, sobreposicao=50):
     if not texto_completo:
         return []
     chunks = []
