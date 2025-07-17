@@ -7,9 +7,10 @@ from sentence_transformers import SentenceTransformer
 import psycopg2
 from sklearn.metrics.pairwise import cosine_similarity
 from flask import Flask, request, jsonify
-import google.generativeai as genai
+#import google.generativeai as genai
 import hashlib
 from sklearn.preprocessing import normalize
+from groq import Groq
 
 
 def log_stderr(message):
@@ -18,10 +19,13 @@ def log_stderr(message):
 
 load_dotenv()
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    log_stderr("ERRO FATAL: A variável de ambiente GEMINI_API_KEY não foi encontrada.")
+#GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+if not GROQ_API_KEY:
+    log_stderr("ERRO FATAL: A variável de ambiente GROQ_API_KEY não foi encontrada.")
     sys.exit(1)
+
+groq_client = Groq(api_key=GROQ_API_KEY)
 
 print("Carregando o modelo de embedding")
 try:
@@ -112,29 +116,52 @@ def buscar_melhor_chunk(embedding_pergunta, id_subtema, conn):
 #         return None, f"Erro ao reconstruir contexto: {e}"
 
 
-def gerar_resposta_com_gemini(contexto, pergunta):
-    model = genai.GenerativeModel('gemini-1.5-flash')
+# def gerar_resposta_com_gemini(contexto, pergunta):
+#     model="llama-3.3-70b-versatile",
+#
+#     generation_config = genai.types.GenerationConfig(
+#         max_output_tokens=250,
+#         temperature=0.2
+#     )
+#
+#     prompt = f"""Com base apenas no contexto fornecido abaixo, responda à pergunta do usuário de forma clara e direta em português. Se a resposta não estiver no contexto, diga "Com base nos documentos que tenho acesso, não encontrei uma resposta para a sua pergunta."
+#
+# Contexto:
+# ---
+# {contexto}
+# ---
+# Pergunta do usuário: {pergunta}
+# Resposta:"""
+#
+#     try:
+#         response = model.generate_content(prompt, generation_config=generation_config)
+#         return response.text, None
+#     except Exception as e:
+#         return None, f"Erro ao comunicar com a API do Gemini: {e}"
 
-    generation_config = genai.types.GenerationConfig(
-        max_output_tokens=250,
-        temperature=0.2
-    )
-
-    prompt = f"""Com base apenas no contexto fornecido abaixo, responda à pergunta do usuário de forma clara e direta em português. Se a resposta não estiver no contexto, diga "Com base nos documentos que tenho acesso, não encontrei uma resposta para a sua pergunta."
+def gerar_resposta_com_groq(contexto, pergunta):
+    prompt = f"""Com base apenas no contexto fornecido abaixo, responda à pergunta do usuário de forma clara e direta em português.
+Se a resposta não estiver no contexto, diga: "Com base nos documentos que tenho acesso, não encontrei uma resposta para a sua pergunta."
 
 Contexto:
 ---
 {contexto}
 ---
+
 Pergunta do usuário: {pergunta}
 Resposta:"""
 
     try:
-        response = model.generate_content(prompt, generation_config=generation_config)
-        return response.text, None
+        response = groq_client.chat.completions.create(
+            model="llama3-70b-8192",  # ✅ Modelo do GROQ
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+            max_tokens=300,
+            top_p=1,
+        )
+        return response.choices[0].message.content.strip(), None
     except Exception as e:
-        return None, f"Erro ao comunicar com a API do Gemini: {e}"
-
+        return None, f"Erro ao gerar resposta com GROQ: {e}"
 
 def buscar_resposta_no_cache(embedding_pergunta, conn):
     try:
@@ -231,17 +258,10 @@ def responder():
             except Exception as e:
                 return jsonify({"error": f"Erro ao obter parágrafos vizinhos: {e}"}), 500
 
-            resposta_final, err = gerar_resposta_com_gemini(contexto_completo, pergunta)
+            #resposta_final, err = gerar_resposta_com_gemini(contexto_completo, pergunta)
+            resposta_final, err = gerar_resposta_com_groq(contexto_completo, pergunta)
             if err: return jsonify({"error": err}), 500
             score_debug = melhor_chunk["score"]
-
-        embedding_para_salvar = embedding_pergunta.tolist()
-        # err = salvar_resposta_no_cache(pergunta, embedding_para_salvar, resposta_final, conn)
-        #
-        # if err:
-        #     log_stderr(f"[CACHE] ERRO ao salvar no cache: {err}")
-        # else:
-        #     log_stderr("[CACHE] Resposta salva no cache com sucesso.")
 
         return jsonify({"resposta": resposta_final, "score": score_debug})
 
