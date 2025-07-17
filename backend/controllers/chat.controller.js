@@ -58,7 +58,6 @@ const ChatController = {
         if (id_atendimento === null || avaliacao === undefined) {
             return res.status(400).json({message: 'ID do atendimento e avaliação são obrigatórios.'});
         }
-
         const transacao = await sequelize.transaction();
         try {
             const novoFeedback = await Feedback.create({
@@ -76,6 +75,21 @@ const ChatController = {
             }
 
             await transacao.commit();
+
+            if (avaliacao === true) {
+                const atendimento = await AtendimentoChatbot.findByPk(id_atendimento);
+                if (atendimento) {
+                    try {
+                        await axios.post('http://localhost:5001/salvar_cache', {
+                            pergunta: atendimento.pergunta_usuario,
+                            resposta: atendimento.resposta_chatbot
+                        });
+                        console.log("Cache salvo com sucesso.");
+                    } catch (e) {
+                        console.error("Erro ao salvar cache no Python:", e.message);
+                    }
+                }
+            }
             return res.status(201).json({message: 'Feedback registado com sucesso.'});
 
         } catch (error) {

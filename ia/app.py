@@ -236,12 +236,12 @@ def responder():
             score_debug = melhor_chunk["score"]
 
         embedding_para_salvar = embedding_pergunta.tolist()
-        err = salvar_resposta_no_cache(pergunta, embedding_para_salvar, resposta_final, conn)
-
-        if err:
-            log_stderr(f"[CACHE] ERRO ao salvar no cache: {err}")
-        else:
-            log_stderr("[CACHE] Resposta salva no cache com sucesso.")
+        # err = salvar_resposta_no_cache(pergunta, embedding_para_salvar, resposta_final, conn)
+        #
+        # if err:
+        #     log_stderr(f"[CACHE] ERRO ao salvar no cache: {err}")
+        # else:
+        #     log_stderr("[CACHE] Resposta salva no cache com sucesso.")
 
         return jsonify({"resposta": resposta_final, "score": score_debug})
 
@@ -249,6 +249,28 @@ def responder():
         if conn:
             conn.close()
 
+@app.route('/salvar_cache', methods=['POST'])
+def salvar_cache():
+    dados = request.json
+    pergunta = dados.get('pergunta')
+    resposta = dados.get('resposta')
+
+    if not pergunta or not resposta:
+        return jsonify({"error": "Pergunta e resposta são obrigatórias."}), 400
+
+    conn, err = conectar_db()
+    if err:
+        return jsonify({"error": err}), 500
+
+    try:
+        embedding = model_embedding.encode(pergunta)
+        embedding = normalize([embedding])[0].tolist()
+        err = salvar_resposta_no_cache(pergunta, embedding, resposta, conn)
+        if err:
+            return jsonify({"error": err}), 500
+        return jsonify({"message": "Resposta salva no cache com sucesso."})
+    finally:
+        conn.close()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)

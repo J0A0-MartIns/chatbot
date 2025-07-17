@@ -13,7 +13,7 @@ export interface RespostaChat {
     id_atendimento: number;
     solucoes: Documento[];
     encontrado: boolean;
-    resposta: string; // A resposta final gerada pela IA
+    resposta: string;
 }
 
 export interface FeedbackPayload {
