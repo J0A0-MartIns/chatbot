@@ -50,8 +50,14 @@ def conectar_db():
         return None, f"Erro ao conectar ao banco de dados: {e}"
 
 
-def buscar_melhor_chunk(embedding_pergunta, id_subtema, conn):
+def buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn):
     try:
+        #Pega as palavras da pergunta
+        palavras_pergunta = pergunta.lower().split()
+        stop_words = {'o', 'a', 'de', 'para', 'com', 'um', 'uma', 'como', 'qual', 'onde', 'quando', 'quero', 'saber'}
+        keywords = [palavra for palavra in palavras_pergunta if palavra not in stop_words and len(palavra) > 3]
+        log_stderr(f"Palavras-chave extraídas da pergunta: {keywords}")
+
         with conn.cursor() as cur:
             sql_query = """
                 SELECT p.id_documento, p.numero_paragrafo, p.conteudo_paragrafo, p.embedding
@@ -59,6 +65,12 @@ def buscar_melhor_chunk(embedding_pergunta, id_subtema, conn):
                 JOIN base_conhecimento d ON p.id_documento = d.id_documento
                 WHERE d.id_subtema = %s;
             """
+            params = [id_subtema]
+            if keywords:
+                #Cria uma condição como. Ex: (d.palavras_chave ILIKE '%palavra1%' OR d.palavras_chave ILIKE '%palavra2%')
+                keyword_conditions = " OR ".join([f"d.palavras_chave ILIKE %s" for _ in keywords])
+                sql_query += f" AND ({keyword_conditions})"
+                params.extend([f"%{kw}%" for kw in keywords])
             cur.execute(sql_query, (id_subtema,))
             chunks_db = cur.fetchall()
         if not chunks_db:
@@ -208,7 +220,7 @@ def responder():
             log_stderr("[CACHE] Resposta encontrada no cache.")
             return jsonify({"resposta": resposta_cache, "score": "cache"})
 
-        melhor_chunk, err = buscar_melhor_chunk(embedding_pergunta, id_subtema, conn)
+        melhor_chunk, err = buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn)
         if err:
             return jsonify({"error": err}), 500
 
