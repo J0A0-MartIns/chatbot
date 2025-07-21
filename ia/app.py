@@ -1,6 +1,5 @@
-import os  # Usado para acessar variáveis de ambiente ou funções do sistema operacional.
-import \
-    sys  # Usado para interagir com o interpretador Python, como manipular o sys.path, encerrar o script, logar erros, etc.
+import os
+import sys
 import numpy as np
 import json
 from dotenv import load_dotenv
