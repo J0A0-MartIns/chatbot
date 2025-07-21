@@ -54,9 +54,9 @@ def buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn):
     try:
         #Pega as palavras da pergunta
         palavras_pergunta = pergunta.lower().split()
-        stop_words = {'o', 'a', 'de', 'para', 'com', 'um', 'uma', 'como', 'qual', 'onde', 'quando', 'quero', 'saber'}
-        keywords = [palavra for palavra in palavras_pergunta if palavra not in stop_words and len(palavra) > 3]
-        log_stderr(f"Palavras-chave extraídas da pergunta: {keywords}")
+        ignorar_palavras = {'o', 'a', 'de', 'para', 'com', 'um', 'uma', 'como', 'qual', 'onde', 'quando', 'quero', 'saber'}
+        palavra_chave = [palavra for palavra in palavras_pergunta if palavra not in ignorar_palavras and len(palavra) > 3]
+        log_stderr(f"Palavras-chave extraídas da pergunta: {palavra_chave}")
 
         with conn.cursor() as cur:
             sql_query = """
@@ -66,11 +66,11 @@ def buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn):
                 WHERE d.id_subtema = %s;
             """
             params = [id_subtema]
-            if keywords:
+            if palavra_chave:
                 #Cria uma condição como. Ex: (d.palavras_chave ILIKE '%palavra1%' OR d.palavras_chave ILIKE '%palavra2%')
-                keyword_conditions = " OR ".join([f"d.palavras_chave ILIKE %s" for _ in keywords])
+                keyword_conditions = " OR ".join([f"d.palavras_chave ILIKE %s" for _ in palavra_chave])
                 sql_query += f" AND ({keyword_conditions})"
-                params.extend([f"%{kw}%" for kw in keywords])
+                params.extend([f"%{kw}%" for kw in palavra_chave])
             cur.execute(sql_query, (id_subtema,))
             chunks_db = cur.fetchall()
         if not chunks_db:
