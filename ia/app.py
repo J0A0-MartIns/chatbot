@@ -56,23 +56,36 @@ def buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn):
         palavras_pergunta = pergunta.lower().split()
         ignorar_palavras = {'o', 'a', 'de', 'para', 'com', 'um', 'uma', 'como', 'qual', 'onde', 'quando', 'quero', 'saber'}
         palavra_chave = [palavra for palavra in palavras_pergunta if palavra not in ignorar_palavras and len(palavra) > 3]
-        log_stderr(f"Palavras-chave extraídas da pergunta: {palavra_chave}")
+        log_stderr(f"Palavras extraídas da pergunta: {palavra_chave}")
 
-        with conn.cursor() as cur:
-            sql_query = """
-                SELECT p.id_documento, p.numero_paragrafo, p.conteudo_paragrafo, p.embedding
-                FROM documento_paragrafo_embedding p
-                JOIN base_conhecimento d ON p.id_documento = d.id_documento
-                WHERE d.id_subtema = %s;
-            """
-            params = [id_subtema]
-            if palavra_chave:
+        chunks_db = []
+        if palavra_chave:
+            log_stderr(f"Etapa 1: A tentar busca com palavras-chave: {palavra_chave}")
+            with conn.cursor() as cur:
                 palavra_chave_condicao = " OR ".join([f"d.palavras_chave ILIKE %s" for _ in palavra_chave])
-                sql_query += f" AND ({palavra_chave_condicao})"
-                params.extend([f"%{kw}%" for kw in palavra_chave])
+                sql_query = f"""
+                    SELECT p.id_documento, p.numero_paragrafo, p.conteudo_paragrafo, p.embedding
+                    FROM documento_paragrafo_embedding p
+                    JOIN base_conhecimento d ON p.id_documento = d.id_documento
+                    WHERE d.id_subtema = %s AND ({palavra_chave_condicao});
+                """
+                params = [id_subtema] + [f"%{kw}%" for kw in palavra_chave]
+                cur.execute(sql_query, tuple(params))
+                chunks_db = cur.fetchall()
+            log_stderr(f"Encontrados {len(chunks_db)} chunks na busca por palavra-chave.")
 
-            cur.execute(sql_query, tuple(params))
-            chunks_db = cur.fetchall()
+        if not chunks_db:
+            log_stderr("Etapa 2: Nenhuma correspondência de palavra-chave. A fazer busca semântica completa.")
+            with conn.cursor() as cur:
+                sql_query = """
+                    SELECT p.id_documento, p.numero_paragrafo, p.conteudo_paragrafo, p.embedding
+                    FROM documento_paragrafo_embedding p
+                    JOIN base_conhecimento d ON p.id_documento = d.id_documento
+                    WHERE d.id_subtema = %s;
+                """
+                cur.execute(sql_query, (id_subtema,))
+                chunks_db = cur.fetchall()
+            log_stderr(f"Encontrados {len(chunks_db)} chunks no total para o subtema selecionado.")
 
         if not chunks_db:
             return None, None
