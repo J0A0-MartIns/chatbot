@@ -67,9 +67,8 @@ def buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn):
             """
             params = [id_subtema]
             if palavra_chave:
-                #Cria uma condição como. Ex: (d.palavras_chave ILIKE '%palavra1%' OR d.palavras_chave ILIKE '%palavra2%')
-                keyword_conditions = " OR ".join([f"d.palavras_chave ILIKE %s" for _ in palavra_chave])
-                sql_query += f" AND ({keyword_conditions})"
+                palavra_chave_condicao = " OR ".join([f"d.palavras_chave ILIKE %s" for _ in palavra_chave])
+                sql_query += f" AND ({palavra_chave_condicao})"
                 params.extend([f"%{kw}%" for kw in palavra_chave])
             cur.execute(sql_query, (id_subtema,))
             chunks_db = cur.fetchall()
