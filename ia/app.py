@@ -70,8 +70,10 @@ def buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn):
                 palavra_chave_condicao = " OR ".join([f"d.palavras_chave ILIKE %s" for _ in palavra_chave])
                 sql_query += f" AND ({palavra_chave_condicao})"
                 params.extend([f"%{kw}%" for kw in palavra_chave])
-            cur.execute(sql_query, (id_subtema,))
+
+            cur.execute(sql_query, tuple(params))
             chunks_db = cur.fetchall()
+
         if not chunks_db:
             return None, None
 
