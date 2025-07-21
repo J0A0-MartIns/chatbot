@@ -1,5 +1,5 @@
-import os
-import sys
+import os  #Usado para acessar variáveis de ambiente ou funções do sistema operacional.
+import sys # Usado para interagir com o interpretador Python, como manipular o sys.path, encerrar o script, logar erros, etc.
 import numpy as np
 from dotenv import load_dotenv
 from psycopg2._json import Json
@@ -92,30 +92,6 @@ def buscar_melhor_chunk(embedding_pergunta, id_subtema, conn):
     except Exception as e:
         return None, f"Erro ao buscar chunks: {e}"
 
-
-# def reconstruir_contexto(melhor_chunk, conn):
-#     try:
-#         log_stderr(f"A reconstruir contexto em torno do parágrafo nº {melhor_chunk['numero_paragrafo']}...")
-#         with conn.cursor() as cur:
-#             sql_query = """
-#                 SELECT conteudo_paragrafo
-#                 FROM documento_paragrafo_embedding
-#                 WHERE id_documento = %s AND numero_paragrafo >= %s AND numero_paragrafo <= %s
-#                 ORDER BY numero_paragrafo ASC;
-#             """
-#             cur.execute(sql_query, (
-#                 melhor_chunk['id_documento'],
-#                 melhor_chunk['numero_paragrafo'] - 1,
-#                 melhor_chunk['numero_paragrafo'] + 1
-#             ))
-#             chunks_contexto = cur.fetchall()
-#             contexto_rico = "\n\n".join([chunk[0] for chunk in chunks_contexto])
-#             log_stderr("Contexto reconstruído com sucesso.")
-#             return contexto_rico, None
-#     except Exception as e:
-#         return None, f"Erro ao reconstruir contexto: {e}"
-
-
 # def gerar_resposta_com_gemini(contexto, pergunta):
 #     model="llama-3.3-70b-versatile",
 #
@@ -140,7 +116,7 @@ def buscar_melhor_chunk(embedding_pergunta, id_subtema, conn):
 #         return None, f"Erro ao comunicar com a API do Gemini: {e}"
 
 def gerar_resposta_com_groq(contexto, pergunta):
-    prompt = f"""Com base apenas no contexto fornecido abaixo, responda à pergunta do usuário de forma clara e direta em português.
+    prompt = f"""Com base no contexto fornecido abaixo, responda à pergunta do usuário de forma clara e direta em português.
 Se a resposta não estiver no contexto, diga: "Com base nos documentos que tenho acesso, não encontrei uma resposta para a sua pergunta."
 
 Contexto:
@@ -153,7 +129,7 @@ Resposta:"""
 
     try:
         response = groq_client.chat.completions.create(
-            model="llama3-70b-8192",  # ✅ Modelo do GROQ
+            model="llama3-70b-8192",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.2,
             max_tokens=300,
