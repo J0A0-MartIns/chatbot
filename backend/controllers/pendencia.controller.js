@@ -1,5 +1,5 @@
 /**
- * Lógica de negócio para as pendências, com a busca de dados corrigida.
+ * Lógica de negócio para as pendências
  */
 
 const {
@@ -14,7 +14,7 @@ const {
 
 const PendenciaController = {
     /**
-     * @description Lista todas as pendências com detalhes agregados.
+     * @description Lista todas as pendências.
      */
     async listarPendencias(req, res) {
         try {
@@ -43,7 +43,9 @@ const PendenciaController = {
                     resposta: p.AtendimentoChatbot.resposta_chatbot,
                     usuario: p.AtendimentoChatbot.SessaoUsuario?.Usuario?.nome || 'Desconhecido',
                     motivo: p.motivo,
-                    data_criacao: p.createdAt
+                    data_criacao: p.createdAt,
+                    sugestao_tema: p.sugestao_tema,
+                    sugestao_subtema: p.sugestao_subtema
                 };
             }).filter(Boolean);
 
@@ -56,7 +58,6 @@ const PendenciaController = {
 
     /**
      * @description Aprova uma pendência, criando um novo documento na Base de Conhecimento
-     * e apagando a pendência e o feedback associado de forma atómica.
      */
     async aprovarPendencia(req, res) {
         const { id } = req.params; // ID da pendência
@@ -70,8 +71,6 @@ const PendenciaController = {
                 await t.rollback();
                 return res.status(404).json({ message: 'Pendência não encontrada.' });
             }
-
-            //Cria o novo documento
             await BaseConhecimento.create({
                 titulo,
                 conteudo,

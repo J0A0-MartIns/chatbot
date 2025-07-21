@@ -16,6 +16,14 @@ module.exports = (sequelize, DataTypes) => {
         id_atendimento: {
             type: DataTypes.INTEGER,
             allowNull: false
+        },
+        sugestao_tema: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        sugestao_subtema: {
+            type: DataTypes.STRING,
+            allowNull: true
         }
     }, {
         tableName: 'pendencia',

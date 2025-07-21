@@ -2,10 +2,7 @@
  * Lógica de chat com IA (Llama 3) e criação de pendências.
  */
 
-const {AtendimentoChatbot, Feedback, SessaoUsuario, BaseConhecimento, Pendencia, sequelize} = require('../models');
-const {Op} = require('sequelize');
-const { spawn } = require('child_process');
-const path = require('path');
+const {AtendimentoChatbot, Feedback, SessaoUsuario, Pendencia, sequelize, Tema, Subtema} = require('../models');
 const axios = require('axios');
 
 const ChatController = {
@@ -99,21 +96,52 @@ const ChatController = {
     },
 
     /**
-     * @description Cria uma pendência diretamente (para o cenário em que não há resposta).
+     * @description Cria uma pendência diretamente.
      */
     async criarPendenciaDireta(req, res) {
         const {id_atendimento} = req.body;
         if (!id_atendimento) {
             return res.status(400).json({message: 'ID do atendimento é obrigatório.'});
         }
+        const solicitacao = await sequelize.transaction();
         try {
-            await Pendencia.create({
+            const atendimento = await AtendimentoChatbot.findByPk(id_atendimento);
+            if (!atendimento) {
+                return res.status(404).json({ message: 'Atendimento não encontrado.' });
+            }
+
+            const novaPendencia = await Pendencia.create({
                 id_atendimento: id_atendimento,
                 motivo: 'O bot não encontrou uma resposta para a pergunta do usuário.'
+            }, { transaction: solicitacao });
+
+            const temas = await Tema.findAll({
+                include: [{ model: Subtema, as: 'subtemas' }]
             });
-            return res.status(201).json({message: 'A sua sugestão foi enviada com sucesso!'});
+
+            const categoriasLimpas = temas.map(tema => ({
+                nome: tema.nome,
+                subtemas: tema.subtemas.map(subtema => subtema.nome)
+            }));
+
+            const respostaIA = await axios.post('http://localhost:5001/categorizar', {
+                pergunta: atendimento.pergunta_usuario,
+                categorias: categoriasLimpas
+            });
+
+            const sugestao = respostaIA.data;
+            if (sugestao.tema && sugestao.subtema) {
+                novaPendencia.sugestao_tema = sugestao.tema;
+                novaPendencia.sugestao_subtema = sugestao.subtema;
+                await novaPendencia.save({ transaction: solicitacao });
+            }
+
+            await solicitacao.commit();
+            return res.status(201).json({ message: 'A sua sugestão foi enviada com sucesso e está a ser analisada.' });
         } catch (error) {
-            return res.status(500).json({message: 'Erro ao criar pendência.', error: error.message});
+            await solicitacao.rollback();
+            console.error("Erro ao criar pendência com IA:", error.response ? error.response.data : error.message);
+            return res.status(500).json({ message: 'Erro ao criar pendência.', error: error.message });
         }
     }
 };

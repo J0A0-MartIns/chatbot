@@ -1,13 +1,15 @@
-import os  #Usado para acessar variáveis de ambiente ou funções do sistema operacional.
-import sys # Usado para interagir com o interpretador Python, como manipular o sys.path, encerrar o script, logar erros, etc.
+import os  # Usado para acessar variáveis de ambiente ou funções do sistema operacional.
+import \
+    sys  # Usado para interagir com o interpretador Python, como manipular o sys.path, encerrar o script, logar erros, etc.
 import numpy as np
+import json
 from dotenv import load_dotenv
 from psycopg2._json import Json
 from sentence_transformers import SentenceTransformer
 import psycopg2
 from sklearn.metrics.pairwise import cosine_similarity
 from flask import Flask, request, jsonify
-#import google.generativeai as genai
+# import google.generativeai as genai
 import hashlib
 from sklearn.preprocessing import normalize
 from groq import Groq
@@ -19,7 +21,7 @@ def log_stderr(message):
 
 load_dotenv()
 
-#GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+# GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 if not GROQ_API_KEY:
     log_stderr("ERRO FATAL: A variável de ambiente GROQ_API_KEY não foi encontrada.")
@@ -52,10 +54,12 @@ def conectar_db():
 
 def buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn):
     try:
-        #Pega as palavras da pergunta
+        # Pega as palavras da pergunta
         palavras_pergunta = pergunta.lower().split()
-        ignorar_palavras = {'o', 'a', 'de', 'para', 'com', 'um', 'uma', 'como', 'qual', 'onde', 'quando', 'quero', 'saber'}
-        palavra_chave = [palavra for palavra in palavras_pergunta if palavra not in ignorar_palavras and len(palavra) > 3]
+        ignorar_palavras = {'o', 'a', 'de', 'para', 'com', 'um', 'uma', 'como', 'qual', 'onde', 'quando', 'quero',
+                            'saber'}
+        palavra_chave = [palavra for palavra in palavras_pergunta if
+                         palavra not in ignorar_palavras and len(palavra) > 3]
         log_stderr(f"Palavras extraídas da pergunta: {palavra_chave}")
 
         chunks_db = []
@@ -118,6 +122,7 @@ def buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn):
     except Exception as e:
         return None, f"Erro ao buscar chunks: {e}"
 
+
 # def gerar_resposta_com_gemini(contexto, pergunta):
 #     model="llama-3.3-70b-versatile",
 #
@@ -165,6 +170,7 @@ Resposta:"""
     except Exception as e:
         return None, f"Erro ao gerar resposta com GROQ: {e}"
 
+
 def buscar_resposta_no_cache(embedding_pergunta, conn):
     try:
         with conn.cursor() as cur:
@@ -207,6 +213,34 @@ def salvar_resposta_no_cache(pergunta, embedding_pergunta, resposta, conn):
     except Exception as e:
         conn.rollback()
         return f"Erro ao salvar no cache: {e}"
+
+
+def categorizar_pergunta_com_groq(pergunta, categorias_json):
+    prompt = f"""
+    Você é um assistente de organização de conteúdo. Sua tarefa é categorizar a pergunta de um usuário no tema e subtema mais apropriados a partir de uma lista fornecida.
+    Se nenhuma categoria existente parecer adequada, sugira um novo subtema dentro do tema mais relevante. Se nenhum tema for relevante, sugira um novo tema e um novo subtema.
+
+    Responda APENAS com um objeto JSON com as chaves "tema" e "subtema".
+
+    Lista de Categorias Existentes (JSON):
+    {categorias_json}
+
+    Pergunta do Usuário: "{pergunta}"
+
+    JSON com a sua sugestão:
+    """
+    try:
+        response = groq_client.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.0,
+            max_tokens=100,
+            response_format={"type": "json_object"}
+        )
+        sugestao = json.loads(response.choices[0].message.content)
+        return sugestao, None
+    except Exception as e:
+        return None, f"Erro ao categorizar: {e}"
 
 
 @app.route('/responder', methods=['POST'])
@@ -260,7 +294,7 @@ def responder():
             except Exception as e:
                 return jsonify({"error": f"Erro ao obter parágrafos vizinhos: {e}"}), 500
 
-            #resposta_final, err = gerar_resposta_com_gemini(contexto_completo, pergunta)
+            # resposta_final, err = gerar_resposta_com_gemini(contexto_completo, pergunta)
             resposta_final, err = gerar_resposta_com_groq(contexto_completo, pergunta)
             if err: return jsonify({"error": err}), 500
             score_debug = melhor_chunk["score"]
@@ -270,6 +304,7 @@ def responder():
     finally:
         if conn:
             conn.close()
+
 
 @app.route('/salvar_cache', methods=['POST'])
 def salvar_cache():
@@ -293,6 +328,21 @@ def salvar_cache():
         return jsonify({"message": "Resposta salva no cache com sucesso."})
     finally:
         conn.close()
+
+
+@app.route('/categorizar', methods=['POST'])
+def categorizar():
+    dados = request.json
+    pergunta = dados.get('pergunta')
+    categorias = dados.get('categorias')
+    if not pergunta or not categorias:
+        return jsonify({"error": "Os campos 'pergunta' e 'categorias' são obrigatórios."}), 400
+    categorias_json = json.dumps(categorias, indent=2, ensure_ascii=False)
+    sugestao, err = categorizar_pergunta_com_groq(pergunta, categorias_json)
+    if err:
+        return jsonify({"error": err}), 500
+    return jsonify(sugestao)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)

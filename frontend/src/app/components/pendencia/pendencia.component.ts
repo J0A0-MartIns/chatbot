@@ -83,9 +83,11 @@ export class PendenciaComponent implements OnInit {
     this.perguntaResumo = pendencia.pergunta.length > 150 ? `${pendencia.pergunta.substring(0, 150)}...` : pendencia.pergunta;
     this.docParaAprovar = {
       titulo: pendencia.pergunta,
-      conteudo: pendencia.resposta,
+      conteudo: '',
       palavras_chave: '',
       id_subtema: 0,
+      sugestao_tema: pendencia.sugestao_tema,
+      sugestao_subtema: pendencia.sugestao_subtema
     };
     this.idTemaSelecionadoNoModal = null;
     this.novoTemaNome = '';

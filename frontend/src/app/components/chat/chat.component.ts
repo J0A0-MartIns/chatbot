@@ -78,7 +78,7 @@ export class ChatComponent implements OnInit {
                 this.idAtendimentoAtual = res.id_atendimento;
                 this.respostaEncontrada = res.encontrado;
                 this.solucoesEncontradas = res.solucoes || [];
-                this.respostaDaIA = res.resposta; // Guarda a resposta da IA
+                this.respostaDaIA = res.resposta;
                 this.isLoading = false;
             },
             error: (err) => {
@@ -113,7 +113,7 @@ export class ChatComponent implements OnInit {
         if (!this.idAtendimentoAtual) return;
         this.chatService.criarPendenciaDireta(this.idAtendimentoAtual).subscribe(() => {
             this.etapaFeedback = 'finalizado';
-            this.respostaDaIA = 'Obrigado! A sua dúvida foi enviada como uma sugestão para a nossa equipa.';
+            this.respostaDaIA = 'Obrigado! A sua dúvida foi enviada para análise.';
         });
     }
 
