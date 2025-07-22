@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { DashboardService } from '../../services/dashboard.service';
-import {CommonModule, NgIf} from '@angular/common'; // Importe se o componente for standalone
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,8 +13,10 @@ import {CommonModule, NgIf} from '@angular/common'; // Importe se o componente f
      standalone: true,
 })
 export class DashboardComponent implements OnInit {
-  perguntasHojeCount = 0;
+  respostasEncontradasHoje = 0;
+  usuariosAtivosCount = 0;
   pendenciasCount = 0;
+  usuariosPendentesCount = 0;
   isLoading = true;
 
   constructor(
@@ -30,15 +32,15 @@ export class DashboardComponent implements OnInit {
     this.isLoading = true;
     this.dashboardService.getStats().subscribe({
       next: (stats) => {
-        this.perguntasHojeCount = stats.perguntasHojeCount;
+        this.respostasEncontradasHoje = stats.respostasEncontradasHoje;
+        this.usuariosAtivosCount = stats.usuariosAtivosCount;
+        this.usuariosPendentesCount = stats.usuariosPendentesCount;
         this.pendenciasCount = stats.pendenciasCount;
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Erro ao carregar indicadores do dashboard:', err);
         this.isLoading = false;
-        this.perguntasHojeCount = 0;
-        this.pendenciasCount = 0;
       }
     });
   }

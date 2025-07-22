@@ -33,7 +33,7 @@
                     <li><a routerLink="/chat" routerLinkActive="active"><span class="material-icons">question_answer</span><span class="text" *ngIf="!isCollapsed">Buscar Solução</span></a></li>
 
                     <li *ngIf="temAcessoAPagina(user, ['dashboard', 'relatorio', 'pendencia'])">
-                        <a routerLink="/dashboard" routerLinkActive="active"><span class="material-icons">insights</span><span class="text" *ngIf="!isCollapsed">Dashboard & Relatórios</span></a>
+                        <a routerLink="/dashboard" routerLinkActive="active"><span class="material-icons">insights</span><span class="text" *ngIf="!isCollapsed">Dashboard</span></a>
                     </li>
                     <li *ngIf="temAcessoAPagina(user, ['usuario', 'perfil', 'permissao'])">
                         <a routerLink="/gestao" routerLinkActive="active"><span class="material-icons">manage_accounts</span><span class="text" *ngIf="!isCollapsed">Gestão de Usuários</span></a>

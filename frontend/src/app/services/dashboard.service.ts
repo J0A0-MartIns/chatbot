@@ -5,8 +5,10 @@ import { environment } from '../environments/environment';
 
 //Defini a estrutura da resposta da API
 export interface DashboardStats {
-    perguntasHojeCount: number;
+    respostasEncontradasHoje: number;
+    usuariosAtivosCount: number;
     pendenciasCount: number;
+    usuariosPendentesCount: number;
 }
 
 @Injectable({
