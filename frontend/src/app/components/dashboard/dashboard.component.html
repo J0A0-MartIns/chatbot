@@ -1,14 +1,32 @@
 <div class="dashboard-container">
     <div class="dashboard-box">
-        <h2>Dashboard</h2>
+        <h2>Visão Geral</h2>
         <div class="dashboard-grid">
             <div class="dashboard-left dashboard-box-inner">
                 <div class="button-group">
                     <button (click)="irParaRelatorios()">
-                        Relatórios
+                        <span class="icon-container">
+                            <i class="material-icons">dashboard</i>
+                        </span>
+                        <span class="label-text">Relatórios</span>
                     </button>
                     <button (click)="irParaPendencias()">
-                        Solicitações de Inclusão
+                        <span class="icon-container">
+                            <i class="material-icons">add</i>
+                        </span>
+                        <span class="label-text">Solicitações de Inclusão</span>
+                    </button>
+                    <button (click)="irParaUsuarios()">
+                        <span class="icon-container">
+                            <i class="material-icons">people</i>
+                        </span>
+                        <span class="label-text">Gerenciar Usuários</span>
+                    </button>
+                    <button (click)="irParaPerfil()">
+                        <span class="icon-container">
+                            <i class="material-icons">security</i>
+                        </span>
+                        <span class="label-text">Gerenciar Perfis</span>
                     </button>
                 </div>
             </div>
@@ -34,6 +52,14 @@
                            *ngIf="!isLoading; else loadingIndicator">{{ usuariosPendentesCount }}</p>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div class="charts-grid">
+            <div class="chart-container dashboard-card">
+                <canvas id="taxaRespostasChart"></canvas>
+            </div>
+            <div class="chart-container dashboard-card">
+                <canvas id="volumeAtendimentosChart"></canvas>
             </div>
         </div>
     </div>

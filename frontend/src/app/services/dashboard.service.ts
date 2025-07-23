@@ -3,12 +3,21 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
-//Defini a estrutura da resposta da API
 export interface DashboardStats {
     respostasEncontradasHoje: number;
     usuariosAtivosCount: number;
     pendenciasCount: number;
     usuariosPendentesCount: number;
+}
+
+export interface TaxaRespostasData {
+    encontradas: number;
+    naoEncontradas: number;
+}
+
+export interface VolumeAtendimentosData {
+    dia: string;
+    count: string;
 }
 
 @Injectable({
@@ -21,5 +30,13 @@ export class DashboardService {
 
     getStats(): Observable<DashboardStats> {
         return this.http.get<DashboardStats>(`${this.apiUrl}/stats`);
+    }
+
+    getTaxaRespostas(): Observable<TaxaRespostasData> {
+        return this.http.get<TaxaRespostasData>(`${this.apiUrl}/taxa-respostas`);
+    }
+
+    getVolumeAtendimentos(): Observable<VolumeAtendimentosData[]> {
+        return this.http.get<VolumeAtendimentosData[]>(`${this.apiUrl}/volume-atendimentos`);
     }
 }

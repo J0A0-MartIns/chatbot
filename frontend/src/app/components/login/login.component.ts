@@ -34,7 +34,7 @@ export class LoginComponent {
         this.authService.login(this.email, this.senha).subscribe({
             next: () => {
                 this.isLoading = false;
-                this.router.navigate(['/home']);
+                this.router.navigate(['/chat']);
             },
             error: (err) => {
                 this.isLoading = false;
