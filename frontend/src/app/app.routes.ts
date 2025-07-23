@@ -28,10 +28,10 @@ export const routes: Routes = [
     path: '',
     canActivate: [authGuard],
     children: [
-      { path: 'home', component: HomeComponent },
+      // { path: 'home', component: HomeComponent },
       { path: 'usuario', component: UsuarioComponent },
       { path: 'perfil', component: PerfilComponent },
-      { path: 'dashboard', component: DashboardComponent },
+      { path: 'home', component: DashboardComponent },
       { path: 'base', component: BaseComponent },
       { path: 'login', component: LoginComponent },
       { path: 'cadastro', component: CadastroComponent },

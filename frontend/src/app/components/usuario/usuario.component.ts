@@ -88,17 +88,17 @@ export class UsuarioComponent implements OnInit {
             };
             this.userService.criarUsuarioAtivo(payload).subscribe({
                 next: (res) => {
-                    alert(res.mensagem || 'Utilizador criado com sucesso!');
+                    alert(res.mensagem || 'Usuário criado com sucesso!');
                     this.carregarDados();
                     this.fecharModalUsuario();
                 },
-                error: (err) => alert(`Erro ao criar utilizador: ${err.error?.message || 'Tente novamente.'}`)
+                error: (err) => alert(`Erro ao criar Usuário: ${err.error?.message || 'Tente novamente.'}`)
             });
         }
     }
 
     desativarUsuario(id: number): void {
-        if (confirm('Tem a certeza que deseja desativar este utilizador?')) {
+        if (confirm('Tem a certeza que deseja desativar este Usuário?')) {
             this.userService.desativarUsuario(id).subscribe(() => this.carregarDados());
         }
     }

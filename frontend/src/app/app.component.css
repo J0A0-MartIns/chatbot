@@ -83,7 +83,6 @@ html, body {
   padding-top: 40px;
 }
 
-/* SIDEBAR */
 .sidebar {
   width: 220px;
   background-color: #00A651;
@@ -179,7 +178,6 @@ html, body {
   align-items: center;
 }
 
-/* RESPONSIVO */
 @media (max-width: 780px) {
   .sidebar {
     width: 100%;
@@ -254,23 +252,6 @@ html, body {
     margin-left: 0;
     padding-bottom: 60px;
   }
+
 }
 
-@media (max-width: 480px) {
-  .menu li .text {
-    display: none;
-  }
-
-  .menu li a {
-    padding: 6px;
-    font-size: 0;
-  }
-
-  .material-icons {
-    font-size: 24px;
-  }
-
-  .sidebar.collapsed {
-    width: 100% !important;
-  }
-}

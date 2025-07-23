@@ -3,7 +3,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: 40px 20px;
+    padding-top: 2rem;
     min-height: 100%;
     box-sizing: border-box;
 }
@@ -189,7 +189,7 @@ form select:focus {
 
 .table-container {
     padding: 20px;
-    overflow-x: visible;
+    overflow-x: auto;
     width: 100%;
 }
 
@@ -197,9 +197,8 @@ table {
     width: 100%;
     border-collapse: collapse;
     font-family: Arial, sans-serif;
-    min-width: 650px;
+    min-width: 1000px;
     border-radius: 8px;
-    /*overflow: hidden;*/
     box-shadow: 0 0 10px rgb(0 0 0 / 0.05);
 }
 

@@ -30,7 +30,7 @@
             <nav class="menu" *ngIf="user$ | async as user">
                 <ul>
                     <li *ngIf="temAcessoAPagina(user, ['dashboard', 'relatorio', 'pendencia'])">
-                        <a routerLink="/dashboard" routerLinkActive="active"><span class="material-icons">home</span><span class="text" *ngIf="!isCollapsed">Início</span></a>
+                        <a routerLink="/home" routerLinkActive="active"><span class="material-icons">home</span><span class="text" *ngIf="!isCollapsed">Início</span></a>
                     </li>
 <!--                    <li><a routerLink="/home" routerLinkActive="active"><span class="material-icons">home</span><span class="text" *ngIf="!isCollapsed">Início</span></a></li>-->
                     <li><a routerLink="/chat" routerLinkActive="active"><span class="material-icons">question_answer</span><span class="text" *ngIf="!isCollapsed">Buscar Solução</span></a></li>

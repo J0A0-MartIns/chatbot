@@ -33,7 +33,7 @@ const UserController = {
             return res.status(201).json({ message: 'Solicitação de cadastro enviada com sucesso! Aguardando aprovação.' });
 
         } catch (err) {
-            return res.status(500).json({ message: 'Erro ao criar solicitação de utilizador.', error: err.message });
+            return res.status(500).json({ message: 'Erro ao criar solicitação de usuário.', error: err.message });
         }
     },
 
@@ -53,11 +53,11 @@ const UserController = {
 
             return res.status(201).json({
                 usuario: formatUserResponse(novoUsuario),
-                mensagem: `Utilizador criado com sucesso! A senha padrão é: "${senhaPadrao}"`
+                mensagem: `Usuário criado com sucesso! A senha padrão é: "${senhaPadrao}"`
             });
 
         } catch (err) {
-            return res.status(500).json({ message: "Erro ao criar utilizador ativo.", error: err.message });
+            return res.status(500).json({ message: "Erro ao criar usuário ativo.", error: err.message });
         }
     },
 
@@ -73,8 +73,8 @@ const UserController = {
             const formattedUsers = users.map(user => formatUserResponse(user));
             return res.status(200).json(formattedUsers);
         } catch (err) {
-            console.error("Erro ao listar utilizadores:", err);
-            return res.status(500).json({ message: 'Erro ao listar utilizadores.', error: err.message });
+            console.error("Erro ao listar usuários:", err);
+            return res.status(500).json({ message: 'Erro ao listar usuário.', error: err.message });
         }
     },
 
@@ -110,7 +110,7 @@ const UserController = {
             return res.status(200).json(usuariosPendentes.map(user => formatUserResponse(user)));
         } catch (err) {
             console.error("Erro ao listar pendentes:", err);
-            return res.status(500).json({ message: 'Erro ao listar utilizadores pendentes.', error: err.message });
+            return res.status(500).json({ message: 'Erro ao listar usuários pendentes.', error: err.message });
         }
     },
 
@@ -122,13 +122,13 @@ const UserController = {
         try {
             const usuario = await Usuario.findByPk(id);
             if (!usuario || usuario.status !== 'pendente') {
-                return res.status(404).json({ message: 'Utilizador pendente não encontrado.' });
+                return res.status(404).json({ message: 'Usuário pendente não encontrado.' });
             }
             usuario.status = 'ativo';
             await usuario.save();
-            return res.status(200).json({ message: 'Utilizador aprovado com sucesso.' });
+            return res.status(200).json({ message: 'Usuário aprovado com sucesso.' });
         } catch (err) {
-            return res.status(500).json({ message: 'Erro ao aprovar utilizador.', error: err.message });
+            return res.status(500).json({ message: 'Erro ao aprovar usuário.', error: err.message });
         }
     },
 
@@ -155,14 +155,14 @@ const UserController = {
         const { id } = req.params;
         try {
             const user = await Usuario.findByPk(id);
-            if (!user) return res.status(404).json({ message: 'Utilizador não encontrado.' });
+            if (!user) return res.status(404).json({ message: 'Usuário não encontrado.' });
 
             user.status = 'inativo';
             await user.save();
 
-            return res.status(200).json({ message: 'Utilizador desativado com sucesso.' });
+            return res.status(200).json({ message: 'Usuário desativado com sucesso.' });
         } catch (err) {
-            return res.status(500).json({ message: 'Erro ao desativar utilizador.', error: err.message });
+            return res.status(500).json({ message: 'Erro ao desativar usuário.', error: err.message });
         }
     },
 
@@ -175,7 +175,7 @@ const UserController = {
         try {
             const user = await Usuario.findOne({ where: { id_usuario: id, status: 'ativo' }});
             if (!user) {
-                return res.status(404).json({ message: 'Utilizador não encontrado.' });
+                return res.status(404).json({ message: 'Usuário não encontrado.' });
             }
             user.nome = nome || user.nome;
             user.email = email || user.email;
@@ -183,7 +183,7 @@ const UserController = {
             await user.save();
             return res.json(formatUserResponse(user));
         } catch (err) {
-            return res.status(500).json({ message: 'Erro ao atualizar utilizador.', error: err.message });
+            return res.status(500).json({ message: 'Erro ao atualizar usuário.', error: err.message });
         }
     },
 
@@ -196,7 +196,7 @@ const UserController = {
         try {
             const usuario = await Usuario.findOne({ where: { id_usuario: id, status: 'ativo' } });
             if (!usuario) {
-                return res.status(404).json({ mensagem: 'Utilizador não encontrado.' });
+                return res.status(404).json({ mensagem: 'Usuário não encontrado.' });
             }
 
             const senhaValida = await bcrypt.compare(senhaAtual, usuario.senha);

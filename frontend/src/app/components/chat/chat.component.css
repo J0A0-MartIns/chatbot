@@ -197,7 +197,7 @@ form button:hover {
     }
 
     .form-row {
-        flex-direction: column;
+        flex-direction: row;
     }
 
     .button-wrapper {
@@ -207,5 +207,10 @@ form button:hover {
     form button {
         width: 100%;
         justify-content: center;
+    }
+
+    .chat-form {
+        display: flex;
+        flex-direction: column;
     }
 }
