@@ -101,6 +101,23 @@ export class BaseComponent implements OnInit {
     this.showModal = true;
   }
 
+  async excluirArquivoAnexado(id_arquivo: number): Promise<void> {
+    if (confirm('Tem a certeza que deseja excluir este anexo?')) {
+      try {
+        await lastValueFrom(this.baseService.excluirArquivo(id_arquivo));
+        if (this.docEmEdicao.DocumentoArquivos) {
+          this.docEmEdicao.DocumentoArquivos = this.docEmEdicao.DocumentoArquivos.filter(
+              f => f.id_arquivo !== id_arquivo
+          );
+        }
+        this.carregarDocumentos();
+      } catch (error) {
+        console.error('Erro ao excluir arquivo:', error);
+        alert('Não foi possível excluir o anexo.');
+      }
+    }
+  }
+
   fecharModal(): void {
     this.showModal = false;
   }
@@ -202,6 +219,7 @@ export class BaseComponent implements OnInit {
       ativo: true,
       id_usuario: user?.id_usuario,
       id_subtema: 0,
+      DocumentoArquivos: []
     };
   }
 }

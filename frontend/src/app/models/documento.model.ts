@@ -20,8 +20,14 @@ export interface Documento {
     data_criacao?: string;
     id_usuario?: number;
     id_subtema?: number;
-
     Tema?: Tema;
     Subtema?: Subtema;
     Usuario?: UsuarioSimple;
+    DocumentoArquivos?: DocumentoArquivo[];
+}
+
+export interface DocumentoArquivo {
+    id_arquivo: number;
+    nome_original: string;
+    caminho_arquivo: string;
 }

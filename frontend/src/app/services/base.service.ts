@@ -9,6 +9,7 @@ import { environment } from '../environments/environment';
 })
 export class BaseService {
     private apiUrl = `${environment.apiUrl}/base-conhecimento`;
+    private arquivoApiUrl = `${environment.apiUrl}/arquivo`;
 
     constructor(private http: HttpClient) {}
 
@@ -35,9 +36,12 @@ export class BaseService {
 
     uploadArquivo(id_documento: number, file: File): Observable<any> {
         const formData = new FormData();
-        //nome deve corresponder ao usado no middleware multer no back-end.
         formData.append('arquivo', file, file.name);
         return this.http.post(`${this.apiUrl}/${id_documento}/upload`, formData);
+    }
+
+    excluirArquivo(id_arquivo: number): Observable<any> {
+        return this.http.delete(`${this.arquivoApiUrl}/${id_arquivo}`);
     }
 
     //Implementar quando usar ia

@@ -4,7 +4,8 @@
         <button (click)="abrirModalParaCriar()" class="add-button">Adicionar Conteúdo</button>
 
         <div class="filtros-container">
-            <input type="text" [(ngModel)]="termoBusca" placeholder="Buscar por título..." class="input-busca" name="busca" />
+            <input type="text" [(ngModel)]="termoBusca" placeholder="Buscar por título..." class="input-busca"
+                   name="busca"/>
         </div>
 
         <div class="table-container">
@@ -43,7 +44,8 @@
                 [ngStyle]="{ top: dropdownPosition.top, left: dropdownPosition.left }">
 
             <button (click)="abrirModalParaEditar(documentos[openActionIndex])">Editar</button>
-            <button (click)="excluirDocumento(documentos[openActionIndex].id_documento)" class="btn-excluir">Excluir</button>
+            <button (click)="excluirDocumento(documentos[openActionIndex].id_documento)" class="btn-excluir">Excluir
+            </button>
         </div>
 
         <div class="modal" *ngIf="showModal">
@@ -52,32 +54,59 @@
                 <h3>{{ isEditMode ? 'Editar Documento' : 'Adicionar Documento' }}</h3>
 
                 <form (ngSubmit)="salvarDocumento()">
-                    <input type="text" [(ngModel)]="docEmEdicao.titulo" name="titulo" placeholder="Título do Documento" required />
+                    <input type="text" [(ngModel)]="docEmEdicao.titulo" name="titulo" placeholder="Título do Documento"
+                           required/>
 
                     <label for="tema-modal">Tema:</label>
-                    <select id="tema-modal" name="tema" [(ngModel)]="idTemaSelecionadoNoModal" (change)="onTemaChangeNoModal()" [disabled]="novoTemaNome.trim() !== ''">
+                    <select id="tema-modal" name="tema" [(ngModel)]="idTemaSelecionadoNoModal"
+                            (change)="onTemaChangeNoModal()" [disabled]="novoTemaNome.trim() !== ''">
                         <option [ngValue]="null">-- Escolha um Tema Existente --</option>
                         <option *ngFor="let tema of temas" [ngValue]="tema.id_tema">{{ tema.nome }}</option>
                     </select>
                     <span class="ou-text">ou</span>
-                    <input type="text" [(ngModel)]="novoTemaNome" name="novoTemaNome" placeholder="Crie um Novo Tema" [disabled]="!!idTemaSelecionadoNoModal" />
+                    <input type="text" [(ngModel)]="novoTemaNome" name="novoTemaNome" placeholder="Crie um Novo Tema"
+                           [disabled]="!!idTemaSelecionadoNoModal"/>
 
                     <label for="subtema-modal">Subtema:</label>
-                    <select id="subtema-modal" name="id_subtema" [(ngModel)]="docEmEdicao.id_subtema" [disabled]="novoSubtemaNome.trim() !== '' || !idTemaSelecionadoNoModal">
+                    <select id="subtema-modal" name="id_subtema" [(ngModel)]="docEmEdicao.id_subtema"
+                            [disabled]="novoSubtemaNome.trim() !== '' || !idTemaSelecionadoNoModal">
                         <option [ngValue]="0" disabled>-- Escolha um Subtema --</option>
-                        <option *ngFor="let subtema of subtemasDoTemaSelecionado" [ngValue]="subtema.id_subtema">{{ subtema.nome }}</option>
+                        <option *ngFor="let subtema of subtemasDoTemaSelecionado"
+                                [ngValue]="subtema.id_subtema">{{ subtema.nome }}
+                        </option>
                     </select>
                     <span class="ou-text">ou</span>
-                    <input type="text" [(ngModel)]="novoSubtemaNome" name="novoSubtemaNome" placeholder="Crie um Novo Subtema" [disabled]="!!docEmEdicao.id_subtema && docEmEdicao.id_subtema > 0" />
+                    <input type="text" [(ngModel)]="novoSubtemaNome" name="novoSubtemaNome"
+                           placeholder="Crie um Novo Subtema"
+                           [disabled]="!!docEmEdicao.id_subtema && docEmEdicao.id_subtema > 0"/>
 
-                    <textarea [(ngModel)]="docEmEdicao.conteudo" name="conteudo" placeholder="Conteúdo do documento..." required></textarea>
-                    <input type="text" [(ngModel)]="docEmEdicao.palavras_chave" name="palavras_chave" placeholder="Palavras-chave (separadas por vírgula)" />
+                    <textarea [(ngModel)]="docEmEdicao.conteudo" name="conteudo" placeholder="Conteúdo do documento..."
+                              required></textarea>
+                    <input type="text" [(ngModel)]="docEmEdicao.palavras_chave" name="palavras_chave"
+                           placeholder="Palavras-chave (separadas por vírgula)"/>
 
                     <div class="upload-section">
-                        <label for="file-upload">Anexar Documento (PDF, DOCX):</label>
-                        <input id="file-upload" type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx">
-                        <div *ngIf="arquivoParaUpload" class="file-info">
-                            Arquivo selecionado: {{ arquivoParaUpload.name }}
+                        <label>Anexos:</label>
+
+                        <div *ngIf="isEditMode && docEmEdicao.DocumentoArquivos && docEmEdicao.DocumentoArquivos.length > 0">
+                            <ul class="existing-files-list">
+                                <li *ngFor="let arquivo of docEmEdicao.DocumentoArquivos">
+                                    <a [href]="'http://localhost:3000/' + arquivo.caminho_arquivo"
+                                       target="_blank">{{ arquivo.nome_original }}</a>
+                                    <button type="button" class="delete-file-btn"
+                                            (click)="excluirArquivoAnexado(arquivo.id_arquivo)">&times;
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <label for="file-upload" class="file-upload-label">Adicionar Novo Arquivo:</label>
+                            <input id="file-upload" type="file" (change)="onFileSelected($event)"
+                                   accept=".pdf,.doc,.docx">
+                            <div *ngIf="arquivoParaUpload" class="file-info">
+                                Novo arquivo para enviar: {{ arquivoParaUpload.name }}
+                            </div>
                         </div>
                     </div>
 

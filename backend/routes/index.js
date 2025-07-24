@@ -11,6 +11,7 @@ const baseConhecimentoRoutes = require('./base_conhecimento.routes');
 //const solucaoRoutes = require('./solucao.routes');
 const feedbackRoutes = require('./feedback.routes');
 const pendenciaRoutes = require('./pendencia.routes');
+const documentoRoutes = require('./documento_arquivo.routes');
 
 router.use('/usuarios', usuarioRoutes);
 router.use('/perfis', perfilRoutes);
@@ -24,7 +25,9 @@ router.use('/base', baseConhecimentoRoutes);
 router.use('/feedbacks', feedbackRoutes);
 router.use('/pendencias', pendenciaRoutes);
 router.use('/auth', pendenciaRoutes);
-router.use('/base-conhecimento', require('./base_conhecimento.routes'));
+router.use('/base-conhecimento', baseConhecimentoRoutes);
+router.use('/arquivo', documentoRoutes);
+
 
 
 module.exports = router;

@@ -44,11 +44,11 @@ const BaseConhecimentoController = {
                         model: Usuario,
                         as: 'Usuario',
                         attributes: ['id_usuario', 'nome', 'email']
+                    },
+                    {
+                        model: DocumentoArquivo,
+                        as: 'DocumentoArquivos'
                     }
-                    // {
-                    //     model: DocumentoArquivo,
-                    //     as: 'DocumentoArquivos'
-                    // }
                 ],
                 order: [['data_criacao', 'DESC']]
             });
@@ -180,7 +180,7 @@ const BaseConhecimentoController = {
     },
 
     /**
-     * @description Processa um arquivo enviado e o associa a um documento da base de conhecimento.
+     * Processa um arquivo enviado e o associa a um documento da base de conhecimento.
      * integrado com a IA
      */
     async uploadArquivo(req, res) {
