@@ -16,6 +16,14 @@ module.exports = (sequelize, DataTypes) => {
         id_perfil: {
             type: DataTypes.INTEGER,
             allowNull: false
+        },
+        passwordResetToken: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        passwordResetExpires: {
+            type: DataTypes.DATE,
+            allowNull: true
         }
     }, {
         tableName: 'usuario',

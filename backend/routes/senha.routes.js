@@ -8,6 +8,6 @@ const passwordController = require('../controllers/senha.controller');
 
 
 router.post('/forgot', passwordController.forgotPassword);
-router.post('/reset/:token', passwordController.resetPassword);
+router.post('/reset', passwordController.resetPassword);
 
 module.exports = router;

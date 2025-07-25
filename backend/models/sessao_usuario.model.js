@@ -5,12 +5,17 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             autoIncrement: true
         },
+        token: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
         data_login: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW
         },
         data_logout: DataTypes.DATE,
         id_usuario: DataTypes.INTEGER
+
     }, {
         tableName: 'sessao_usuario',
         timestamps: false

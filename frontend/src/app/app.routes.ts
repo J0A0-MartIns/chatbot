@@ -23,6 +23,8 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'cadastro', component: CadastroComponent },
   { path: 'senha', component: SenhaComponent },
+  { path: 'esqueci-senha', component: SenhaComponent },
+  { path: 'reset-senha', component: NovaSenhaComponent },
 
   {
     path: '',

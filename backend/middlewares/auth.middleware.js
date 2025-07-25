@@ -29,6 +29,7 @@ const authenticateToken = (req, res, next) => {
             const sessaoAtiva = await SessaoUsuario.findOne({
                 where: {
                     id_usuario: user.id,
+                    token,
                     data_logout: null
                 }
             });
@@ -46,24 +47,6 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-// /** Removido para usar novo padrão de permissões granulares
-//  * Uma função de fábrica que retorna um middleware de autorização.
-//  * O middleware gerado verifica se o perfil do usuário logado está
-//  * incluído na lista de perfis permitidos.  **Substituir pelo pode para rbac**
-//  */
-// const authorizePerfil = (allowedProfiles) => {
-//     return (req, res, next) => {
-//         if (!req.user || !req.user.perfil) {
-//             return res.status(401).json({message: 'Não autenticado ou o perfil do utilizador não foi encontrado no token.'});
-//         }
-//         if (!allowedProfiles.includes(req.user.perfil)) {
-//             return res.status(403).json({message: 'Acesso negado. O seu perfil não tem permissão para esta ação.'});
-//         }
-//         next();
-//     };
-// };
-
 module.exports = {
     authenticateToken
-    //authorizePerfil,
 };

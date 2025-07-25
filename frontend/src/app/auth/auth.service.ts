@@ -9,13 +9,18 @@ export interface AuthResponse {
     token: string;
     usuario: Usuario;
 }
+export interface ResetPasswordPayload {
+    email: string;
+    code: string;
+    senha: string;
+}
 
 @Injectable({
     providedIn: 'root'
 })
 export class AuthService {
     private authApiUrl = `${environment.apiUrl}/auth`;
-    private passwordApiUrl = `${environment.apiUrl}/password`;
+    private passwordApiUrl = `${environment.apiUrl}/senha`;
     private userSubject = new BehaviorSubject<Usuario | null>(null);
     public user$ = this.userSubject.asObservable();
     public sessionExpired$ = new Subject<string>();
@@ -51,7 +56,6 @@ export class AuthService {
      * Faz o logout: notifica o back-end primeiro e depois limpa a sessão local.
      */
     logout(): void {
-        //Token enviado para o back para invalidar a sessão atual
         const token = this.getToken();
         if (token) {
             this.http.post(`${this.authApiUrl}/logout`, {}).subscribe({
@@ -71,10 +75,10 @@ export class AuthService {
     }
 
     /**
-     * Redefine a senha utilizando um token de segurança.
+     * Redefine a senha utilizando o e-mail, o código e a nova senha.
      */
-    resetPassword(token: string, senha: string): Observable<any> {
-        return this.http.post(`${this.passwordApiUrl}/reset/${token}`, { senha });
+    resetPassword(payload: ResetPasswordPayload): Observable<any> {
+        return this.http.post(`${this.passwordApiUrl}/reset`, payload);
     }
 
     getUser(): Usuario | null {
@@ -131,7 +135,8 @@ export class AuthService {
         }
     }
 
-    private handleSessionExpiration(message: string): void {
+    handleSessionExpiration(message: string): void {
         this.sessionExpired$.next(message);
+        this.logout();
     }
 }

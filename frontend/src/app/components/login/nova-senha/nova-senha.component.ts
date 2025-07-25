@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
-import { AuthService } from '../../../auth/auth.service';
+import {AuthService, ResetPasswordPayload} from '../../../auth/auth.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -11,10 +11,11 @@ import { CommonModule } from '@angular/common';
   templateUrl: './nova-senha.component.html',
   styleUrls: ['../login.component.css']
 })
-export class NovaSenhaComponent implements OnInit {
+export class NovaSenhaComponent {
+  email = '';
+  code = '';
   novaSenha = '';
   confirmarSenha = '';
-  token: string | null = null;
 
   mensagem = '';
   erro = '';
@@ -26,21 +27,11 @@ export class NovaSenhaComponent implements OnInit {
       private authService: AuthService
   ) {}
 
-  ngOnInit(): void {
-    this.route.queryParamMap.subscribe(params => {
-      this.token = params.get('token');
-      if (!this.token) {
-        alert('Token de recuperação não encontrado ou inválido. Por favor, solicite a recuperação novamente.');
-        this.router.navigate(['/login']);
-      }
-    });
-  }
-
   redefinirSenha(): void {
     this.erro = '';
     this.mensagem = '';
 
-    if (!this.novaSenha || !this.confirmarSenha) {
+    if (!this.email || !this.code || !this.novaSenha || !this.confirmarSenha) {
       this.erro = 'Por favor, preencha todos os campos.';
       return;
     }
@@ -48,22 +39,23 @@ export class NovaSenhaComponent implements OnInit {
       this.erro = 'As senhas não coincidem.';
       return;
     }
-    if (!this.token) {
-      this.erro = 'Token de recuperação inválido.';
-      return;
-    }
 
     this.isLoading = true;
-    this.authService.resetPassword(this.token, this.novaSenha).subscribe({
+    const payload: ResetPasswordPayload = {
+      email: this.email,
+      code: this.code,
+      senha: this.novaSenha
+    };
+
+    this.authService.resetPassword(payload).subscribe({
       next: (res) => {
         this.isLoading = false;
         this.mensagem = res.message || 'Senha redefinida com sucesso! Você já pode fazer o login.';
-        // Opcional: redirecionar para o login após alguns segundos
         setTimeout(() => this.router.navigate(['/login']), 4000);
       },
       error: (err) => {
         this.isLoading = false;
-        this.erro = err.error?.message || 'Ocorreu um erro ao redefinir a senha. O token pode ter expirado.';
+        this.erro = err.error?.message || 'Ocorreu um erro. Verifique o e-mail e o código, ou solicite um novo.';
       }
     });
   }

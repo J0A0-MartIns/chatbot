@@ -37,7 +37,9 @@ module.exports = (sequelize, DataTypes) => {
         });
         BaseConhecimento.hasMany(models.DocumentoArquivo, {
             foreignKey: 'id_documento',
-            as: 'DocumentoArquivos'
+            as: 'DocumentoArquivos',
+            onDelete: 'CASCADE',
+            hooks: true
         });
 
         BaseConhecimento.belongsToMany(models.AtendimentoChatbot, {

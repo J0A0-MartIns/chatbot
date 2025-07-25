@@ -9,8 +9,7 @@ const jwt = require('jsonwebtoken');
 
 const AuthController = {
     /**
-     * @description Autentica um usuário, cria uma nova sessão e retorna um token JWT.
-     * @route POST /auth/login
+     * Autentica um usuário, cria uma nova sessão e retorna um token JWT.
      */
     async login(req, res) {
         const { email, senha } = req.body;
@@ -42,12 +41,12 @@ const AuthController = {
                 { where: { id_usuario: usuario.id_usuario, data_logout: null } }
             );
 
-            await SessaoUsuario.create({ id_usuario: usuario.id_usuario });
-
             const payload = { id: usuario.id_usuario, perfil: usuario.Perfil?.nome };
             const secret = process.env.JWT_SECRET || 'chave_secreta';
 
             const token = jwt.sign(payload, secret, { expiresIn: '8h' });
+
+            await SessaoUsuario.create({ id_usuario: usuario.id_usuario, token });
 
             const usuarioParaRetorno = usuario.toJSON();
             delete usuarioParaRetorno.senha;

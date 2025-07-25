@@ -3,8 +3,11 @@
  */
 
 const { Usuario } = require('../models');
-const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const {enviarEmailRecuperacao} = require("../services/email.service");
+const {Op} = require("sequelize");
+
+const gerarCodigo = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 const SenhaController = {
     /**
@@ -16,52 +19,54 @@ const SenhaController = {
             const usuario = await Usuario.findOne({ where: { email } });
 
             if (!usuario) {
-                return res.status(200).json({ message: 'Se um usuário com este e-mail existir, um link de recuperação será enviado.' });
+                return res.status(200).json({ message: 'Se um usuário com este e-mail existir, um código de recuperação será enviado.' });
             }
 
-            const resetToken = crypto.randomBytes(32).toString('hex');
-            const passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+            const resetCode = gerarCodigo();
+            const hashedCode = await bcrypt.hash(resetCode, 10);
+            const expires = Date.now() + 10 * 60 * 1000;
 
-            //Tempo de expiração do token
-            const passwordResetExpires = Date.now() + 10 * 60 * 1000;
-
-            usuario.passwordResetToken = passwordResetToken;
-            usuario.passwordResetExpires = passwordResetExpires;
+            usuario.passwordResetToken = hashedCode;
+            usuario.passwordResetExpires = expires;
             await usuario.save();
 
-            //Implementar envio de email ........
+            await enviarEmailRecuperacao(usuario.email, resetCode);
 
             return res.status(200).json({ message: 'Se um usuário com este e-mail existir, um link de recuperação será enviado.' });
 
         } catch (error) {
+            console.error("Erro no processo de recuperar senha:", error);
             return res.status(500).json({ message: 'Erro ao processar solicitação.', error: error.message });
         }
     },
 
     /**
-     * @description Redefine a senha do usuário usando um token.
-     * @route POST /password/reset/:token
+     * @Redefine a senha do usuário
      */
     async resetPassword(req, res) {
-        const { token } = req.params;
-        const { senha } = req.body;
-
-        //Transforma em hash o token recebido da URL para comparar com o que está no banco
-        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+        const { email, code, senha } = req.body;
+        if (!email || !code || !senha) {
+            return res.status(400).json({ message: 'E-mail, código e nova senha são obrigatórios.' });
+        }
 
         try {
             const usuario = await Usuario.findOne({
                 where: {
-                    passwordResetToken: hashedToken,
-                    passwordResetExpires: { [require('sequelize').Op.gt]: Date.now() } // Verifica se o token não expirou
+                    email,
+                    passwordResetExpires: { [Op.gt]: Date.now() }
                 }
             });
 
             if (!usuario) {
-                return res.status(400).json({ message: 'Token de redefinição de senha inválido ou expirado.' });
+                return res.status(400).json({ message: 'Código inválido, expirado ou e-mail incorreto.' });
             }
 
-            //Token for válido, atualiza a senha e limpa os campos de reset
+            const codigoValido = await bcrypt.compare(code, usuario.passwordResetToken);
+
+            if (!codigoValido) {
+                return res.status(400).json({ message: 'Código de redefinição de senha inválido.' });
+            }
+
             usuario.senha = await bcrypt.hash(senha, 10);
             usuario.passwordResetToken = null;
             usuario.passwordResetExpires = null;

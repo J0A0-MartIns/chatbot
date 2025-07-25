@@ -1,24 +1,32 @@
 import { inject } from '@angular/core';
-import { HttpInterceptorFn } from '@angular/common/http';
+import {HttpErrorResponse, HttpInterceptorFn} from '@angular/common/http';
 import { AuthService } from './auth.service';
+import {catchError, throwError} from "rxjs";
 
 /**
  * Intercepta todas as requisições HTTP e adiciona o token JWT de autenticação
  * no cabeçalho 'Authorization', se um token existir.
+ * att. captura erros 401/403 para forçar logout e mostrar modal de sessão expirada
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const authService = inject(AuthService);
     const authToken = authService.getToken();
 
+    let authReq = req;
     if (authToken) {
-        // Clona a requisição para adicionar o novo cabeçalho.
-        const authReq = req.clone({
+        authReq = req.clone({
             setHeaders: {
                 Authorization: `Bearer ${authToken}`
             }
         });
-        // Envia a requisição CLONADA (authReq) com o token, não a original (req).
-        return next(authReq);
     }
-    return next(req);
+
+    return next(authReq).pipe(
+        catchError((error: HttpErrorResponse) => {
+            if (error.status === 401 || error.status === 403) {
+                authService.handleSessionExpiration('Sua sessão foi encerrada pois você fez login em outro dispositivo.');
+            }
+            return throwError(() => error);
+        })
+    );
 };

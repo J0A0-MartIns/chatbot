@@ -42,7 +42,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   onModalClose() {
     this.sessionExpired = false;
-    this.authService.logout();
   }
 
   temAcessoAPagina(user: Usuario | null, chaves: string[]): boolean {

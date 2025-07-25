@@ -59,34 +59,34 @@ const BaseConhecimentoController = {
         }
     },
 
-    async buscarDocumentoPorId(req, res) {
-        try {
-            const documento = await BaseConhecimento.findByPk(req.params.id, {
-                include: [
-                    {
-                        model: Subtema,
-                        as: 'Subtema',
-                        include: [{ model: Tema, as: 'tema' }]
-                    },
-                    {
-                        model: Usuario,
-                        as: 'Usuario',
-                        attributes: ['id_usuario', 'nome', 'email']
-                    }
-                    // {
-                    //     model: DocumentoArquivo,
-                    //     as: 'DocumentoArquivos'
-                    // }
-                ]
-            });
-            if (!documento) {
-                return res.status(404).json({ message: 'Documento não encontrado.' });
-            }
-            return res.status(200).json(documento);
-        } catch (err) {
-            return res.status(500).json({ message: 'Erro ao buscar documento.', error: err.message });
-        }
-    },
+    // async buscarDocumentoPorId(req, res) {
+    //     try {
+    //         const documento = await BaseConhecimento.findByPk(req.params.id, {
+    //             include: [
+    //                 {
+    //                     model: Subtema,
+    //                     as: 'Subtema',
+    //                     include: [{ model: Tema, as: 'tema' }]
+    //                 },
+    //                 {
+    //                     model: Usuario,
+    //                     as: 'Usuario',
+    //                     attributes: ['id_usuario', 'nome', 'email']
+    //                 }
+    //                 // {
+    //                 //     model: DocumentoArquivo,
+    //                 //     as: 'DocumentoArquivos'
+    //                 // }
+    //             ]
+    //         });
+    //         if (!documento) {
+    //             return res.status(404).json({ message: 'Documento não encontrado.' });
+    //         }
+    //         return res.status(200).json(documento);
+    //     } catch (err) {
+    //         return res.status(500).json({ message: 'Erro ao buscar documento.', error: err.message });
+    //     }
+    // },
 
     async buscarPorSubtema(req, res) {
         try {

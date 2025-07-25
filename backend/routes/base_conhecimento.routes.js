@@ -12,7 +12,7 @@ const upload = require('../config/multer');
 router.post('/', authenticateToken, pode('criar_documento'), baseConhecimentoController.criarDocumento);
 router.get('/', authenticateToken, baseConhecimentoController.listarDocumentos);
 router.get('/subtema/:id_subtema', authenticateToken, baseConhecimentoController.buscarPorSubtema);
-router.get('/:id', authenticateToken, baseConhecimentoController.buscarDocumentoPorId);
+//router.get('/:id', authenticateToken, baseConhecimentoController.buscarDocumentoPorId);
 router.put('/:id', authenticateToken, pode('editar_documento'), baseConhecimentoController.atualizarDocumento);
 router.patch('/:id/ativo', authenticateToken, pode('publicar_documento'), baseConhecimentoController.atualizarAtivo);
 router.delete('/:id', authenticateToken, pode('deletar_documento'), baseConhecimentoController.excluirDocumento);
