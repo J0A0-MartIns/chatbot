@@ -101,10 +101,13 @@ export class ChatComponent implements OnInit {
 
     enviarFeedbackNegativo(): void {
         if (!this.idAtendimentoAtual) return;
+        const primeiraSolucao = this.solucoesEncontradas.length > 0 ? this.solucoesEncontradas[0] : null;
         const payload: FeedbackPayload = {
             id_atendimento: this.idAtendimentoAtual,
             avaliacao: false,
-            comentario: this.feedbackComentario
+            comentario: this.feedbackComentario,
+            tema: primeiraSolucao?.Subtema?.tema?.nome,
+            subtema: primeiraSolucao?.Subtema?.nome
         };
         this.chatService.enviarFeedback(payload).subscribe(() => this.etapaFeedback = 'finalizado');
     }

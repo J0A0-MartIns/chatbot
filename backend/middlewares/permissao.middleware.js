@@ -1,15 +1,10 @@
 /**
  * Este middleware controla o RBAC (Role-Based Access Control).
- * Ele verifica se o perfil do usuário logado possui uma permissão específica.
+ * Ele verifica se o perfil do usuário logado possui a permissão específica.
  */
 
 const { Usuario, Perfil, Permissao } = require('../models');
 
-/**
- * Função de alta ordem que gera um middleware de verificação de permissão.
- * @param {string} permissaoNecessaria - O nome da permissão necessária para acessar a rota.
- * @returns {function} Uma função de middleware para o Express.
- */
 const pode = (permissaoNecessaria) => {
     return async (req, res, next) => {
         const userId = req.user?.id;

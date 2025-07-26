@@ -63,7 +63,7 @@ def buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn):
 
         chunks_db = []
         if palavra_chave:
-            log_stderr(f"Etapa 1: A tentar busca com palavras-chave: {palavra_chave}")
+            log_stderr(f"Etapa 1: Buscando palavras-chave: {palavra_chave}")
             with conn.cursor() as cur:
                 palavra_chave_condicao = " OR ".join([f"d.palavras_chave ILIKE %s" for _ in palavra_chave])
                 sql_query = f"""
@@ -78,7 +78,7 @@ def buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn):
             log_stderr(f"Encontrados {len(chunks_db)} chunks na busca por palavra-chave.")
 
         if not chunks_db:
-            log_stderr("Etapa 2: Nenhuma correspondência de palavra-chave. A fazer busca semântica completa.")
+            log_stderr("Etapa 2: Nenhuma correspondência de palavra-chave.")
             with conn.cursor() as cur:
                 sql_query = """
                     SELECT p.id_documento, p.numero_paragrafo, p.conteudo_paragrafo, p.embedding
@@ -147,7 +147,7 @@ def buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn):
 
 def gerar_resposta_com_groq(contexto, pergunta):
     prompt = f"""Com base no contexto fornecido abaixo, responda à pergunta do usuário de forma clara e direta em português.
-Se a resposta não estiver no contexto, diga: "Com base nos documentos que tenho acesso, não encontrei uma resposta para a sua pergunta."
+Se a resposta não estiver no contexto, diga: "Desculpe, não encontrei nenhuma informação relevante sobre este assunto nos meus documentos."
 
 Contexto:
 ---
@@ -229,6 +229,7 @@ def categorizar_pergunta_com_groq(pergunta, categorias_json):
     JSON com a sua sugestão:
     """
     try:
+        log_stderr(f"[Categorizador] Prompt: {prompt}")
         response = groq_client.chat.completions.create(
             model="llama3-8b-8192",
             messages=[{"role": "user", "content": prompt}],
@@ -236,7 +237,27 @@ def categorizar_pergunta_com_groq(pergunta, categorias_json):
             max_tokens=100,
             response_format={"type": "json_object"}
         )
-        sugestao = json.loads(response.choices[0].message.content)
+
+        sugestao_str = response.choices[0].message.content
+        sugestao = json.loads(sugestao_str)
+
+        #Verificação para avaliar se a sugestão corresponde a uma categoria existente
+        categorias = json.loads(categorias_json)
+        tema_sugerido = sugestao.get('tema')
+        subtema_sugerido = sugestao.get('subtema')
+
+        tema_existente = any(t['nome'].lower() == tema_sugerido.lower() for t in categorias)
+        subtema_existente = any(
+            st.lower() == subtema_sugerido.lower()
+            for t in categorias if t['nome'].lower() == tema_sugerido.lower()
+            for st in t.get('subtemas', [])
+        )
+
+        if tema_existente and subtema_existente:
+            log_stderr("Sugeriu um tema e subtema existentes.")
+        else:
+            log_stderr("Sugeriu a criação de um novo tema ou subtema.")
+
         return sugestao, None
     except Exception as e:
         return None, f"Erro ao categorizar: {e}"

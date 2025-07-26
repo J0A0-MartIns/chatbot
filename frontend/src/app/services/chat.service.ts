@@ -20,6 +20,8 @@ export interface FeedbackPayload {
     id_atendimento: number;
     avaliacao: boolean;
     comentario?: string;
+    tema?: string | null;
+    subtema?: string | null;
 }
 
 @Injectable({

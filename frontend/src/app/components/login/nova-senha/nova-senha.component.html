@@ -1,27 +1,12 @@
 <div class="login-container">
     <div class="login-left">
         <div class="login-content">
-            <img src="../images/logo_qq.png" alt="Logo Quero-Quero" class="logo"/>
             <h2>Colaborador</h2>
             <p class="login-label">Redefinir Senha</p>
 
             <form (ngSubmit)="redefinirSenha()">
                 <div *ngIf="erro" class="alert alert-error">{{ erro }}</div>
                 <div *ngIf="mensagem" class="alert alert-success">{{ mensagem }}</div>
-                <input
-                        type="email"
-                        [(ngModel)]="email"
-                        placeholder="Seu e-mail de cadastro"
-                        name="email"
-                        required
-                />
-                <input
-                        type="text"
-                        [(ngModel)]="code"
-                        placeholder="Código recebido por e-mail"
-                        name="code"
-                        required
-                />
                 <input
                         type="password"
                         [(ngModel)]="novaSenha"
@@ -37,14 +22,10 @@
                         required
                 />
 
-
                 <button type="submit" [disabled]="isLoading || mensagem">
                     {{ isLoading ? 'Salvando...' : 'Salvar Nova Senha' }}
                 </button>
             </form>
         </div>
     </div>
-    <!--    <div class="login-right">-->
-    <!--        <img src="../images/mascote_quero_quero.jpg" alt="Mascote Quero-Quero" />-->
-    <!--    </div>-->
 </div>

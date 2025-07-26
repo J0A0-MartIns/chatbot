@@ -11,11 +11,10 @@ import { CommonModule } from '@angular/common';
   templateUrl: './nova-senha.component.html',
   styleUrls: ['../login.component.css']
 })
-export class NovaSenhaComponent {
-  email = '';
-  code = '';
+export class NovaSenhaComponent implements OnInit {
   novaSenha = '';
   confirmarSenha = '';
+  token: string | null = null;
 
   mensagem = '';
   erro = '';
@@ -27,11 +26,19 @@ export class NovaSenhaComponent {
       private authService: AuthService
   ) {}
 
+  ngOnInit(): void {
+    this.token = this.route.snapshot.queryParamMap.get('token');
+    if (!this.token) {
+      alert('Token de recuperação não encontrado ou inválido. Por favor, solicite a recuperação novamente.');
+      this.router.navigate(['/login']);
+    }
+  }
+
   redefinirSenha(): void {
     this.erro = '';
     this.mensagem = '';
 
-    if (!this.email || !this.code || !this.novaSenha || !this.confirmarSenha) {
+    if (!this.novaSenha || !this.confirmarSenha) {
       this.erro = 'Por favor, preencha todos os campos.';
       return;
     }
@@ -39,15 +46,13 @@ export class NovaSenhaComponent {
       this.erro = 'As senhas não coincidem.';
       return;
     }
+    if (!this.token) {
+      this.erro = 'Token de recuperação inválido.';
+      return;
+    }
 
     this.isLoading = true;
-    const payload: ResetPasswordPayload = {
-      email: this.email,
-      code: this.code,
-      senha: this.novaSenha
-    };
-
-    this.authService.resetPassword(payload).subscribe({
+    this.authService.resetPassword(this.token, this.novaSenha).subscribe({
       next: (res) => {
         this.isLoading = false;
         this.mensagem = res.message || 'Senha redefinida com sucesso! Você já pode fazer o login.';
@@ -55,7 +60,7 @@ export class NovaSenhaComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        this.erro = err.error?.message || 'Ocorreu um erro. Verifique o e-mail e o código, ou solicite um novo.';
+        this.erro = err.error?.message || 'Ocorreu um erro. O token pode ter expirado.';
       }
     });
   }

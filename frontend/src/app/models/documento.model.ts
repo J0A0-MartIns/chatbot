@@ -1,10 +1,5 @@
 import {Tema} from "./tema.model";
-
-export interface Subtema {
-    id_subtema: number;
-    nome: string;
-    id_tema: number;
-}
+import { Subtema } from "./subtema.model";
 
 export interface UsuarioSimple {
     id_usuario: number;

@@ -4,10 +4,10 @@
 
 const express = require('express');
 const router = express.Router();
-const passwordController = require('../controllers/senha.controller');
+const senhaController = require('../controllers/senha.controller');
 
 
-router.post('/forgot', passwordController.forgotPassword);
-router.post('/reset', passwordController.resetPassword);
+router.post('/forgot', senhaController.forgotPassword);
+router.post('/reset/:token', senhaController.resetPassword);
 
 module.exports = router;

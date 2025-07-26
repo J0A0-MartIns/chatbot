@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import {catchError, throwError} from "rxjs";
 
 /**
- * Intercepta todas as requisições HTTP e adiciona o token JWT de autenticação
+ * Intercepta todas as requisições e adiciona o token JWT de autenticação
  * no cabeçalho 'Authorization', se um token existir.
  * att. captura erros 401/403 para forçar logout e mostrar modal de sessão expirada
  */

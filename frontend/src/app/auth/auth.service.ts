@@ -68,17 +68,15 @@ export class AuthService {
     }
 
     /**
-     * Solicita um link de recuperação de senha.
+     * Solicita um código de recuperação de senha.
      */
     forgotPassword(email: string): Observable<any> {
         return this.http.post(`${this.passwordApiUrl}/forgot`, { email });
     }
 
-    /**
-     * Redefine a senha utilizando o e-mail, o código e a nova senha.
-     */
-    resetPassword(payload: ResetPasswordPayload): Observable<any> {
-        return this.http.post(`${this.passwordApiUrl}/reset`, payload);
+
+    resetPassword(token: string, senha: string): Observable<any> {
+        return this.http.post(`${this.passwordApiUrl}/reset/${token}`, { senha });
     }
 
     getUser(): Usuario | null {

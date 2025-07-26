@@ -7,7 +7,7 @@ const { SessaoUsuario } = require('../models');
 
 /**
  * Middleware para verificar a validade de um token JWT enviado no cabeçalho 'Authorization'.
- * Se o token for válido, adiciona os dados do utilizador decodificados ao objeto `req`
+ * Se o token for válido, adiciona os dados do usuário decodificados ao objeto `req`
  * e passa para a próxima função na cadeia de middlewares.
  */
 const authenticateToken = (req, res, next) => {

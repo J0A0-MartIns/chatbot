@@ -7,7 +7,7 @@ const { Op } = require('sequelize');
 
 const DashboardController = {
     /**
-     * @description Busca estatísticas gerais para o Dashboard.
+     * Busca estatísticas gerais para o Dashboard.
      */
     async getStats(req, res) {
         try {

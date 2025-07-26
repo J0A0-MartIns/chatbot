@@ -32,9 +32,6 @@ export class SenhaComponent {
       next: (res) => {
         this.isLoading = false;
         this.mensagem = res.message;
-        setTimeout(() => {
-          this.router.navigate(['/reset-senha']);
-        }, 3000);
       },
       error: (err) => {
         this.isLoading = false;

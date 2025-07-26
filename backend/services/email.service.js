@@ -10,13 +10,13 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS
     }
 });
-transporter.verify(function(error, success) {
-    if (error) {
-        console.error("Erro ao verificar transporter:", error);
-    } else {
-        console.log("Servidor pronto para envio de e-mails");
-    }
-});
+// transporter.verify(function(error, success) {
+//     if (error) {
+//         console.error("Erro ao verificar transporter:", error);
+//     } else {
+//         console.log("Servidor pronto para envio de e-mails");
+//     }
+// });
 
 /**
  * Envia um e-mail de recuperação de senha.
@@ -30,12 +30,12 @@ const enviarEmailRecuperacao = async (para, codigo) => {
             <div style="font-family: Arial, sans-serif; line-height: 1.6;">
                 <h2>Recuperação de Senha</h2>
                 <p>Olá,</p>
-                <p>Você solicitou a redefinição da sua senha. Use o código abaixo para continuar o processo. Este código é válido por 10 minutos.</p>
+                <p>Você solicitou a redefinição da sua senha. Use o link abaixo para continuar o processo. Este link é válido por 10 minutos.</p>
                 <p style="font-size: 24px; font-weight: bold; letter-spacing: 2px; text-align: center; background-color: #f0f0f0; padding: 10px; border-radius: 5px;">
                     ${codigo}
                 </p>
                 <p>Se você não solicitou esta alteração, pode ignorar este e-mail com segurança.</p>
-                <p>Atenciosamente,<br>Equipa de Suporte QQTech</p>
+                <p>Atenciosamente,<br>Equipe de Suporte ChatBot</p>
             </div>
         `
     };

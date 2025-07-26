@@ -7,7 +7,7 @@ const axios = require('axios');
 
 const ChatController = {
     /**
-     * @description Recebe uma pergunta, e executa o script python com a ia para buscar a resposta.
+     * Recebe uma pergunta, e executa o script python com a ia para buscar a resposta.
      */
     async perguntar(req, res) {
         const { pergunta, id_subtema } = req.body;
@@ -48,10 +48,10 @@ const ChatController = {
     },
 
     /**
-     * @description Salva o feedback e, se for negativo, cria uma pendência automaticamente.
+     * Salva o feedback e, se for negativo, cria uma pendência automaticamente (sem categorização por IA).
      */
     async darFeedback(req, res) {
-        const {id_atendimento, avaliacao, comentario} = req.body;
+        const {id_atendimento, avaliacao, comentario, tema, subtema} = req.body;
         if (id_atendimento === null || avaliacao === undefined) {
             return res.status(400).json({message: 'ID do atendimento e avaliação são obrigatórios.'});
         }
@@ -64,11 +64,17 @@ const ChatController = {
             }, {transaction: transacao});
 
             if (avaliacao === false) {
-                await Pendencia.create({
+                const novaPendencia = await Pendencia.create({
                     id_feedback: novoFeedback.id_feedback,
-                    motivo: comentario || 'O utilizador não forneceu um motivo.',
+                    motivo: comentario || 'O usuário não forneceu um motivo.',
                     id_atendimento: id_atendimento
-                }, {transaction: transacao});
+                }, { transaction: transacao });
+
+                if (tema && subtema) {
+                    novaPendencia.sugestao_tema = tema;
+                    novaPendencia.sugestao_subtema = subtema;
+                    await novaPendencia.save({ transaction: transacao });
+                }
             }
 
             await transacao.commit();
@@ -96,7 +102,7 @@ const ChatController = {
     },
 
     /**
-     * @description Cria uma pendência diretamente.
+     * Cria uma pendência diretamente (categorização pela IA).
      */
     async criarPendenciaDireta(req, res) {
         const {id_atendimento} = req.body;
