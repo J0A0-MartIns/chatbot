@@ -20,10 +20,14 @@ export class RelatorioComponent implements OnInit {
   filtroSubtemaId: number | null = null;
   temasDisponiveis: Tema[] = [];
   subtemasDisponiveis: Subtema[] = [];
+  dataInicioInteracao = '';
+  dataFimInteracao = '';
 
   usoSubtemas: RelatorioUsoSubtema[] = [];
   dataInicio = '';
   dataFim = '';
+
+  abaAtiva: 'interacoes' | 'uso' = 'interacoes';
 
   constructor(
       private relatorioService: RelatorioService,
@@ -37,6 +41,13 @@ export class RelatorioComponent implements OnInit {
     this.carregarFiltros();
   }
 
+  selecionarAba(aba: 'interacoes' | 'uso'): void {
+    this.abaAtiva = aba;
+    if (aba === 'uso' && this.usoSubtemas.length === 0) {
+      this.aplicarFiltroPeriodo();
+    }
+  }
+
   carregarFiltros(): void {
     this.temaService.getTemas().subscribe(data => this.temasDisponiveis = data);
   }
@@ -47,13 +58,15 @@ export class RelatorioComponent implements OnInit {
     if (this.filtroTemaId) {
       this.subtemaService.getSubtemasPorTema(this.filtroTemaId).subscribe(data => this.subtemasDisponiveis = data);
     }
-    this.aplicarFiltroInteracoes(); // Filtra automaticamente ao mudar o tema
+    this.aplicarFiltroInteracoes();
   }
 
   aplicarFiltroInteracoes(): void {
     const filtros = {
       id_tema: this.filtroTemaId || undefined,
-      id_subtema: this.filtroSubtemaId || undefined
+      id_subtema: this.filtroSubtemaId || undefined,
+      dataInicio: this.dataInicioInteracao || undefined,
+      dataFim: this.dataFimInteracao || undefined
     };
     this.relatorioService.getRelatorioInteracoes(filtros).subscribe(data => this.interacoes = data);
   }
@@ -67,7 +80,7 @@ export class RelatorioComponent implements OnInit {
   }
 
   formatarData(data: string): string {
-    if (!data) return 'N/A';
+    if (!data) return 'Sem dados';
     return new Date(data).toLocaleString('pt-BR');
   }
 

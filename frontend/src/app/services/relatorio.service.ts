@@ -3,7 +3,6 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
-//Dados dos relatórios
 export interface RelatorioInteracao {
     data_atendimento: string;
     pergunta_usuario: string;
@@ -12,6 +11,8 @@ export interface RelatorioInteracao {
     avaliacao: boolean | null;
     tema: string;
     sub_tema: string;
+    dataInicio?: string;
+    dataFim?: string;
 }
 
 export interface RelatorioUsoSubtema {
@@ -31,10 +32,13 @@ export class RelatorioService {
     /**
      * Busca o relatório de interações com filtros opcionais.
      */
-    getRelatorioInteracoes(filtros: { id_tema?: number; id_subtema?: number }): Observable<RelatorioInteracao[]> {
+    getRelatorioInteracoes(filtros: { id_tema?: number; id_subtema?: number; dataInicio?: string;
+        dataFim?: string; }): Observable<RelatorioInteracao[]> {
         let params = new HttpParams();
-        if (filtros.id_tema) params = params.set('id_tema', filtros.id_tema);
-        if (filtros.id_subtema) params = params.set('id_subtema', filtros.id_subtema);
+        if (filtros.id_tema) params = params.set('id_tema', String(filtros.id_tema));
+        if (filtros.id_subtema) params = params.set('id_subtema', String(filtros.id_subtema));
+        if (filtros.dataInicio) params = params.set('dataInicio', filtros.dataInicio);
+        if (filtros.dataFim) params = params.set('dataFim', filtros.dataFim);
         return this.http.get<RelatorioInteracao[]>(`${this.apiUrl}/interacoes`, { params });
     }
 

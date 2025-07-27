@@ -25,20 +25,30 @@ const ChatController = {
             if (respostaDaIA.data.error) {
                 throw new Error(respostaDaIA.data.error);
             }
-            const respostaFinal = respostaDaIA.data.resposta;
+            const { resposta, solucoes } = respostaDaIA.data;
+            const encontrado = !resposta.includes("não encontrei nenhuma informação");
+
             const [sessao] = await SessaoUsuario.findOrCreate({
                 where: { id_usuario, data_logout: null },
                 defaults: { id_usuario }
             });
+
             const atendimento = await AtendimentoChatbot.create({
                 id_sessao: sessao.id_sessao,
                 pergunta_usuario: pergunta,
-                resposta_chatbot: respostaFinal,
+                resposta_chatbot: resposta,
             });
+
+            if (encontrado && solucoes && solucoes.length > 0) {
+                const idsDocumentos = solucoes.map(s => s.id_documento);
+                await atendimento.addSolucoes(idsDocumentos);
+            }
+
             return res.status(200).json({
                 id_atendimento: atendimento.id_atendimento,
-                resposta: respostaFinal,
-                encontrado: !respostaFinal.includes("não encontrei nenhuma informação")
+                resposta: resposta,
+                encontrado: encontrado,
+                solucoes: solucoes
             });
 
         } catch (error) {

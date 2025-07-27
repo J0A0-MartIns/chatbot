@@ -1,8 +1,21 @@
 <div class="relatorios-container">
     <h2>Relatórios</h2>
+    <div class="tabs-container">
+        <button
+                class="tab-button"
+                [class.active]="abaAtiva === 'interacoes'"
+                (click)="selecionarAba('interacoes')">
+            Histórico de Interações
+        </button>
+        <button
+                class="tab-button"
+                [class.active]="abaAtiva === 'uso'"
+                (click)="selecionarAba('uso')">
+            Utilização de documentos
+        </button>
+    </div>
 
-    <!-- Bloco 1: Tabela de Interações -->
-    <div class="relatorio-bloco">
+    <div class="relatorio-bloco" *ngIf="abaAtiva === 'interacoes'">
         <h3>Log de Interações do Chat</h3>
         <div class="filtros-container">
             <label for="filtroTema">Filtrar por Tema:</label>
@@ -16,6 +29,16 @@
                 <option [ngValue]="null">Todos os Subtemas</option>
                 <option *ngFor="let subtema of subtemasDisponiveis" [value]="subtema.id_subtema">{{ subtema.nome }}</option>
             </select>
+            <br>
+            <label for="dataInicio">Data Início:</label>
+            <input type="date" id="dataInicioInteracao" [(ngModel)]="dataInicioInteracao">
+
+            <label for="dataFim">Data Fim:</label>
+            <input type="date" id="dataFimInteracao" [(ngModel)]="dataFimInteracao">
+
+            <button (click)="aplicarFiltroInteracoes()" class="botao-filtrar">
+                <i class="material-icons">filter_list</i> Filtrar Interações
+            </button>
         </div>
 
         <div class="tabela-container">
@@ -35,7 +58,7 @@
                     <td>{{ formatarData(item.data_atendimento) }}</td>
                     <td>{{ item.usuario }}</td>
                     <td>{{ item.pergunta_usuario }}</td>
-                    <td>{{ item.tema }}</td>
+                    <td>{{ item.tema}}</td>
                     <td>{{ item.sub_tema }}</td>
                     <td>{{ formatarAvaliacao(item.avaliacao) }}</td>
                 </tr>
@@ -47,8 +70,7 @@
         </div>
     </div>
 
-    <!-- Bloco 2: Tabela de Uso de Subtemas -->
-    <div class="relatorio-bloco">
+    <div class="relatorio-bloco" *ngIf="abaAtiva === 'uso'">
         <h3>Uso de Subtemas por Período</h3>
         <div class="filtros-container">
             <label for="dataInicio">Data Início:</label>

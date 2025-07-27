@@ -1,12 +1,14 @@
 <div class="page-container">
-    <h2>Base de Conhecimento</h2>
     <div class="page-content">
-        <button (click)="abrirModalParaCriar()" class="add-button">Adicionar Conteúdo</button>
-
+        <h2>Base de Conhecimento</h2>
         <div class="filtros-container">
             <input type="text" [(ngModel)]="termoBusca" placeholder="Buscar por título..." class="input-busca"
                    name="busca"/>
+            <div class="botao-adicionar">
+                <button (click)="abrirModalParaCriar()" class="add-button">Adicionar Conteúdo</button>
+            </div>
         </div>
+
 
         <div class="table-container">
             <table>
@@ -38,6 +40,7 @@
             </table>
         </div>
 
+
         <div
                 class="dropdown-menu global-dropdown"
                 *ngIf="openActionIndex !== null"
@@ -56,7 +59,6 @@
                 <form (ngSubmit)="salvarDocumento()">
                     <input type="text" [(ngModel)]="docEmEdicao.titulo" name="titulo" placeholder="Título do Documento"
                            required/>
-
                     <label for="tema-modal">Tema:</label>
                     <select id="tema-modal" name="tema" [(ngModel)]="idTemaSelecionadoNoModal"
                             (change)="onTemaChangeNoModal()" [disabled]="novoTemaNome.trim() !== ''">

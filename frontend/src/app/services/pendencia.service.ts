@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Pendencia, AprovacaoPayload } from '../models/pendencia.model';
 import { environment } from '../environments/environment';
+import { Documento } from '../models/documento.model';
 
 @Injectable({
     providedIn: 'root'
@@ -20,7 +21,7 @@ export class PendenciaService {
         return this.http.delete(`${this.apiUrl}/${id}`);
     }
 
-    aprovarPendencia(id: number, payload: AprovacaoPayload): Observable<any> {
-        return this.http.post(`${this.apiUrl}/${id}/aprovar`, payload);
+    aprovarPendencia(id: number, payload: AprovacaoPayload): Observable<Documento> {
+        return this.http.post<Documento>(`${this.apiUrl}/${id}/aprovar`, payload);
     }
 }

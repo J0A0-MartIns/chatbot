@@ -22,11 +22,8 @@ html, body {
 /*  object-fit: cover*/
 /*}*/
 
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: Inter, sans-serif;
+.h2 {
+  color: black;
 }
 
 .login-container {

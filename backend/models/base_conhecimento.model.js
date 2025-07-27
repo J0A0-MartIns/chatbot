@@ -1,6 +1,3 @@
-/**
- * models/base_conhecimento.model.js
- */
 module.exports = (sequelize, DataTypes) => {
     const BaseConhecimento = sequelize.define('BaseConhecimento', {
         id_documento: {

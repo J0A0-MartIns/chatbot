@@ -1,6 +1,3 @@
-/**
- * models/atendimento_chatbot.model.js
- */
 module.exports = (sequelize, DataTypes) => {
     const AtendimentoChatbot = sequelize.define('AtendimentoChatbot', {
         id_atendimento: {

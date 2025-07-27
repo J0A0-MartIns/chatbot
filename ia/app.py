@@ -62,33 +62,32 @@ def buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn):
         log_stderr(f"Palavras extraídas da pergunta: {palavra_chave}")
 
         chunks_db = []
+
+        sql_base = """
+            SELECT p.id_documento, p.numero_paragrafo, p.conteudo_paragrafo, p.embedding
+            FROM documento_paragrafo_embedding p
+            JOIN base_conhecimento d ON p.id_documento = d.id_documento
+            WHERE d.id_subtema = %s
+        """
+
+        params = [id_subtema]
+
         if palavra_chave:
-            log_stderr(f"Etapa 1: Buscando palavras-chave: {palavra_chave}")
+            log_stderr(f"Etapa 1: Buscando com palavras-chave: {palavra_chave}")
+            palavra_chave_condicao = " OR ".join([f"d.palavras_chave ILIKE %s" for _ in palavra_chave])
+            sql_query_com_keyword = f"{sql_base} AND ({palavra_chave_condicao});"
+            params.extend([f"%{kw}%" for kw in palavra_chave])
             with conn.cursor() as cur:
-                palavra_chave_condicao = " OR ".join([f"d.palavras_chave ILIKE %s" for _ in palavra_chave])
-                sql_query = f"""
-                    SELECT p.id_documento, p.numero_paragrafo, p.conteudo_paragrafo, p.embedding
-                    FROM documento_paragrafo_embedding p
-                    JOIN base_conhecimento d ON p.id_documento = d.id_documento
-                    WHERE d.id_subtema = %s AND ({palavra_chave_condicao});
-                """
-                params = [id_subtema] + [f"%{kw}%" for kw in palavra_chave]
-                cur.execute(sql_query, tuple(params))
+                cur.execute(sql_query_com_keyword, tuple(params))
                 chunks_db = cur.fetchall()
             log_stderr(f"Encontrados {len(chunks_db)} chunks na busca por palavra-chave.")
 
         if not chunks_db:
-            log_stderr("Etapa 2: Nenhuma correspondência de palavra-chave.")
+            log_stderr("Etapa 2: Nenhuma correspondência de palavra-chave. Fazendo busca semântica completa.")
             with conn.cursor() as cur:
-                sql_query = """
-                    SELECT p.id_documento, p.numero_paragrafo, p.conteudo_paragrafo, p.embedding
-                    FROM documento_paragrafo_embedding p
-                    JOIN base_conhecimento d ON p.id_documento = d.id_documento
-                    WHERE d.id_subtema = %s;
-                """
-                cur.execute(sql_query, (id_subtema,))
+                cur.execute(sql_base + ";", (id_subtema,))
                 chunks_db = cur.fetchall()
-            log_stderr(f"Encontrados {len(chunks_db)} chunks no total para o subtema selecionado.")
+            log_stderr(f"Encontrados {len(chunks_db)} chunks no total para o subtema.")
 
         if not chunks_db:
             return None, None
@@ -109,7 +108,7 @@ def buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn):
                     "id_documento": doc_id,
                     "numero_paragrafo": num_paragrafo,
                     "conteudo": conteudo,
-                    "score": score
+                    "score": score,
                 }
         if maior_score > 0.5:
             log_stderr(f"Melhor chunk encontrado com score: {maior_score:.4f}")
@@ -121,29 +120,9 @@ def buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn):
     except Exception as e:
         return None, f"Erro ao buscar chunks: {e}"
 
+    except Exception as e:
+        return None, f"Erro ao buscar chunks: {e}"
 
-# def gerar_resposta_com_gemini(contexto, pergunta):
-#     model="llama-3.3-70b-versatile",
-#
-#     generation_config = genai.types.GenerationConfig(
-#         max_output_tokens=250,
-#         temperature=0.2
-#     )
-#
-#     prompt = f"""Com base apenas no contexto fornecido abaixo, responda à pergunta do usuário de forma clara e direta em português. Se a resposta não estiver no contexto, diga "Com base nos documentos que tenho acesso, não encontrei uma resposta para a sua pergunta."
-#
-# Contexto:
-# ---
-# {contexto}
-# ---
-# Pergunta do usuário: {pergunta}
-# Resposta:"""
-#
-#     try:
-#         response = model.generate_content(prompt, generation_config=generation_config)
-#         return response.text, None
-#     except Exception as e:
-#         return None, f"Erro ao comunicar com a API do Gemini: {e}"
 
 def gerar_resposta_com_groq(contexto, pergunta):
     prompt = f"""Com base no contexto fornecido abaixo, responda à pergunta do usuário de forma clara e direta em português.
@@ -286,7 +265,7 @@ def responder():
 
         if resposta_cache:
             log_stderr("[CACHE] Resposta encontrada no cache.")
-            return jsonify({"resposta": resposta_cache, "score": "cache"})
+            return jsonify({"resposta": resposta_cache, "score": "cache", "solucoes": []})
 
         melhor_chunk, err = buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn)
         if err:
@@ -295,6 +274,7 @@ def responder():
         if not melhor_chunk:
             resposta_final = "Desculpe, não encontrei nenhuma informação relevante sobre este assunto nos meus documentos."
             score_debug = None
+            solucoes_finais = []
         else:
             try:
                 with conn.cursor() as cur:
@@ -319,7 +299,13 @@ def responder():
             if err: return jsonify({"error": err}), 500
             score_debug = melhor_chunk["score"]
 
-        return jsonify({"resposta": resposta_final, "score": score_debug})
+            solucoes_finais = [{
+                "id_documento": melhor_chunk["id_documento"],
+                "conteudo": melhor_chunk["conteudo"],
+                "score": score_debug
+            }]
+
+        return jsonify({"resposta": resposta_final, "score": score_debug, "solucoes": solucoes_finais})
 
     finally:
         if conn:

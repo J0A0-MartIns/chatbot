@@ -6,11 +6,6 @@
     overflow-y: auto;
 }
 
-h2 {
-    color: #2f855a;
-    margin-bottom: 15px;
-}
-
 .page-content {
     background-color: #fff;
     border-radius: 8px;
@@ -23,18 +18,28 @@ h2 {
 
 .filtros-container {
     display: flex;
-    gap: 10px;
+    justify-content: space-between;
     align-items: center;
-    padding-bottom: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
-.filter-button {
-    min-width: 120px;
-    padding-top: 10px;
+.filtros-container .input-busca {
+    flex: 1;
+    max-width: 350px;
+    height: 36px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+}
+
+.botao-adicionar {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
+    justify-content: flex-end;
 }
 
 .input-busca {
@@ -63,57 +68,69 @@ h2 {
 }
 
 .add-button {
-    background-color: #007d3d;
+    background-color: #00401c;
     color: white;
     border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: bold;
     font-size: 14px;
-    transition: background-color 0.3s ease;
-    margin-bottom: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .add-button:hover {
-    background-color: #00412a;
+    background-color: #16a34a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .table-container {
     overflow-x: auto;
-    overflow-y: visible !important;
-    width: 100%;
-    margin-top: 20px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 6px;
     background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
     font-size: 14px;
     color: #333;
 }
 
+
 table thead {
-    background-color: #007d3d;
+    background-color: #00401c;
     color: white;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
-table th,
-table td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #e0e0e0;
+table thead tr th {
+    padding: 14px;
+    font-weight: 600;
     text-align: left;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+table td {
+    padding: 12px 14px;
     vertical-align: middle;
+    font-size: 13.5px;
+}
+
+table tbody tr {
+    border-bottom: 1px solid #e0e0e0;
+    transition: background-color 0.3s ease;
 }
 
 table tbody tr:hover {
-    background-color: #f0f9f4;
-    cursor: pointer;
+    background-color: #f6fffa;
+}
+
+.action-cell {
+    text-align: center;
 }
 
 .edit-button,
@@ -129,6 +146,13 @@ table tbody tr:hover {
     margin-right: 5px;
 }
 
+.modal h3 {
+    display: flex;
+    justify-content: center;
+    margin-top: 0;
+    color: black;
+}
+
 .modal {
     position: fixed;
     top: 35px;
@@ -142,18 +166,65 @@ table tbody tr:hover {
     z-index: 1000;
     padding: 20px;
     box-sizing: border-box;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 
 .modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     background-color: #fff;
-    border-radius: 8px;
-    padding: 20px;
+    border-radius: 12px;
+    padding: 30px 30px 20px;
     width: 100%;
-    max-width: 600px;
-    max-height: 100%;
+    max-width: 800px;
+    max-height: 95vh;
     overflow-y: auto;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     position: relative;
+    box-sizing: border-box;
+}
+
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 10px;
+}
+
+.modal-content form input[type="text"],
+.modal-content form select,
+.modal-content form textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+}
+
+.modal-content label {
+    font-weight: 600;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    color: #333;
+    display: block;
+}
+
+.modal-content textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.upload-section {
+    margin-top: 10px;
+    width: 100%;
+    padding: 15px;
     box-sizing: border-box;
 }
 
@@ -172,11 +243,6 @@ table tbody tr:hover {
     color: #222;
 }
 
-.modal h3 {
-    margin-top: 0;
-    color: #007d3d;
-}
-
 .campo label {
     font-weight: 600;
     display: block;
@@ -184,56 +250,6 @@ table tbody tr:hover {
     color: #333;
 }
 
-form input[type="text"],
-form textarea {
-    width: 100%;
-    padding: 8px 12px;
-    margin-bottom: 15px;
-    border: 1.5px solid #ccc;
-    border-radius: 6px;
-    font-size: 14px;
-    transition: border-color 0.2s ease;
-}
-
-form input[type="text"]:focus,
-form textarea:focus {
-    border-color: #22c55e;
-    outline: none;
-}
-
-form textarea {
-    resize: vertical;
-    min-height: 100px;
-}
-
-form button[type="button"] {
-    background-color: #22c55e;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 6px 15px;
-    margin-left: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-form button[type="button"]:disabled {
-    background-color: #a7d7ae;
-    cursor: not-allowed;
-}
-
-form button[type="button"]:hover:not(:disabled) {
-    background-color: #16a34a;
-}
-
-.modal-buttons {
-    text-align: right;
-}
-
-.modal-buttons button {
-    margin-left: 10px;
-}
 
 ul {
     list-style-type: none;
@@ -426,4 +442,17 @@ ul li {
     margin-top: 8px;
     font-style: italic;
     color: #555;
+}
+
+@media (max-width: 768px) {
+    .filtros-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .botao-adicionar {
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+    }
 }

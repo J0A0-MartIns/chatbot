@@ -1,7 +1,7 @@
 <div *ngIf="isLoggedIn$ | async">
     <div class="topbar">
         <div class="topbar-left">
-<!--            <<img src="../images/logo_qq.png" alt="Logo Quero-Quero" />-->
+            <!--            <<img src="../images/logo_qq.png" alt="Logo Quero-Quero" />-->
         </div>
         <div class="topbar-right">
             <div class="user-info" *ngIf="user$ | async as user">
@@ -29,17 +29,20 @@
 
             <nav class="menu" *ngIf="user$ | async as user">
                 <ul>
-                    <li *ngIf="temAcessoAPagina(user, ['dashboard', 'relatorio', 'pendencia'])">
-                        <a routerLink="/home" routerLinkActive="active"><span class="material-icons">home</span><span class="text" *ngIf="!isCollapsed">Início</span></a>
+                    <!--                <li><a routerLink="/home" routerLinkActive="active"><span class="material-icons">home</span><span class="text" *ngIf="!isCollapsed">Início</span></a></li>-->
+                    <li><a routerLink="/chat" routerLinkActive="ativo"><span
+                            class="material-icons">question_answer</span><span class="text" *ngIf="!isCollapsed">Buscar Solução</span></a>
                     </li>
-<!--                    <li><a routerLink="/home" routerLinkActive="active"><span class="material-icons">home</span><span class="text" *ngIf="!isCollapsed">Início</span></a></li>-->
-                    <li><a routerLink="/chat" routerLinkActive="active"><span class="material-icons">question_answer</span><span class="text" *ngIf="!isCollapsed">Buscar Solução</span></a></li>
-
-<!--                    <li *ngIf="temAcessoAPagina(user, ['usuario', 'perfil', 'permissao'])">-->
-<!--                        <a routerLink="/gestao" routerLinkActive="active"><span class="material-icons">manage_accounts</span><span class="text" *ngIf="!isCollapsed">Gestão de Usuários</span></a>-->
-<!--                    </li>-->
+                    <li *ngIf="temAcessoAPagina(user, ['dashboard', 'relatorio', 'pendencia'])">
+                        <a routerLink="/home" routerLinkActive="ativo"><span class="material-icons">dashboard</span><span
+                                class="text" *ngIf="!isCollapsed">Visão Geral</span></a>
+                    </li>
+                    <!--                    <li *ngIf="temAcessoAPagina(user, ['usuario', 'perfil', 'permissao'])">-->
+                    <!--                        <a routerLink="/gestao" routerLinkActive="active"><span class="material-icons">manage_accounts</span><span class="text" *ngIf="!isCollapsed">Gestão de Usuários</span></a>-->
+                    <!--                    </li>-->
                     <li *ngIf="temAcessoAPagina(user, ['documento', 'categoria'])">
-                        <a routerLink="/base" routerLinkActive="active"><span class="material-icons">library_books</span><span class="text" *ngIf="!isCollapsed">Base de Conhecimento</span></a>
+                        <a routerLink="/base" routerLinkActive="ativo"><span class="material-icons">library_books</span><span
+                                class="text" *ngIf="!isCollapsed">Base de Conhecimento</span></a>
                     </li>
                 </ul>
             </nav>

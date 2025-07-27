@@ -1,8 +1,3 @@
-/**
- * models/base_chatbot_solucao.model.js
- *
- * Modelo para a tabela de junção que associa Atendimentos a Soluções.
- */
 module.exports = (sequelize, DataTypes) => {
     const BaseChatbotSolucao = sequelize.define('BaseChatbotSolucao', {
         id_atendimento: {

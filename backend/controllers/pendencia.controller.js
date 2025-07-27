@@ -14,7 +14,7 @@ const {
 
 const PendenciaController = {
     /**
-     * @description Lista todas as pendências.
+     * Lista todas as pendências.
      */
     async listarPendencias(req, res) {
         try {
@@ -57,46 +57,45 @@ const PendenciaController = {
     },
 
     /**
-     * @description Aprova uma pendência, criando um novo documento na Base de Conhecimento
+     * Aprova uma pendência, criando um novo documento na Base de Conhecimento
      */
     async aprovarPendencia(req, res) {
         const { id } = req.params; // ID da pendência
         const { titulo, conteudo, palavras_chave, id_subtema } = req.body;
-        const usuario_id = req.user.id; // ID do admin que está a aprovar
+        const usuario_id = req.user.id;
 
-        const t = await sequelize.transaction();
+        const transacao = await sequelize.transaction();
         try {
-            const pendencia = await Pendencia.findByPk(id, { transaction: t });
+            const pendencia = await Pendencia.findByPk(id, { transaction: transacao });
             if (!pendencia) {
-                await t.rollback();
+                await transacao.rollback();
                 return res.status(404).json({ message: 'Pendência não encontrada.' });
             }
-            await BaseConhecimento.create({
+            const novoDocumento = await BaseConhecimento.create({
                 titulo,
                 conteudo,
                 palavras_chave,
                 id_subtema,
                 usuario_id,
                 ativo: true
-            }, { transaction: t });
+            }, { transaction: transacao });
 
             const idFeedback = pendencia.id_feedback;
-            await pendencia.destroy({ transaction: t });
+            await pendencia.destroy({ transaction: transacao });
             if (idFeedback) {
-                await Feedback.destroy({ where: { id_feedback: idFeedback }, transaction: t });
+                await Feedback.destroy({ where: { id_feedback: idFeedback }, transaction: transacao });
             }
-
-            await t.commit();
-            return res.status(200).json({ message: 'Pendência aprovada e adicionada à base de conhecimento.' });
+            await transacao.commit();
+            return res.status(200).json(novoDocumento);
         } catch (err) {
-            await t.rollback();
+            await transacao.rollback();
             console.error("Erro ao aprovar pendência:", err);
             return res.status(500).json({ message: 'Erro ao aprovar pendência.', error: err.message });
         }
     },
 
     /**
-     * @description Exclui uma pendência.
+     * Exclui uma pendência.
      */
     async excluirPendencia(req, res) {
         const { id } = req.params;

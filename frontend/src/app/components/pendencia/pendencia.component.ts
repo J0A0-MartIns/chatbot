@@ -8,6 +8,7 @@ import { Tema } from '../../models/tema.model';
 import { Subtema } from '../../models/subtema.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { BaseService } from '../../services/base.service';
 
 @Component({
   selector: 'app-pendencia',
@@ -33,11 +34,13 @@ export class PendenciaComponent implements OnInit {
   novoSubtemaNome = '';
   openActionIndex: number | null = null;
   dropdownPosition = { top: '0px', left: '0px' };
+  arquivoParaUpload: File | null = null;
 
   constructor(
       private pendenciaService: PendenciaService,
       private temaService: TemaService,
-      private subtemaService: SubtemaService
+      private subtemaService: SubtemaService,
+      private baseService: BaseService
   ) {
     this.docParaAprovar = this.criarPayloadVazio();
   }
@@ -45,6 +48,13 @@ export class PendenciaComponent implements OnInit {
   ngOnInit(): void {
     this.carregarPendencias();
     this.carregarTemas();
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files?.[0];
+    if (file) {
+      this.arquivoParaUpload = file;
+    }
   }
 
   @HostListener('document:click', ['$event'])
@@ -103,8 +113,8 @@ export class PendenciaComponent implements OnInit {
 
   async confirmarAprovacao(): Promise<void> {
     try {
-      if (!this.pendenciaIdAtual) return;
-
+      if (!this.pendenciaIdAtual)
+        return;
       let temaIdFinal: number;
       if (this.novoTemaNome.trim()) {
         const novoTema = await lastValueFrom(this.temaService.criarTema(this.novoTemaNome.trim()));
@@ -128,7 +138,11 @@ export class PendenciaComponent implements OnInit {
       }
 
       this.docParaAprovar.id_subtema = subtemaIdFinal;
-      await lastValueFrom(this.pendenciaService.aprovarPendencia(this.pendenciaIdAtual, this.docParaAprovar));
+      const novoDocumento = await lastValueFrom(this.pendenciaService.aprovarPendencia(this.pendenciaIdAtual, this.docParaAprovar));
+
+      if (this.arquivoParaUpload && novoDocumento.id_documento) {
+        await lastValueFrom(this.baseService.uploadArquivo(novoDocumento.id_documento, this.arquivoParaUpload));
+      }
 
       alert('Pendência aprovada e adicionada à base com sucesso!');
       this.carregarPendencias();
