@@ -34,19 +34,35 @@
             <div class="dashboard-right dashboard-box-inner">
                 <div class="stats-grid">
                     <div class="stat-card">
+                        <div class="stat-badge">
+                            <i class="material-icons" style="font-size: 14px;">check_circle</i>
+                            Hoje
+                        </div>
                         <h4>Respostas Encontradas Hoje</h4>
                         <p class="stat-number"
                            *ngIf="!isLoading; else loadingIndicator">{{ respostasEncontradasHoje }}</p>
                     </div>
                     <div class="stat-card">
+                        <div class="stat-badge">
+                            <i class="material-icons" style="font-size: 14px;">person</i>
+                            Ativos
+                        </div>
                         <h4>Usuários Cadastrados</h4>
                         <p class="stat-number" *ngIf="!isLoading; else loadingIndicator">{{ usuariosAtivosCount }}</p>
                     </div>
                     <div class="stat-card">
+                        <div class="stat-badge">
+                            <i class="material-icons" style="font-size: 14px;">add_circle</i>
+                            Novas
+                        </div>
                         <h4>Solicitações de Inclusão</h4>
                         <p class="stat-number" *ngIf="!isLoading; else loadingIndicator">{{ pendenciasCount }}</p>
                     </div>
                     <div class="stat-card">
+                        <div class="stat-badge">
+                            <i class="material-icons" style="font-size: 14px;">pending</i>
+                            Pendente
+                        </div>
                         <h4>Usuários Pendentes de Aprovação</h4>
                         <p class="stat-number"
                            *ngIf="!isLoading; else loadingIndicator">{{ usuariosPendentesCount }}</p>

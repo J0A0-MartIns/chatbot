@@ -141,7 +141,7 @@ Resposta:"""
             model="llama3-70b-8192",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.2,
-            max_tokens=300,
+            max_tokens=3000,
             top_p=1,
         )
         return response.choices[0].message.content.strip(), None

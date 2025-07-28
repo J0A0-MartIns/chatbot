@@ -34,7 +34,7 @@ def extrair_texto_pdf(caminho_arquivo):
         print(f"Erro ao extrair texto do PDF: {e}")
         return None
 
-def dividir_em_chunks(texto_completo, tamanho_chunk=200, sobreposicao=50):
+def dividir_em_chunks(texto_completo, tamanho_chunk=600, sobreposicao=200):
     if not texto_completo:
         return []
     chunks = []
