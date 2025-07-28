@@ -59,35 +59,6 @@ const BaseConhecimentoController = {
         }
     },
 
-    // async buscarDocumentoPorId(req, res) {
-    //     try {
-    //         const documento = await BaseConhecimento.findByPk(req.params.id, {
-    //             include: [
-    //                 {
-    //                     model: Subtema,
-    //                     as: 'Subtema',
-    //                     include: [{ model: Tema, as: 'tema' }]
-    //                 },
-    //                 {
-    //                     model: Usuario,
-    //                     as: 'Usuario',
-    //                     attributes: ['id_usuario', 'nome', 'email']
-    //                 }
-    //                 // {
-    //                 //     model: DocumentoArquivo,
-    //                 //     as: 'DocumentoArquivos'
-    //                 // }
-    //             ]
-    //         });
-    //         if (!documento) {
-    //             return res.status(404).json({ message: 'Documento não encontrado.' });
-    //         }
-    //         return res.status(200).json(documento);
-    //     } catch (err) {
-    //         return res.status(500).json({ message: 'Erro ao buscar documento.', error: err.message });
-    //     }
-    // },
-
     async buscarPorSubtema(req, res) {
         try {
             const documentos = await BaseConhecimento.findAll({
@@ -199,7 +170,6 @@ const BaseConhecimentoController = {
                 id_documento: id_documento
             });
 
-            //Caminho para o script Python
             const pythonExecutable = process.platform === 'win32'
                 ? path.join(__dirname, '..', '..', 'ia', 'venv', 'Scripts', 'python.exe')
                 : path.join(__dirname, '..', '..', 'ia', 'venv', 'bin', 'python');
@@ -211,7 +181,7 @@ const BaseConhecimentoController = {
             console.log(`Executável: ${pythonExecutable}`);
             console.log(`Script: ${scriptPath}`);
 
-            const pythonProcess = spawn(pythonExecutable, [scriptPath, id_documento, filePath]);
+            const pythonProcess = spawn(pythonExecutable, [scriptPath, id_documento, novoArquivo.id_arquivo, filePath]);
 
             pythonProcess.stdout.on('data', (data) => {
                 console.log(`[Python]: ${data.toString().trim()}`);

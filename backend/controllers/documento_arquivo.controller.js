@@ -1,15 +1,10 @@
-/**
- * controllers/documento_arquivo.controller.js
- *
- * Versão final com lógica de depuração robusta para a exclusão de ficheiros.
- */
-const { DocumentoArquivo } = require('../models');
+const { DocumentoArquivo, DocumentoParagrafoEmbedding } = require('../models');
 const fs = require('fs');
 const path = require('path');
 
 const DocumentoArquivoController = {
     /**
-     * Exclui um ficheiro anexado (tanto o registo no DB quanto o ficheiro físico).
+     * Exclui um arquivo anexado, tanto no registo do bd quanto no arquivo físico.
      */
     async excluirArquivo(req, res) {
         const { id_arquivo } = req.params;
@@ -22,35 +17,28 @@ const DocumentoArquivoController = {
                 return res.status(404).json({ message: 'Arquivo não encontrado.' });
             }
 
-            // --- LÓGICA DE DEPURAÇÃO ---
-            // Constrói o caminho absoluto para o ficheiro a partir da raiz do projeto
+            const excluidos = await DocumentoParagrafoEmbedding.destroy({
+                where: { id_arquivo: id_arquivo }
+            });
+            log_stderr(`[Excluir Arquivo] ${excluidos} embeddings excluídos do banco.`);
+
             const filePath = path.resolve(__dirname, '..', arquivo.caminho_arquivo);
-
-            log_stderr(`[Excluir Arquivo] Caminho relativo do DB: ${arquivo.caminho_arquivo}`);
-            log_stderr(`[Excluir Arquivo] Caminho absoluto construído: ${filePath}`);
-
             if (fs.existsSync(filePath)) {
-                log_stderr(`[Excluir Arquivo] Ficheiro físico encontrado. A tentar apagar...`);
                 fs.unlinkSync(filePath);
-                log_stderr(`[Excluir Arquivo] Ficheiro físico apagado com sucesso.`);
-            } else {
-                log_stderr(`[Excluir Arquivo] AVISO: Ficheiro físico não encontrado em ${filePath}. A prosseguir para apagar apenas o registo do DB.`);
+                log_stderr(`[Excluir Arquivo] Arquivo físico excluído.`);
             }
 
-            // Apaga o registo do banco de dados
             await arquivo.destroy();
-            log_stderr(`[Excluir Arquivo] Registo do arquivo ID: ${id_arquivo} apagado do banco de dados.`);
+            log_stderr(`[Excluir Arquivo] Registro do arquivo removido.`);
 
             return res.status(204).send();
         } catch (err) {
             log_stderr(`[Excluir Arquivo] ERRO FATAL: ${err.message}`);
-            console.error("Erro detalhado ao excluir arquivo:", err);
             return res.status(500).json({ message: 'Erro ao excluir arquivo.', error: err.message });
         }
     }
 };
 
-// Função helper para logs, para manter a consistência
 function log_stderr(message) {
     console.log(message);
 }
