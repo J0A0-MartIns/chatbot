@@ -52,8 +52,12 @@
                         <label><strong>Pergunta original:</strong></label>
                         <p class="pergunta-resumo">{{ perguntaResumo }}</p>
                     </div>
+                    <div *ngIf="motivoPendencia" class="campo motivo-feedback">
+                        <label><strong>Motivo do Feedback Negativo:</strong></label>
+                        <p>{{ motivoPendencia }}</p>
+                    </div>
                     <div class="sugestao-ia">
-                        <p><strong>Sugestão da IA:</strong></p>
+                        <p><strong>Sugestões de Conteúdo:</strong></p>
                         <p>Tema: <strong>{{ docParaAprovar.sugestao_tema || 'Nenhuma' }}</strong></p>
                         <p>Subtema: <strong>{{ docParaAprovar.sugestao_subtema || 'Nenhuma' }}</strong></p>
                     </div>

@@ -35,6 +35,7 @@ export class PendenciaComponent implements OnInit {
   openActionIndex: number | null = null;
   dropdownPosition = { top: '0px', left: '0px' };
   arquivoParaUpload: File | null = null;
+  motivoPendencia: string | null = null;
 
   constructor(
       private pendenciaService: PendenciaService,
@@ -91,6 +92,7 @@ export class PendenciaComponent implements OnInit {
     this.pendenciaIdAtual = pendencia.id_pendencia;
     this.perguntaOriginal = pendencia.pergunta;
     this.perguntaResumo = pendencia.pergunta.length > 150 ? `${pendencia.pergunta.substring(0, 150)}...` : pendencia.pergunta;
+    this.motivoPendencia = pendencia.motivo;
     this.docParaAprovar = {
       titulo: pendencia.pergunta,
       conteudo: '',

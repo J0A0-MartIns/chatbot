@@ -56,7 +56,7 @@
                 </div>
             </div>
             <div *ngIf="etapaFeedback === 'comentario'" class="feedback-negativo-form">
-                <label for="comentario">Por favor, diga-nos o que estava a procurar para que possamos melhorar:</label>
+                <label for="comentario">Por favor, informe o motivo desse feedback</label>
                 <textarea id="comentario" [(ngModel)]="feedbackComentario" name="comentario" rows="3"></textarea>
                 <button (click)="enviarFeedbackNegativo()">Enviar Feedback</button>
             </div>

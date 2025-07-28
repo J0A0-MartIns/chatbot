@@ -100,7 +100,8 @@ export class ChatComponent implements OnInit {
     }
 
     enviarFeedbackNegativo(): void {
-        if (!this.idAtendimentoAtual) return;
+        if (!this.idAtendimentoAtual)
+            return;
         const primeiraSolucao = this.solucoesEncontradas.length > 0 ? this.solucoesEncontradas[0] : null;
         const payload: FeedbackPayload = {
             id_atendimento: this.idAtendimentoAtual,

@@ -2,8 +2,9 @@
  * Lógica de chat com IA (Llama 3) e criação de pendências.
  */
 
-const {AtendimentoChatbot, Feedback, SessaoUsuario, Pendencia, sequelize, Tema, Subtema} = require('../models');
+const {AtendimentoChatbot, Feedback, SessaoUsuario, Pendencia, sequelize, Tema, Subtema, BaseConhecimento} = require('../models');
 const axios = require('axios');
+const {Op} = require("sequelize");
 
 const ChatController = {
     /**
@@ -39,8 +40,17 @@ const ChatController = {
                 resposta_chatbot: resposta,
             });
 
+            let solucoesCompletas = [];
             if (encontrado && solucoes && solucoes.length > 0) {
                 const idsDocumentos = solucoes.map(s => s.id_documento);
+                solucoesCompletas = await BaseConhecimento.findAll({
+                    where: { id_documento: { [Op.in]: idsDocumentos } },
+                    include: [{
+                        model: Subtema,
+                        as: 'Subtema',
+                        include: [{ model: Tema, as: 'tema' }]
+                    }]
+                });
                 await atendimento.addSolucoes(idsDocumentos);
             }
 
@@ -48,7 +58,7 @@ const ChatController = {
                 id_atendimento: atendimento.id_atendimento,
                 resposta: resposta,
                 encontrado: encontrado,
-                solucoes: solucoes
+                solucoes: solucoesCompletas
             });
 
         } catch (error) {
@@ -72,20 +82,6 @@ const ChatController = {
                 avaliacao: avaliacao,
                 comentario: comentario
             }, {transaction: transacao});
-
-            if (avaliacao === false) {
-                const novaPendencia = await Pendencia.create({
-                    id_feedback: novoFeedback.id_feedback,
-                    motivo: comentario || 'O usuário não forneceu um motivo.',
-                    id_atendimento: id_atendimento
-                }, { transaction: transacao });
-
-                if (tema && subtema) {
-                    novaPendencia.sugestao_tema = tema;
-                    novaPendencia.sugestao_subtema = subtema;
-                    await novaPendencia.save({ transaction: transacao });
-                }
-            }
 
             await transacao.commit();
 
