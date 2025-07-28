@@ -67,7 +67,7 @@ def buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn):
             SELECT p.id_documento, p.numero_paragrafo, p.conteudo_paragrafo, p.embedding
             FROM documento_paragrafo_embedding p
             JOIN base_conhecimento d ON p.id_documento = d.id_documento
-            WHERE d.id_subtema = %s
+            WHERE d.id_subtema = %s AND d.ativo = true
         """
 
         params = [id_subtema]
@@ -160,7 +160,7 @@ def buscar_resposta_no_cache(embedding_pergunta, conn):
         for id_cache, resposta, embedding_db_json in cache_db:
             embedding_db = np.array(embedding_db_json, dtype=np.float32)
             score = cosine_similarity([embedding_pergunta], [embedding_db])[0][0]
-            if score > 0.8:
+            if score > 0.9:
                 with conn.cursor() as cur_update:
                     cur_update.execute(
                         "UPDATE pergunta_cache SET contagem_uso = contagem_uso + 1, data_ultimo_uso = NOW() WHERE id_cache = %s;",

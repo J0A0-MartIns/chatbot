@@ -222,4 +222,19 @@ export class BaseComponent implements OnInit {
       DocumentoArquivos: []
     };
   }
+  mudarAtivo(doc: Documento): void {
+    if (doc.id_documento === undefined) return;
+
+    const novoStatus = !doc.ativo;
+    doc.ativo = novoStatus;
+
+    this.baseService.atualizarAtivo(doc.id_documento, novoStatus).subscribe({
+      error: (err) => {
+        console.error('Erro ao atualizar o status do documento:', err);
+        doc.ativo = !novoStatus;
+        alert('Não foi possível atualizar o status do documento.');
+      }
+    });
+  }
+
 }

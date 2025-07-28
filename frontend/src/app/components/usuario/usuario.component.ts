@@ -5,11 +5,12 @@ import {Usuario, UsuarioPayload} from '../../models/usuario.model';
 import {Perfil} from '../../models/perfil.model';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {RouterLink} from "@angular/router";
 
 @Component({
     selector: 'app-usuario',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, RouterLink],
     templateUrl: './usuario.component.html',
     styleUrls: ['./usuario.component.css']
 })

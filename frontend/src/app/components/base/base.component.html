@@ -18,6 +18,7 @@
                     <th>Tema</th>
                     <th>Subtema</th>
                     <th>Conteúdo</th>
+                    <th>Status</th>
                     <th>Ações</th>
                 </tr>
                 </thead>
@@ -27,6 +28,12 @@
                     <td>{{ doc.Tema?.nome || 'N/A' }}</td>
                     <td>{{ doc.Subtema?.nome || 'N/A' }}</td>
                     <td>{{ doc.conteudo.substring(0, 70) }}...</td>
+                    <td>
+                        <label class="switch">
+                            <input type="checkbox" [checked]="doc.ativo" (change)="mudarAtivo(doc)">
+                            <span class="slider round"></span>
+                        </label>
+                    </td>
                     <td class="action-cell">
                         <div class="dropdown-container">
                             <button class="icon-button" (click)="toggleActionSelect(i, $event)">⋮</button>
@@ -89,25 +96,26 @@
 
                     <div class="upload-section">
                         <label>Anexos:</label>
-
                         <div *ngIf="isEditMode && docEmEdicao.DocumentoArquivos && docEmEdicao.DocumentoArquivos.length > 0">
                             <ul class="existing-files-list">
                                 <li *ngFor="let arquivo of docEmEdicao.DocumentoArquivos">
-                                    <a [href]="'http://localhost:3000/' + arquivo.caminho_arquivo"
-                                       target="_blank">{{ arquivo.nome_original }}</a>
-                                    <button type="button" class="delete-file-btn"
-                                            (click)="excluirArquivoAnexado(arquivo.id_arquivo)">&times;
+                                    <a [href]="'http://localhost:3000/' + arquivo.caminho_arquivo" target="_blank">{{ arquivo.nome_original }}</a>
+                                    <button
+                                            *ngIf="docEmEdicao.DocumentoArquivos.length > 1"
+                                            type="button"
+                                            class="delete-file-btn"
+                                            (click)="excluirArquivoAnexado(arquivo.id_arquivo)"
+                                            title="Excluir anexo">
+                                        &times;
                                     </button>
                                 </li>
                             </ul>
                         </div>
-
                         <div>
-                            <label for="file-upload" class="file-upload-label">Adicionar Novo Arquivo:</label>
-                            <input id="file-upload" type="file" (change)="onFileSelected($event)"
-                                   accept=".pdf,.doc,.docx">
+                            <label for="file-upload" class="file-upload-label">Adicionar Novo Ficheiro:</label>
+                            <input id="file-upload" type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx">
                             <div *ngIf="arquivoParaUpload" class="file-info">
-                                Novo arquivo para enviar: {{ arquivoParaUpload.name }}
+                                Novo ficheiro a ser enviado: {{ arquivoParaUpload.name }}
                             </div>
                         </div>
                     </div>

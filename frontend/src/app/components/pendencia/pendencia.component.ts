@@ -9,11 +9,12 @@ import { Subtema } from '../../models/subtema.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseService } from '../../services/base.service';
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-pendencia',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './pendencia.component.html',
   styleUrls: ['./pendencia.component.css']
 })

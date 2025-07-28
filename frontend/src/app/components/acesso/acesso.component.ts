@@ -4,6 +4,7 @@ import { Perfil } from '../../models/perfil.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {Permissao} from "../../models/permissao.model";
+import {RouterLink} from "@angular/router";
 
 interface GrupoDePagina {
   nomeExibicao: string;
@@ -15,7 +16,7 @@ interface GrupoDePagina {
 @Component({
   selector: 'app-acesso',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './acesso.component.html',
   styleUrls: ['./acesso.component.css']
 })

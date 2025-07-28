@@ -6,11 +6,12 @@ import { Tema } from '../../models/tema.model';
 import { Subtema } from '../../models/subtema.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-relatorio',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './relatorio.component.html',
   styleUrls: ['./relatorio.component.css']
 })

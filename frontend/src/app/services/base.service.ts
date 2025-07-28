@@ -44,7 +44,6 @@ export class BaseService {
         return this.http.delete(`${this.arquivoApiUrl}/${id_arquivo}`);
     }
 
-    //Implementar quando usar ia
     atualizarAtivo(id: number, ativo: boolean): Observable<Documento> {
         return this.http.patch<Documento>(`${this.apiUrl}/${id}/ativo`, { ativo });
     }
