@@ -137,7 +137,7 @@ def processar_documento(id_documento, id_arquivo, caminho_arquivo):
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        print("Uso: python processador_documento.py <id_documento> <id_arquivo> <caminho_para_o_ficheiro>")
+        print("Uso: python processador_documento.py <id_documento> <id_arquivo> <caminho_para_o_documento>")
     else:
         doc_id = int(sys.argv[1])
         arquivo_id = int(sys.argv[2])

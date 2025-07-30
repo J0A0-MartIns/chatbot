@@ -4,7 +4,7 @@
 const multer = require('multer');
 const path = require('path');
 
-// Define a estratégia de armazenamento dos ficheiros
+// Define a estratégia de armazenamento dos arquivos
 const armazenamento = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, './uploads/docs/');

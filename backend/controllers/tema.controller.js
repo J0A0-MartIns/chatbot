@@ -1,7 +1,5 @@
 /**
- * controllers/tema.controller.js
- *
- * Este ficheiro gere a lógica de negócio para as operações de CRUD
+ * Este arquvio gere a lógica de negócio para as operações de CRUD
  * relacionadas aos Temas da base de conhecimento.
  */
 
@@ -9,8 +7,7 @@ const { Tema } = require('../models');
 
 const TemaController = {
     /**
-     * @description Cria um novo tema.
-     * @route POST /api/temas
+     * Cria um novo tema.
      */
     async criarTema(req, res) {
         const { nome } = req.body;
@@ -44,8 +41,7 @@ const TemaController = {
     },
 
     /**
-     * @description Busca um tema pelo seu ID.
-     * @route GET /api/temas/:id
+     * Busca um tema pelo seu ID.
      */
     async buscarTemaPorId(req, res) {
         try {
@@ -60,8 +56,7 @@ const TemaController = {
     },
 
     /**
-     * @description Atualiza um tema existente.
-     * @route PUT /api/temas/:id
+     * Atualiza um tema existente.
      */
     async atualizarTema(req, res) {
         const { id } = req.params;
@@ -82,8 +77,7 @@ const TemaController = {
     },
 
     /**
-     * @description Remove um tema.
-     * @route DELETE /api/temas/:id
+     * Remove um tema.
      */
     async removerTema(req, res) {
         const { id } = req.params;
