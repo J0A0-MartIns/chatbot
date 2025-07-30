@@ -6,8 +6,7 @@ const { Permissao } = require('../models');
 
 const PermissaoController = {
     /**
-     * @description Lista todas as permissões cadastradas.
-     * @route GET /permissoes
+     *Lista todas as permissões cadastradas.
      */
     async listarTodas(req, res) {
         try {

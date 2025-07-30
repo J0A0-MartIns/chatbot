@@ -44,15 +44,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.sessionExpired = false;
   }
 
-  temAcessoAPagina(user: Usuario | null, chaves: string[]): boolean {
-    if (!user || !user.Perfil || !user.Perfil.Permissoes || user.Perfil.Permissoes.length === 0) {
-      return false;
-    }
-    return user.Perfil.Permissoes.some(p =>
-        chaves.some(chave => (p.nome || '').toLowerCase().includes(chave.toLowerCase()))
-    );
-  }
-
   irParaPerfil(): void {
     this.router.navigate(['/perfil']);
   }

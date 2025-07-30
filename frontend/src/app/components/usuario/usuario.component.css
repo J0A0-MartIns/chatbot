@@ -280,8 +280,8 @@ button.delete-button:hover {
 
 
 .modal.large {
-    max-width: 90%;
-    width: 800px;
+    max-width: 100%;
+    width: 1000px;;
     max-height: 90vh;
     overflow: hidden;
     padding: 20px;
@@ -295,7 +295,7 @@ button.delete-button:hover {
 
 .modal h3 {
     margin: 0 0 15px 0;
-    color: #007d3d;
+    color: black;
     font-weight: 700;
     font-size: 1.5rem;
     flex-shrink: 0;
@@ -365,7 +365,7 @@ button.delete-button:hover {
     background-color: #00412a;
 }
 
-.pending-table-wrapper {
+.pendencias-tabela {
     overflow-y: auto;
     max-height: 300px;
     border: 1px solid #ddd;
@@ -373,19 +373,19 @@ button.delete-button:hover {
     box-sizing: border-box;
 }
 
-.pending-table-wrapper table {
+.pendencias-tabela table {
     width: 100%;
     border-collapse: collapse;
     font-family: Arial, sans-serif;
 }
 
-.pending-table-wrapper thead tr {
+.pendencias-tabela thead tr {
     background-color: #007d3d;
     color: white;
 }
 
-.pending-table-wrapper th,
-.pending-table-wrapper td {
+.pendencias-tabela th,
+.pendencias-tabela td {
     padding: 10px 12px;
     border-bottom: 1px solid #eee;
     text-align: left;
@@ -393,9 +393,9 @@ button.delete-button:hover {
     font-size: 1rem;
 }
 
-.pending-table-wrapper th {
-    background-color: #007d3d;
-    color: black;
+.pendencias-tabela th {
+    background-color: #00401c;
+    color: white;
     font-weight: bold;
 }
 
@@ -465,7 +465,7 @@ button.delete-button:hover {
         margin: 6px 4px;
     }
 
-    .pending-table-wrapper {
+    .pendencias-tabela {
         max-height: 50vh;
     }
 }
@@ -477,8 +477,8 @@ button.delete-button:hover {
         margin: 6px 0;
     }
 
-    .pending-table-wrapper th,
-    .pending-table-wrapper td {
+    .pendencias-tabela th,
+    .pendencias-tabela td {
         font-size: 0.9rem;
     }
 }

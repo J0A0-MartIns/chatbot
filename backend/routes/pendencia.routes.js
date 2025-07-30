@@ -6,11 +6,11 @@ const express = require('express');
 const router = express.Router();
 const pendenciaController = require('../controllers/pendencia.controller');
 const { authenticateToken } = require('../middlewares/auth.middleware');
-const { pode } = require('../middlewares/permissao.middleware');
+const { isAdmin } = require('../middlewares/permissao.middleware');
 
-router.get('/', authenticateToken, pode('listar_pendencias'), pendenciaController.listarPendencias);
-router.post('/:id/aprovar', authenticateToken, pode('aprovar_pendencia'), pendenciaController.aprovarPendencia);
-router.delete('/:id', authenticateToken, pode('rejeitar_pendencia'), pendenciaController.excluirPendencia);
+router.get('/', authenticateToken, isAdmin, pendenciaController.listarPendencias);
+router.post('/:id/aprovar', authenticateToken, isAdmin, pendenciaController.aprovarPendencia);
+router.delete('/:id', authenticateToken, isAdmin, pendenciaController.excluirPendencia);
 
 module.exports = router;
 

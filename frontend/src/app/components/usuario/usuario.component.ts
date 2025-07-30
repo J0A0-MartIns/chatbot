@@ -126,6 +126,11 @@ export class UsuarioComponent implements OnInit {
         }
     }
 
+    getPerfilNome(id_perfil: number): string {
+        const perfil = this.perfis.find(p => p.id_perfil === id_perfil);
+        return perfil ? perfil.nome : 'N/A';
+    }
+
     toggleActionSelect(index: number): void {
         this.openActionIndex = this.openActionIndex === index ? null : index;
     }

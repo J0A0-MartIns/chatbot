@@ -83,12 +83,13 @@
         <div class="modal-backdrop" *ngIf="showPendingModal">
             <div class="modal large">
                 <h3>Solicitações de Cadastro Pendentes</h3>
-                <div class="pending-table-wrapper">
+                <div class="pendencias-tabela">
                     <table>
                         <thead>
                         <tr>
                             <th>Nome</th>
                             <th>Email</th>
+                            <th>Perfil</th>
                             <th>Ações</th>
                         </tr>
                         </thead>
@@ -96,6 +97,7 @@
                         <tr *ngFor="let pending of usuariosPendentes">
                             <td>{{ pending.nome }}</td>
                             <td>{{ pending.email }}</td>
+                            <td>{{ getPerfilNome(pending.id_perfil) }}</td>
                             <td>
                                 <button (click)="aprovarUsuarioPendente(pending.id_usuario)" class="btn-approve">
                                     Aprovar

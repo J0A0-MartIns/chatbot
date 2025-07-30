@@ -79,26 +79,6 @@ const UserController = {
     },
 
     /**
-     * Busca um usuário por ID.
-     */
-    async buscarUsuarioPorId(req, res) {
-        const { id } = req.params;
-        try {
-            const user = await Usuario.findOne({
-                where: { id_usuario: id, status: 'ativo' },
-                include: [{ model: Perfil, as: 'Perfil' }]
-            });
-
-            if (!user) {
-                return res.status(404).json({ message: 'Usuário não encontrado.' });
-            }
-            return res.json(formatUserResponse(user));
-        } catch (err) {
-            return res.status(500).json({ message: 'Erro ao buscar usuário.', error: err.message });
-        }
-    },
-
-    /**
      * Lista todos os usuário com status 'pendente'.
      */
     async listarPendentes(req, res) {

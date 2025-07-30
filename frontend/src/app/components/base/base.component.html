@@ -112,10 +112,10 @@
                             </ul>
                         </div>
                         <div>
-                            <label for="file-upload" class="file-upload-label">Adicionar Novo Ficheiro:</label>
+                            <label for="file-upload" class="file-upload-label">Adicionar Novo Arquivo:</label>
                             <input id="file-upload" type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx">
                             <div *ngIf="arquivoParaUpload" class="file-info">
-                                Novo ficheiro a ser enviado: {{ arquivoParaUpload.name }}
+                                Novo arquivo a ser enviado: {{ arquivoParaUpload.name }}
                             </div>
                         </div>
                     </div>

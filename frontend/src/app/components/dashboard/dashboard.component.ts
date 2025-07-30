@@ -138,8 +138,4 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy{
   irParaUsuarios() {
     this.router.navigate(['/usuario']);
   }
-
-  irParaPerfil() {
-    this.router.navigate(['/acesso']);
-  }
 }

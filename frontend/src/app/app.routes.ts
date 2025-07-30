@@ -8,7 +8,7 @@ import { HomeComponent } from './components/home/home.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { BaseComponent } from './components/base/base.component';
 import { UsuarioComponent } from './components/usuario/usuario.component';
-import { AcessoComponent } from './components/acesso/acesso.component';
+//import { AcessoComponent } from './components/acesso/acesso.component';
 import { GerenciarUsuarioComponent } from './components/gerir-usuario/gerir-usuario.component';
 import { ChatComponent } from './components/chat/chat.component';
 import { PendenciaComponent } from './components/pendencia/pendencia.component';
@@ -41,7 +41,7 @@ export const routes: Routes = [
       { path: 'relatorio', component: RelatorioComponent },
       { path: 'feedback', component: FeedbakcsComponent },
       { path: 'pendencia', component: PendenciaComponent },
-      { path: 'acesso', component: AcessoComponent },
+      //{ path: 'acesso', component: AcessoComponent },
       { path: 'gestao', component: GerenciarUsuarioComponent },
       { path: 'novaSenha', component: NovaSenhaComponent },
       { path: '', redirectTo: '/login', pathMatch: 'full' },

@@ -7,10 +7,10 @@ const router = express.Router();
 
 const dashboardController = require('../controllers/dashboard.controller');
 const { authenticateToken } = require('../middlewares/auth.middleware');
-const { pode } = require('../middlewares/permissao.middleware');
+const { isAdmin } = require('../middlewares/permissao.middleware');
 
-router.get('/stats', authenticateToken, pode('ver_relatorios'), dashboardController.getStats);
-router.get('/taxa-respostas', authenticateToken, pode('ver_relatorios'), dashboardController.getTaxaRespostas);
-router.get('/volume-atendimentos', authenticateToken, pode('ver_relatorios'), dashboardController.getVolumeAtendimentos);
+router.get('/stats', authenticateToken, isAdmin, dashboardController.getStats);
+router.get('/taxa-respostas', authenticateToken, isAdmin, dashboardController.getTaxaRespostas);
+router.get('/volume-atendimentos', authenticateToken, isAdmin, dashboardController.getVolumeAtendimentos);
 
 module.exports = router;

@@ -7,9 +7,9 @@ const router = express.Router();
 
 const relatorioController = require('../controllers/relatorio.controller');
 const { authenticateToken } = require('../middlewares/auth.middleware');
-const { pode } = require('../middlewares/permissao.middleware');
+const { isAdmin } = require('../middlewares/permissao.middleware');
 
-router.use(authenticateToken, pode('ver_relatorios'));
+router.use(authenticateToken, isAdmin);
 router.get('/interacoes', relatorioController.getInteracoes);
 router.get('/uso-subtema', relatorioController.getUsoSubtema);
 

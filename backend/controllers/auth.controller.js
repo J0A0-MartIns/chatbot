@@ -3,7 +3,7 @@
  * finalização de sessões de usuário.
  */
 
-const { Usuario, Perfil, Permissao, SessaoUsuario } = require('../models');
+const { Usuario, Perfil, SessaoUsuario } = require('../models');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -18,12 +18,7 @@ const AuthController = {
                 where: { email },
                 include: [{
                     model: Perfil,
-                    as: 'Perfil',
-                    include: [{
-                        model: Permissao,
-                        as: 'Permissoes',
-                        through: { attributes: [] }
-                    }]
+                    as: 'Perfil'
                 }]
             });
 
@@ -43,10 +38,9 @@ const AuthController = {
 
             const payload = { id: usuario.id_usuario, perfil: usuario.Perfil?.nome };
             const secret = process.env.JWT_SECRET || 'chave_secreta';
-
             const token = jwt.sign(payload, secret, { expiresIn: '8h' });
 
-            await SessaoUsuario.create({ id_usuario: usuario.id_usuario, token });
+            await SessaoUsuario.create({ id_usuario: usuario.id_usuario, token: token });
 
             const usuarioParaRetorno = usuario.toJSON();
             delete usuarioParaRetorno.senha;

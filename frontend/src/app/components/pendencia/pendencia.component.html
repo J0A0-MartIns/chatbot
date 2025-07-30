@@ -93,7 +93,7 @@
                            placeholder="Palavras-chave (separadas por vírgula)"/>
 
                     <div class="upload-section">
-                        <label for="file-upload">Anexar Documento (Opcional):</label>
+                        <label for="file-upload">*Anexar Documento:</label>
                         <input id="file-upload" type="file" (change)="onFileSelected($event)" accept=".pdf,.docx">
                         <div *ngIf="arquivoParaUpload" class="file-info">
                             Ficheiro selecionado: {{ arquivoParaUpload.name }}

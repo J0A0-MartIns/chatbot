@@ -29,7 +29,7 @@ const authenticateToken = (req, res, next) => {
             const sessaoAtiva = await SessaoUsuario.findOne({
                 where: {
                     id_usuario: user.id,
-                    token,
+                    token: token,
                     data_logout: null
                 }
             });
