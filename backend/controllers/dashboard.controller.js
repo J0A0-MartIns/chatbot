@@ -81,12 +81,13 @@ const DashboardController = {
     },
 
     /**
-     * @description Calcula o volume de atendimentos por dia nos últimos 7 dias.
+     * Calcula o volume de atendimentos por dia nos últimos x dias dias.
      */
     async getVolumeAtendimentos(req, res) {
         try {
+            const dias = 7;
             const seteDiasAtras = new Date();
-            seteDiasAtras.setDate(seteDiasAtras.getDate() - 7);
+            seteDiasAtras.setDate(seteDiasAtras.getDate() - dias);
             seteDiasAtras.setHours(0, 0, 0, 0);
 
             const resultado = await AtendimentoChatbot.findAll({

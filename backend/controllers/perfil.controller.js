@@ -6,7 +6,6 @@ const { Perfil, sequelize  } = require('../models');
 
 const PerfilController = {
 
-
     /**
      * Lista todos os perfis
      */

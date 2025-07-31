@@ -72,8 +72,8 @@ const ChatController = {
      */
     async darFeedback(req, res) {
         const {id_atendimento, avaliacao, comentario, tema, subtema} = req.body;
-        if (id_atendimento === null || avaliacao === undefined) {
-            return res.status(400).json({message: 'ID do atendimento e avaliação são obrigatórios.'});
+        if (id_atendimento === null) {
+            return res.status(400).json({message: 'ID do atendimento é obrigatório.'});
         }
         const transacao = await sequelize.transaction();
         try {

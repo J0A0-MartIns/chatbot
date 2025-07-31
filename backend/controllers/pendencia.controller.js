@@ -2,15 +2,7 @@
  * Lógica de negócio para as pendências
  */
 
-const {
-    Pendencia,
-    Feedback,
-    AtendimentoChatbot,
-    SessaoUsuario,
-    Usuario,
-    BaseConhecimento,
-    sequelize
-} = require('../models');
+const {Pendencia, Feedback, AtendimentoChatbot, SessaoUsuario, Usuario, BaseConhecimento, sequelize} = require('../models');
 
 const PendenciaController = {
     /**

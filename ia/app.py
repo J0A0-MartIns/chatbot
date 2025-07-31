@@ -126,7 +126,9 @@ def buscar_melhor_chunk(pergunta, embedding_pergunta, id_subtema, conn):
 
 def gerar_resposta_com_groq(contexto, pergunta):
     prompt = f"""Com base no contexto fornecido abaixo, responda à pergunta do usuário de forma clara e direta em português.
-Se a resposta não estiver no contexto, diga: "Desculpe, não encontrei nenhuma informação relevante sobre este assunto nos meus documentos."
+Se a resposta não estiver no contexto, diga: "Desculpe, não encontrei nenhuma informação relevante sobre este assunto nos meus documentos".
+Você pode considerar sinônimos para melhorar o entendimento do contexto com a pergunta do usuário, assim não é necessário que esteja as exatas
+palavras.
 
 Contexto:
 ---
