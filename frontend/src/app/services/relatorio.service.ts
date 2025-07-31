@@ -11,14 +11,18 @@ export interface RelatorioInteracao {
     avaliacao: boolean | null;
     tema: string;
     sub_tema: string;
-    dataInicio?: string;
-    dataFim?: string;
+    documento?: string;
 }
 
 export interface RelatorioUsoSubtema {
     id_subtema: number;
     nome: string;
     count: string;
+}
+
+export interface Paginacao<T> {
+    count: number;
+    rows: T[];
 }
 
 @Injectable({
@@ -33,22 +37,28 @@ export class RelatorioService {
      * Busca o relatório de interações com filtros opcionais.
      */
     getRelatorioInteracoes(filtros: { id_tema?: number; id_subtema?: number; dataInicio?: string;
-        dataFim?: string; }): Observable<RelatorioInteracao[]> {
+        dataFim?: string; page?: number; pageSize?: number; exportar?: boolean }): Observable<Paginacao<RelatorioInteracao>> {
         let params = new HttpParams();
         if (filtros.id_tema) params = params.set('id_tema', String(filtros.id_tema));
         if (filtros.id_subtema) params = params.set('id_subtema', String(filtros.id_subtema));
         if (filtros.dataInicio) params = params.set('dataInicio', filtros.dataInicio);
         if (filtros.dataFim) params = params.set('dataFim', filtros.dataFim);
-        return this.http.get<RelatorioInteracao[]>(`${this.apiUrl}/interacoes`, { params });
+        if (filtros.page) params = params.set('page', String(filtros.page));
+        if (filtros.pageSize) params = params.set('pageSize', String(filtros.pageSize));
+        if (filtros.exportar) params = params.set('exportar', 'true');
+
+        return this.http.get<Paginacao<RelatorioInteracao>>(`${this.apiUrl}/interacoes`, { params });
     }
 
     /**
      * Busca o relatório de uso de subtemas por período.
      */
-    getRelatorioUsoSubtema(filtros: { dataInicio?: string; dataFim?: string }): Observable<RelatorioUsoSubtema[]> {
+    getRelatorioUsoSubtema(filtros: { dataInicio?: string; dataFim?: string; page?: number; pageSize?: number }): Observable<Paginacao<RelatorioUsoSubtema>> {
         let params = new HttpParams();
         if (filtros.dataInicio) params = params.set('de', filtros.dataInicio);
         if (filtros.dataFim) params = params.set('ate', filtros.dataFim);
-        return this.http.get<RelatorioUsoSubtema[]>(`${this.apiUrl}/uso-subtema`, { params });
+        if (filtros.page) params = params.set('page', String(filtros.page));
+        if (filtros.pageSize) params = params.set('pageSize', String(filtros.pageSize));
+        return this.http.get<Paginacao<RelatorioUsoSubtema>>(`${this.apiUrl}/uso-subtema`, { params });
     }
 }

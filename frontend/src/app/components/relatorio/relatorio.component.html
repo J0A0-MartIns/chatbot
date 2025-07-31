@@ -30,15 +30,35 @@
                 <option [ngValue]="null">Todos os Subtemas</option>
                 <option *ngFor="let subtema of subtemasDisponiveis" [value]="subtema.id_subtema">{{ subtema.nome }}</option>
             </select>
-            <br>
-            <label for="dataInicio">Data Início:</label>
+            <label for="dataInicioInteracao">Data Início:</label>
             <input type="date" id="dataInicioInteracao" [(ngModel)]="dataInicioInteracao">
 
-            <label for="dataFim">Data Fim:</label>
+            <label for="dataFimInteracao">Data Fim:</label>
             <input type="date" id="dataFimInteracao" [(ngModel)]="dataFimInteracao">
-
-            <button (click)="aplicarFiltroInteracoes()" class="botao-filtrar">
+            <div>
+                <button (click)="onFiltroInteracoesClick()" class="botao-filtrar">
                 <i class="material-icons">filter_list</i> Filtrar Interações
+                </button>
+            </div>
+            <button (click)="exportarParaExcel()" class="botao-exportar">
+                <i class="material-icons">download</i> Exportar Dados
+            </button>
+        </div>
+
+        <div class="paginacao-container" *ngIf="totalInteracoes > 0">
+            <label for="itensPorPaginaInteracoes">Itens por página:</label>
+            <select id="itensPorPaginaInteracoes" [(ngModel)]="itensPorPaginaInteracoes" (change)="onItensPorPaginaInteracoesChange()">
+                <option *ngFor="let opcao of opcoesItensPorPagina" [value]="opcao">{{ opcao }}</option>
+            </select>
+
+            <button (click)="mudarPaginaInteracoes(paginaAtualInteracoes - 1)" [disabled]="paginaAtualInteracoes === 1">
+                Anterior
+            </button>
+
+            <span>Página {{ paginaAtualInteracoes }} de {{ totalPaginasInteracoes }}</span>
+
+            <button (click)="mudarPaginaInteracoes(paginaAtualInteracoes + 1)" [disabled]="paginaAtualInteracoes === totalPaginasInteracoes">
+                Próxima
             </button>
         </div>
 
@@ -46,26 +66,36 @@
             <table>
                 <thead>
                 <tr>
-                    <th>Data/Hora</th>
-                    <th>Utilizador</th>
-                    <th>Pergunta</th>
-                    <th>Tema</th>
-                    <th>Subtema</th>
-                    <th>Avaliação</th>
+                    <th class="col-media">Data/Hora</th>
+                    <th class="col-pequena">Usuário</th>
+                    <th class="col-grande">Pergunta</th>
+                    <th class="col-grande">Resposta</th>
+                    <th class="col-media">Tema</th>
+                    <th class="col-media">Subtema</th>
+                    <th class="col-pequena">Documento</th>
+                    <th class="col-pequena">Avaliação</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr *ngFor="let item of interacoes">
-                    <td>{{ formatarData(item.data_atendimento) }}</td>
-                    <td>{{ item.usuario }}</td>
-                    <td>{{ item.pergunta_usuario }}</td>
-                    <td [ngClass]="{'mensagem-sem-dados': item.tema === 'Solução não encontrada'}">
+                    <td data-label="Data/Hora">{{ formatarData(item.data_atendimento) }}</td>
+                    <td data-label="Usuário">{{ item.usuario }}</td>
+
+                    <td data-label="Pergunta" class="celula-texto-longo" [title]="item.pergunta_usuario">
+                        {{ item.pergunta_usuario }}
+                    </td>
+                    <td data-label="Resposta" class="celula-texto-longo" [title]="item.resposta_gerada">
+                        {{ item.resposta_gerada }}
+                    </td>
+
+                    <td data-label="Tema" [ngClass]="{'mensagem-sem-dados': item.tema === 'Solução não encontrada'}">
                         {{ item.tema }}
                     </td>
-                    <td [ngClass]="{'mensagem-sem-dados': item.sub_tema === 'Solução não encontrada'}">
+                    <td data-label="Subtema" [ngClass]="{'mensagem-sem-dados': item.sub_tema === 'Solução não encontrada'}">
                         {{ item.sub_tema }}
                     </td>
-                    <td>{{ formatarAvaliacao(item.avaliacao) }}</td>
+                    <td data-label="Documento">{{ item.documento }}</td>
+                    <td data-label="Avaliação">{{ formatarAvaliacao(item.avaliacao) }}</td>
                 </tr>
                 <tr *ngIf="interacoes.length === 0">
                     <td colspan="6" class="mensagem-sem-dados">Nenhuma interação encontrada para os filtros selecionados.</td>
@@ -78,13 +108,13 @@
     <div class="relatorio-bloco" *ngIf="abaAtiva === 'uso'">
         <h3>Uso de Subtemas por Período</h3>
         <div class="filtros-container">
-            <label for="dataInicio">Data Início:</label>
-            <input type="date" id="dataInicio" [(ngModel)]="dataInicio" name="dataInicio">
+            <label for="dataInicioUso">Data Início:</label>
+            <input type="date" id="dataInicioUso" [(ngModel)]="dataInicio" name="dataInicioUso">
 
-            <label for="dataFim">Data Fim:</label>
-            <input type="date" id="dataFim" [(ngModel)]="dataFim" name="dataFim">
+            <label for="dataFimUso">Data Fim:</label>
+            <input type="date" id="dataFimUso" [(ngModel)]="dataFim" name="dataFimUso">
 
-            <button (click)="aplicarFiltroPeriodo()" class="botao-filtrar">
+            <button (click)="onFiltroPeriodoClick()" class="botao-filtrar">
                 <i class="material-icons">filter_list</i>Filtrar por Período
             </button>
         </div>
@@ -107,6 +137,21 @@
         </div>
         <div *ngIf="usoSubtemas.length === 0" class="mensagem-sem-dados">
             Não existem dados de utilização para o período selecionado.
+        </div>
+
+        <div class="paginacao-container" *ngIf="totalUsoSubtemas > 0">
+            <label for="itensPorPaginaUso">Itens por página:</label>
+            <select id="itensPorPaginaUso" [(ngModel)]="itensPorPaginaUso" (change)="onItensPorPaginaUsoChange()">
+                <option *ngFor="let opcao of opcoesItensPorPagina" [value]="opcao">{{ opcao }}</option>
+            </select>
+
+            <button (click)="mudarPaginaUso(paginaAtualUso - 1)" [disabled]="paginaAtualUso === 1">
+                Anterior
+            </button>
+            <span>Página {{ paginaAtualUso }} de {{ totalPaginasUso }}</span>
+            <button (click)="mudarPaginaUso(paginaAtualUso + 1)" [disabled]="paginaAtualUso === totalPaginasUso">
+                Próxima
+            </button>
         </div>
     </div>
 </div>

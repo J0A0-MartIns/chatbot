@@ -31,27 +31,12 @@
 
 
 .page-container {
-    width: 100%;
-    max-width: 1000px;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    background-color: white;
-    padding: 30px 40px;
-    box-shadow: 0 0 12px rgb(0 0 0 / 0.1);
+    background-color: #fff;
     border-radius: 8px;
-    box-sizing: border-box;
-}
-
-.page-left {
-    flex: 1;
-    background-color: white;
-    padding: 30px 40px;
-    box-shadow: 0 0 12px rgb(0 0 0 / 0.1);
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto 30px auto;
 }
 
 .page-content {
@@ -59,17 +44,50 @@
     width: 100%;
 }
 
-.botao-container {
+.filtros-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
     margin-bottom: 20px;
-    gap: 10px;
 }
 
-.botao-container .open-modal-btn {
-    flex: 1;
-    max-width: unset;
+.input-busca {
+    height: 38px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    flex-grow: 1;
+    max-width: 350px;
+}
+
+.botao-container {
+    display: flex;
+    gap: 15px;
+}
+
+.open-modal-btn {
+    background-color: #00401c;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+}
+
+.open-modal-btn:hover {
+    background-color: #16a34a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 button {
@@ -105,48 +123,47 @@ button:hover {
 }
 
 .dropdown-toggle {
-    padding: 5px 10px;
+    background-color: #00401c;
+    color: white;
+    border: 1px solid #dcdfe6;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
-    background-color: white;
-    border: none;
-    border-radius: 4px;
-    color: black;
-    font-weight: 600;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 4px;
-    transition: background-color 0.3s ease;
 }
 
 .dropdown-toggle:hover {
-    background-color: #007d3d;
-    color: white;
+    background-color: #e4e6eb;
+    color: #333;
 }
 
 .dropdown-menu {
     position: absolute;
     top: 100%;
     right: 0;
-    background: white;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    border-radius: 4px;
-    margin-top: 4px;
-    min-width: 120px;
-    z-index: 10000;
-    display: flex;
-    flex-direction: column;
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 100;
+    padding: 6px 0;
+    margin-top: 5px;
+    min-width: 140px;
+    border: 1px solid #e0e0e0;
 }
 
 .dropdown-menu button {
-    padding: 8px 12px;
+    display: block;
+    width: 100%;
     background: none;
     border: none;
+    padding: 8px 15px;
     text-align: left;
+    font-size: 14px;
     cursor: pointer;
-    font-weight: normal;
     color: #333;
-    border-bottom: 1px solid #eee;
-    transition: background-color 0.2s;
 }
 
 .dropdown-menu button:last-child {
@@ -196,9 +213,11 @@ form select:focus {
 }
 
 .table-container {
-    padding: 20px;
     overflow-x: auto;
-    width: 100%;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    margin-top: 20px;
 }
 
 table {
@@ -211,7 +230,7 @@ table {
 }
 
 thead {
-    background-color: #007d3d;
+    background-color: #00401c;
     color: white;
 }
 
@@ -256,13 +275,12 @@ button.delete-button:hover {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 10000;
-    overflow: hidden;
+    z-index: 1000;
     padding: 20px;
-    box-sizing: border-box;
 }
 
 .modal {
@@ -272,10 +290,6 @@ button.delete-button:hover {
     width: 100%;
     max-width: 400px;
     box-shadow: 0 0 25px rgba(0,0,0,0.3);
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
 }
 
 

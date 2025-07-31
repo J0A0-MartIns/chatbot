@@ -1,20 +1,11 @@
 .relatorios-container {
-    padding: 3rem;
-    max-width: 1000px;
+    padding: 20px 30px;
+    max-width: 1600px;
     margin: auto;
     font-family: Arial, sans-serif;
     background-color: #fff;
 }
 
-.relatorio-bloco {
-    background-color: #f5f5f5;
-    padding: 2rem;
-    border-radius: 16px;
-    margin-bottom: 2.5rem;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease;
-
-}
 
 .relatorio-bloco:hover {
     background-color: #e6f0e8;
@@ -23,13 +14,13 @@
 .relatorio-bloco h3 {
     margin: 0 0 1.5rem 0;
     font-size: 1.5rem;
-    color: #005f3c;
+    color: #333;
 }
 
 .tabs-container {
     display: flex;
     gap: 0.5rem;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid #e0e0e0;
     margin-bottom: 1.5rem;
 }
 
@@ -46,13 +37,23 @@
 }
 
 .tab-button.active {
-    color: #2f855a;
-    border-bottom-color: #2f855a;
+    color: #00401c;
+    border-bottom-color: #00401c;
     font-weight: 600;
 }
 
 .tab-button:hover {
     background-color: #f7fafc;
+}
+
+.tabela-container {
+    margin-top: 1.5rem;
+    overflow-x: auto;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    table-layout: fixed;
 }
 
 .tabela-container table {
@@ -83,14 +84,13 @@
 
 .filtros-container select,
 .filtro-periodo input[type="date"] {
-    padding: 0.6rem 1rem;
-    border-radius: 10px;
-    border: 1px solid #cbd5e0;
-    font-size: 1rem;
-    color: #34495e;
+    height: 38px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
     background-color: #fff;
-    min-width: 160px;
-    transition: border-color 0.2s ease;
 }
 
 .filtros-container select:focus,
@@ -99,7 +99,7 @@
     outline: none;
 }
 
-.botao-filtrar {
+.botao-filtrar, .botao-exportar {
     background-color: #00401c;
     color: white;
     border: none;
@@ -110,13 +110,13 @@
     cursor: pointer;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
+    gap: 8px;
+    height: 38px;
 }
 
-.botao-filtrar:hover {
+.botao-filtrar:hover, .botao-exportar:hover {
     background-color: #27ae60;
 }
 
@@ -126,26 +126,27 @@
     background-color: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    padding: 1rem;
+    padding: 0;
 
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: #34495e;
-    border-radius: 6px;
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 thead {
-    background-color: #007d3d;
+    background-color: #00401c;
     color: white;
     font-weight: 600;
 }
 
 th, td {
-    padding: 1rem 1.25rem;
+    padding: 0.8rem 1.5rem;
     border-bottom: 1px solid #ddd;
     text-align: left;
     vertical-align: middle;
@@ -163,7 +164,101 @@ tbody tr:hover {
     font-size: 1rem;
 }
 
+.paginacao-container {
+    margin-top: 15px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+}
+
+.paginacao-container select,
+.paginacao-container button {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+}
+
+.paginacao-container button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.celula-texto-longo {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 250px;
+}
+
+.col-grande { width: 28%; }
+.col-media  { width: 25%; }
+.col-pequena{ width: 20%; }
+
 @media (max-width: 780px) {
+    .relatorios-container {
+        width: 90vw;
+        padding: 1.5rem 1rem;
+    }
+
+    .tabela-container thead {
+        display: none;
+    }
+
+    .tabela-container tr {
+        background-color: rgba(0, 95, 60, 0.35);
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .tabela-container td {
+        display: block;
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+        border-bottom: 1px solid #eee;
+    }
+
+    .tabela-container td:last-child {
+        border-bottom: none;
+    }
+
+    .tabela-container td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        padding-right: 10px;
+        text-align: left;
+        font-weight: bold;
+        color: #005f3c;
+    }
+
+    .celula-texto-longo {
+        text-align: left;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+
+    .celula-texto-longo::before {
+        display: block;
+        margin-bottom: 5px;
+        position: static;
+        width: 100%;
+    }
+
+    .filtros-container,
+    .filtro-periodo {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
     .filtros-container,
     .filtro-periodo {
         flex-direction: column;
@@ -187,22 +282,5 @@ tbody tr:hover {
         padding: 0.75rem 0.8rem;
         font-size: 0.9rem;
     }
-}
 
-@media (max-width: 480px) {
-    .relatorios-container {
-        padding: 1.5rem 1rem;
-    }
-
-    .relatorio-bloco {
-        padding: 1.5rem 1rem;
-    }
-
-    table {
-        font-size: 0.9rem;
-    }
-
-    th, td {
-        padding: 0.5rem 0.6rem;
-    }
 }
