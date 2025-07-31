@@ -55,7 +55,8 @@ export class RelatorioComponent implements OnInit {
 
   onTemaChange(): void {
     this.filtroSubtemaId = null;
-    this.subtemasDisponiveis = [];
+    this.
+        subtemasDisponiveis = [];
     if (this.filtroTemaId) {
       this.subtemaService.getSubtemasPorTema(this.filtroTemaId).subscribe(data => this.subtemasDisponiveis = data);
     }

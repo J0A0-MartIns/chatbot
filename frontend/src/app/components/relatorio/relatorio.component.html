@@ -59,8 +59,12 @@
                     <td>{{ formatarData(item.data_atendimento) }}</td>
                     <td>{{ item.usuario }}</td>
                     <td>{{ item.pergunta_usuario }}</td>
-                    <td>{{ item.tema}}</td>
-                    <td>{{ item.sub_tema }}</td>
+                    <td [ngClass]="{'mensagem-sem-dados': item.tema === 'Solução não encontrada'}">
+                        {{ item.tema }}
+                    </td>
+                    <td [ngClass]="{'mensagem-sem-dados': item.sub_tema === 'Solução não encontrada'}">
+                        {{ item.sub_tema }}
+                    </td>
                     <td>{{ formatarAvaliacao(item.avaliacao) }}</td>
                 </tr>
                 <tr *ngIf="interacoes.length === 0">

@@ -97,8 +97,8 @@ const RelatorioController = {
                         resposta_gerada: at.resposta_chatbot,
                         usuario: at.SessaoUsuario?.Usuario?.nome || 'Desconhecido',
                         avaliacao: at.Feedback?.avaliacao,
-                        tema: solucao?.Subtema?.tema?.nome || 'N/A',
-                        sub_tema: solucao?.Subtema?.nome || 'N/A'
+                        tema: solucao?.Subtema?.tema?.nome || 'Solução não encontrada',
+                        sub_tema: solucao?.Subtema?.nome || 'Solução não encontrada'
                     };
                 });
 
