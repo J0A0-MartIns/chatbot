@@ -49,12 +49,12 @@ const RelatorioController = {
                     model: BaseConhecimento,
                     as: 'Solucoes',
                     through: {attributes: []},
-                    required: false,
+                    required: !!(id_tema || id_subtema),
                     attributes: ['id_documento', 'titulo'],
                     include: [{
                         model: Subtema,
                         as: 'Subtema',
-                        required: !!(id_tema || id_subtema),
+                        required: true,
                         where: Object.keys(whereSubtema).length > 0 ? whereSubtema : null,
                         include: [{model: Tema, as: 'tema'}]
                     }]

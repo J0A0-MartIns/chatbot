@@ -16,8 +16,8 @@
         </div>
     </div>
 
-    <div class="app-container">
-        <aside class="sidebar" [class.collapsed]="isCollapsed">
+    <div class="app-container"  *ngIf="user$ | async as user">
+        <aside class="sidebar" *ngIf="user.Perfil?.nome === 'Administrador'" [class.collapsed]="isCollapsed">
             <button class="toggle-btn" (click)="toggleSidebar()">
                 <span class="material-icons">menu</span>
             </button>
