@@ -31,7 +31,7 @@ const SubtemaController = {
 
 
     /**
-     * @description Lista todos os subtemas.
+     * Lista todos os subtemas.
      */
     async listarSubtemas(req, res) {
         try {
@@ -43,7 +43,7 @@ const SubtemaController = {
     },
 
     /**
-     * @description Lista todos os subtemas de um tema específico.
+     * Lista todos os subtemas de um tema específico.
      */
     async listarPorTema(req, res) {
         const { id_tema } = req.params;
@@ -56,7 +56,7 @@ const SubtemaController = {
     },
 
     /**
-     * @description Busca um subtema pelo seu ID.
+     * Busca um subtema pelo seu ID.
      */
     async buscarSubtemaPorId(req, res) {
         try {
@@ -71,7 +71,7 @@ const SubtemaController = {
     },
 
     /**
-     * @description Atualiza um subtema existente.
+     * Atualiza um subtema existente.
      */
     async atualizarSubtema(req, res) {
         const { id } = req.params;
@@ -89,7 +89,7 @@ const SubtemaController = {
     },
 
     /**
-     * @description Remove um subtema.
+     * Remove um subtema.
      */
     async removerSubtema(req, res) {
         try {

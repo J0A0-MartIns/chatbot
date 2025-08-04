@@ -117,7 +117,7 @@ export class AuthService {
             }
 
             this.sessionTimer = setTimeout(() => {
-                this.handleSessionExpiration('Sua sessão expirou por inatividade.');
+                this.handleSessionExpiration('Sua sessão expirou.');
             }, timeout);
 
         } catch (e) {
