@@ -1,7 +1,3 @@
-/**
- * Contém os middlewares responsáveis pela autenticação e autorização de rotas na aplicação.
- */
-
 const jwt = require('jsonwebtoken');
 const { SessaoUsuario } = require('../models');
 

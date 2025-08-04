@@ -10,13 +10,6 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS
     }
 });
-// transporter.verify(function(error, success) {
-//     if (error) {
-//         console.error("Erro ao verificar transporter:", error);
-//     } else {
-//         console.log("Servidor pronto para envio de e-mails");
-//     }
-// });
 
 /**
  * Envia um e-mail de recuperação de senha.

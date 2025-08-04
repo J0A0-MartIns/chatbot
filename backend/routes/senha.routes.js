@@ -1,7 +1,3 @@
-/**
- * Define os endpoints da API para recuperação de senha.
- */
-
 const express = require('express');
 const router = express.Router();
 const senhaController = require('../controllers/senha.controller');

@@ -1,6 +1,6 @@
 /**
- * Lida com a lógica de autenticação, incluindo a criação e
- * finalização de sessões de usuário.
+ * Lógica de autenticação
+ * incluindo a criação e finalização de sessões de usuário.
  */
 
 const { Usuario, Perfil, SessaoUsuario } = require('../models');

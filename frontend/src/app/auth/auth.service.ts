@@ -9,11 +9,6 @@ export interface AuthResponse {
     token: string;
     usuario: Usuario;
 }
-export interface ResetPasswordPayload {
-    email: string;
-    code: string;
-    senha: string;
-}
 
 @Injectable({
     providedIn: 'root'
@@ -43,7 +38,7 @@ export class AuthService {
     }
 
     /**
-     * Autentica um utilizador, salva a sessão e notifica a aplicação.
+     * Autentica um usuário, salva a sessão e notifica a aplicação.
      */
     login(email: string, senha: string): Observable<AuthResponse> {
         const payload = { email, senha };
@@ -53,7 +48,7 @@ export class AuthService {
     }
 
     /**
-     * Faz o logout: notifica o back-end primeiro e depois limpa a sessão local.
+     * Notifica o back-end primeiro e depois limpa a sessão local.
      */
     logout(): void {
         const token = this.getToken();
@@ -67,9 +62,6 @@ export class AuthService {
         }
     }
 
-    /**
-     * Solicita um código de recuperação de senha.
-     */
     forgotPassword(email: string): Observable<any> {
         return this.http.post(`${this.passwordApiUrl}/forgot`, { email });
     }

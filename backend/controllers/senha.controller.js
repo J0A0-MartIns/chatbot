@@ -8,8 +8,6 @@ const crypto = require('crypto');
 const {enviarEmailRecuperacao} = require("../services/email.service");
 const {Op} = require("sequelize");
 
-const gerarCodigo = () => Math.floor(100000 + Math.random() * 900000).toString();
-
 const SenhaController = {
     /**
      * Inicia o processo de recuperação de senha.

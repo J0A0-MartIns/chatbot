@@ -1,7 +1,3 @@
-/**
- * Fornece dados para a página de Relatórios.
- */
-
 const {AtendimentoChatbot, Feedback, BaseConhecimento, Subtema, Tema, SessaoUsuario, Usuario, sequelize} = require('../models');
 const {Op} = require('sequelize');
 
@@ -13,7 +9,7 @@ const getPaginacao = (page, pageSize) => {
 
 const RelatorioController = {
     /**
-     *Busca um relatório de todas as interações do chat.
+     *Busca por todas as interações do chat.
      */
     async getInteracoes(req, res) {
         const {id_tema, id_subtema, dataInicio, dataFim, page, pageSize, exportar} = req.query;

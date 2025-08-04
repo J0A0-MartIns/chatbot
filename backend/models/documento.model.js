@@ -1,6 +1,3 @@
-/**
- * Modelo do arquivo
- */
 module.exports = (sequelize, DataTypes) => {
     const DocumentoArquivo = sequelize.define('DocumentoArquivo', {
         id_arquivo: {

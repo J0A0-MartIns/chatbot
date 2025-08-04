@@ -1,7 +1,3 @@
-/**
- * Define os endpoints da API para o recurso de Pendências.
- */
-
 const express = require('express');
 const router = express.Router();
 const pendenciaController = require('../controllers/pendencia.controller');

@@ -1,8 +1,3 @@
-
-/**
- * Middleware para verificar se o usuário tem o papel de Administrador.
- * Ele lê o perfil diretamente do token JWT.
- */
 const isAdmin = (req, res, next) => {
     const userProfile = req.user?.perfil;
 

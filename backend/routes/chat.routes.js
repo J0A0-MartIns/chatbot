@@ -1,7 +1,3 @@
-/**
- * Define os endpoints da API para o Chat.
- */
-
 const express = require('express');
 const router = express.Router();
 

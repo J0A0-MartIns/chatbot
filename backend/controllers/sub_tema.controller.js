@@ -1,12 +1,12 @@
 /**
- * Gerencia a lógica de negócio para os Subtemas.
+ * Lógica de negócio para os Subtemas.
  */
 
 const { Subtema, Tema } = require('../models');
 
 const SubtemaController = {
     /**
-     * @description Cria um novo subtema.
+     * Cria um novo subtema.
      */
     async criarSubtema(req, res) {
         const { nome, id_tema } = req.body;

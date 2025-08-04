@@ -7,7 +7,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 })
 export class AlertModalComponent {
   @Input() titulo = 'Atenção';
-  @Input() mensagem = '';
+  @Input() mensagem = 'Sessão encerrada. Faça login novamente.';
   @Output() close = new EventEmitter<void>();
 
   onClose() {

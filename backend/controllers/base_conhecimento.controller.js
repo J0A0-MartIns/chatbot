@@ -5,7 +5,7 @@ const path = require('path');
 const BaseConhecimentoController = {
     async criarDocumento(req, res) {
         const { titulo, conteudo, palavras_chave, id_subtema } = req.body;
-        const usuario_id = req.user.id;
+        const usuario_id = req.req.user.id;
 
         if (!titulo || !conteudo || !id_subtema) {
             return res.status(400).json({ message: 'Os campos título, conteúdo e id_subtema são obrigatórios.' });
@@ -23,7 +23,7 @@ const BaseConhecimentoController = {
 
             return res.status(201).json(novoDocumento);
         } catch (err) {
-            console.error("ERRO DETALHADO AO CRIAR DOCUMENTO:", err);
+            console.error("ERRO DOCUMENTO:", err);
             return res.status(500).json({ message: 'Erro ao criar documento.', error: err.message });
         }
     },

@@ -1,7 +1,3 @@
-/**
- * Define as rotas para API de gerência de usuários.
- */
-
 const express = require('express');
 const router = express.Router();
 const usuarioController = require('../controllers/usuario.controller');

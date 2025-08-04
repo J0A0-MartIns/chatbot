@@ -1,12 +1,6 @@
-/**
- * Gerencia toda a lógica de negócio para Utilizadores, utilizando um
- * campo 'status' ('pendente', 'ativo', 'inativo') para controlar o estado da conta.
- */
-
 const { Usuario, Perfil } = require('../models');
 const bcrypt = require('bcryptjs');
 
-//Remove a senha das resp. da API
 const formatUserResponse = (user) => {
     if (!user) return null;
     const userJson = user.toJSON();
@@ -15,10 +9,7 @@ const formatUserResponse = (user) => {
 };
 
 const UserController = {
-    /**
-     * Rota de Registo Público: Cria um novo usuário com status 'pendente'.
-     * Esse é para a opção de cadastro, na parte de login.
-     */
+
     async criarUsuario(req, res) {
         const { nome, email, senha, id_perfil } = req.body;
         try {

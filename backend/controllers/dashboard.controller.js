@@ -1,5 +1,5 @@
 /**
- * Fornece dados para o dashboard.
+ * Apenas para fornecer dados para o dashboard.
  */
 
 const { AtendimentoChatbot, Pendencia, Usuario, sequelize } = require('../models');
@@ -7,7 +7,7 @@ const { Op } = require('sequelize');
 
 const DashboardController = {
     /**
-     * Busca estatísticas gerais para o Dashboard.
+     * Busca dados gerais para o Dashboard.
      */
     async getStats(req, res) {
         try {
@@ -54,7 +54,7 @@ const DashboardController = {
     },
 
     /**
-     * @description Calcula a taxa de respostas encontradas vs. não encontradas nos últimos 30 dias.
+     * Calcula a taxa de respostas encontradas vs. não encontradas nos últimos 30 dias.
      */
     async getTaxaRespostas(req, res) {
         try {

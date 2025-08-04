@@ -1,14 +1,6 @@
-/**
- * Este arquvio gere a lógica de negócio para as operações de CRUD
- * relacionadas aos Temas da base de conhecimento.
- */
-
 const { Tema } = require('../models');
 
 const TemaController = {
-    /**
-     * Cria um novo tema.
-     */
     async criarTema(req, res) {
         const { nome } = req.body;
         if (!nome) {

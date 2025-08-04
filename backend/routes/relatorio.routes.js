@@ -1,7 +1,3 @@
-/**
- * Define os endpoints da API para os diferentes tipos de Relatórios.
- */
-
 const express = require('express');
 const router = express.Router();
 

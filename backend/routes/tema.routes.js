@@ -1,7 +1,3 @@
-/**
- * Define os endpoints da API para o recurso de Temas.
- */
-
 const express = require('express');
 const router = express.Router();
 

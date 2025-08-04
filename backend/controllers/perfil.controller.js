@@ -1,7 +1,3 @@
-/**
- * Gerencia o CRUD de Perfis e suas associações com Permissões.
- */
-
 const { Perfil, sequelize  } = require('../models');
 
 const PerfilController = {

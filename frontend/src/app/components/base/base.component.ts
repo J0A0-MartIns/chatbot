@@ -24,7 +24,6 @@ export class BaseComponent implements OnInit {
   subtemasDoTemaSelecionado: Subtema[] = [];
   showModal: boolean = false;
   isEditMode: boolean = false;
-  activeMenuIndex: number | null = null;
   docEmEdicao: Documento;
   idTemaSelecionadoNoModal: number | null = null;
   novoTemaNome: string = '';
@@ -102,7 +101,7 @@ export class BaseComponent implements OnInit {
   }
 
   async excluirArquivoAnexado(id_arquivo: number): Promise<void> {
-    if (confirm('Tem a certeza que deseja excluir este anexo?')) {
+    if (confirm('Tem certeza que deseja excluir este anexo?')) {
       try {
         await lastValueFrom(this.baseService.excluirArquivo(id_arquivo));
         if (this.docEmEdicao.DocumentoArquivos) {

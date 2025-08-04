@@ -1,7 +1,3 @@
-/**
- * Define os endpoints da API para autenticação, incluindo login e logout.
- */
-
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/auth.controller');

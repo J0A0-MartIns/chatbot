@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'; // Importa OnInit
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -36,7 +36,7 @@ export class CadastroComponent implements OnInit {
   carregarPerfis(): void {
     this.perfilService.getPerfis().subscribe({
       next: (data) => {
-        this.perfisDisponiveis = data.filter(p => p.nome !== 'Admin');
+        this.perfisDisponiveis = data;
       },
       error: () => {
         this.erro = 'Não foi possível carregar os perfis disponíveis.';
