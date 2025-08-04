@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {RelatorioService, RelatorioInteracao, RelatorioUsoSubtema} from '../../services/relatorio.service';
+import {RelatorioService} from '../../services/relatorio.service';
 import {TemaService} from '../../services/tema.service';
 import {SubtemaService} from '../../services/subtema.service';
 import {Tema} from '../../models/tema.model';
@@ -8,6 +8,7 @@ import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from "@angular/router";
 import * as XLSX from 'xlsx';
+import {RelatorioInteracao, RelatorioUsoSubtema} from "../../models/relatorio.model";
 
 @Component({
     selector: 'app-relatorio',

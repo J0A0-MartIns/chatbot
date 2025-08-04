@@ -3,7 +3,7 @@ const { SessaoUsuario } = require('../models');
 
 /**
  * Middleware para verificar a validade de um token JWT enviado no cabeçalho 'Authorization'.
- * Se o token for válido, adiciona os dados do usuário decodificados ao objeto `req`
+ * Se o token for válido, adiciona os dados do usuário ao objeto `req`
  * e passa para a próxima função na cadeia de middlewares.
  */
 const authenticateToken = (req, res, next) => {
@@ -31,7 +31,7 @@ const authenticateToken = (req, res, next) => {
             });
 
             if (!sessaoAtiva) {
-                return res.status(401).json({message: 'Sessão inválida ou expirada. Por favor, faça login novamente.'});
+                return res.status(401).json({message: 'Sessão inválida ou expirada.'});
             }
             req.user = user;
             next();

@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ChatService, PerguntaPayload, FeedbackPayload, RespostaChat} from '../../services/chat.service';
+import {ChatService} from '../../services/chat.service';
 import {TemaService} from '../../services/tema.service';
 import {SubtemaService} from '../../services/subtema.service';
 import {Tema} from '../../models/tema.model';
@@ -7,6 +7,7 @@ import {Subtema} from '../../models/subtema.model';
 import {Documento} from '../../models/documento.model';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {FeedbackPayload, PerguntaPayload, RespostaChat} from "../../models/chat.model";
 
 @Component({
     selector: 'app-chat',

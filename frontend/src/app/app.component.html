@@ -54,7 +54,7 @@
 
 <app-alerta
         *ngIf="sessionExpired"
-        [title]="expiredMessage"
-        message="Por favor, faça login novamente."
+        [titulo]="expiredMessage"
+        mensagem="Por favor, faça login novamente."
         (close)="onModalClose()">
 </app-alerta>

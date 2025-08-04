@@ -2,27 +2,8 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {environment} from '../environments/environment';
-import {Documento} from "../models/documento.model";
+import {PerguntaPayload, RespostaChat, FeedbackPayload} from "../models/chat.model";
 
-export interface PerguntaPayload {
-    pergunta: string;
-    id_subtema: number;
-}
-
-export interface RespostaChat {
-    id_atendimento: number;
-    solucoes: Documento[];
-    encontrado: boolean;
-    resposta: string;
-}
-
-export interface FeedbackPayload {
-    id_atendimento: number;
-    avaliacao: boolean;
-    comentario?: string;
-    tema?: string | null;
-    subtema?: string | null;
-}
 
 @Injectable({
     providedIn: 'root'

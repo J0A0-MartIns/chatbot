@@ -15,7 +15,6 @@
                 <thead>
                 <tr>
                     <th>Título</th>
-                    <th>Tema</th>
                     <th>Subtema</th>
                     <th>Conteúdo</th>
                     <th>Status</th>
@@ -25,7 +24,6 @@
                 <tbody>
                 <tr *ngFor="let doc of docsFiltrados(); let i = index">
                     <td>{{ doc.titulo }}</td>
-                    <td>{{ doc.Tema?.nome || 'N/A' }}</td>
                     <td>{{ doc.Subtema?.nome || 'N/A' }}</td>
                     <td>{{ doc.conteudo.substring(0, 70) }}...</td>
                     <td>

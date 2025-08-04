@@ -24,8 +24,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return next(authReq).pipe(
         catchError((error: HttpErrorResponse) => {
             if (error.status === 401 || error.status === 403) {
-                authService.handleSessionExpiration('Sua sessão foi encerrada pois você fez login em outro dispositivo.');
-            }
+                const errorMessage = error.error?.message || 'A sua sessão é inválida ou expirou. Por favor, faça login novamente.';
+                authService.handleSessionExpiration(errorMessage);            }
             return throwError(() => error);
         })
     );

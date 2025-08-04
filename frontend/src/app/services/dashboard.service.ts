@@ -2,23 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
+import {DashboardStats, TaxaRespostasData, VolumeAtendimentosData} from "../models/dashboard.model";
 
-export interface DashboardStats {
-    respostasEncontradasHoje: number;
-    usuariosAtivosCount: number;
-    pendenciasCount: number;
-    usuariosPendentesCount: number;
-}
-
-export interface TaxaRespostasData {
-    encontradas: number;
-    naoEncontradas: number;
-}
-
-export interface VolumeAtendimentosData {
-    dia: string;
-    count: string;
-}
 
 @Injectable({
     providedIn: 'root'
